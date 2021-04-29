@@ -1,0 +1,24 @@
+﻿@using DbgCensus.Rest.Abstractions.Queries;
+
+@page "/"
+@inject IQueryFactory QueryFactory;
+
+<h4>@_queryString</h4>
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+@code {
+    private string _queryString;
+
+    protected override void OnInitialized()
+    {
+        _queryString = QueryFactory.Get()
+            .On("outfit")
+            .Where("alias_lower", "uvoc", SearchModifier.EQUALS)
+            .WithResolve("leader", "name")
+            .WithResolve("member_online_status")
+            .HasFields("name_lower")
+            .HideFields("name")
+            .ConstructEndpoint().AbsoluteUri;
+    }
+}
