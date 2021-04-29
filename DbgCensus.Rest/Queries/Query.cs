@@ -27,6 +27,10 @@ namespace DbgCensus.Rest.Queries
         private bool _exactMatchesFirst;
         private string? _language;
         private bool _isCaseSensitive; // True by default
+        private bool _withNullFields;
+        private bool _withTimings;
+        private bool _retry; // True by default
+        private string? _distinctField;
 
         /// <summary>
         /// Provides functions to build a query string.
@@ -50,6 +54,7 @@ namespace DbgCensus.Rest.Queries
             _limit = null;
             _limitPerDb = null;
             _isCaseSensitive = true;
+            _retry = true;
         }
 
         public Query(CensusQueryOptions options)
@@ -69,6 +74,12 @@ namespace DbgCensus.Rest.Queries
             // No query can be made on the collection result.
             if (string.IsNullOrEmpty(_onCollection))
                 return builder.Uri;
+
+            if (_distinctField is not null)
+            {
+                builder.Query = $"?c:distinct={_distinctField}";
+                return builder.Uri;
+            }
 
             // Add filters
             foreach (QueryFilter filter in _filters)
@@ -90,7 +101,7 @@ namespace DbgCensus.Rest.Queries
                 builder.Query += $"c:resolve={ string.Join(',', _resolves.Select(r => r.GetResolveString())) }&";
 
             // Add language, exact matching, case sensitivity and limits
-            builder.Query += $"c:lang={_language}&c:exactMatchFirst={_exactMatchesFirst}&c:case={_isCaseSensitive}";
+            builder.Query += $"c:lang={_language}&c:exactMatchFirst={_exactMatchesFirst}&c:case={_isCaseSensitive}&c:includeNull={_withNullFields}&c:retry={_retry}&c:timing={_withTimings}";
 
             if (_limitPerDb is not null)
                 builder.Query += $"&c:limitPerDb={_limitPerDb}";
@@ -224,6 +235,41 @@ namespace DbgCensus.Rest.Queries
         public IQuery IsCaseInsensitive()
         {
             _isCaseSensitive = false;
+
+            return this;
+        }
+
+        /// <inheritdoc/>
+        public IQuery WithNullFields()
+        {
+            _withNullFields = true;
+
+            return this;
+        }
+
+        /// <inheritdoc/>
+        public IQuery WithTimings()
+        {
+            _withTimings = true;
+
+            return this;
+        }
+
+        /// <inheritdoc/>
+        public IQuery WithoutOneTimeRetry()
+        {
+            _retry = false;
+
+            return this;
+        }
+
+        /// <inheritdoc/>
+        public IQuery GetDistinctFieldValues(string fieldName)
+        {
+            if (string.IsNullOrEmpty(_onCollection))
+                throw new InvalidOperationException("This operation can only be performed on a collection.");
+
+            _distinctField = fieldName;
 
             return this;
         }

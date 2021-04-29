@@ -95,5 +95,30 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// <remarks>Using this command might slow down your query. If a lower case version of a field is available, use that instead for a faster result.</remarks>
         /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
         IQuery IsCaseInsensitive();
+
+        /// <summary>
+        /// Includes fields that have a null value in the response.
+        /// </summary>
+        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
+        IQuery WithNullFields();
+
+        /// <summary>
+        /// Includes the times taken for server-side queries and resolves to be made, in the response.
+        /// </summary>
+        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
+        IQuery WithTimings();
+
+        /// <summary>
+        /// Prevents the query from being re-attempted after a failure. Useful for quick failure.
+        /// </summary>
+        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
+        IQuery WithoutOneTimeRetry();
+
+        /// <summary>
+        /// Gets the distinct values of the provided field.
+        /// </summary>
+        /// <param name="fieldName">The field to get distinct values of.</param>
+        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
+        IQuery GetDistinctFieldValues(string fieldName);
     }
 }
