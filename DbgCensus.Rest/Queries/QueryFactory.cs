@@ -16,7 +16,7 @@ namespace DbgCensus.Rest.Queries
             _getQuery = () => new Query(queryOptions.Value);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery Get() => _getQuery.Invoke();
     }
 }

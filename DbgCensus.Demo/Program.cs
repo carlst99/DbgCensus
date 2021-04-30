@@ -22,6 +22,7 @@ namespace DbgCensus.Demo
             {
                 o.Language = CensusLanguage.ENGLISH;
                 o.Namespace = CensusNamespace.PS2;
+                o.Limit = 100;
                 o.ServiceId = "***REMOVED***"; // TODO: REMOVE!!!
             });
 

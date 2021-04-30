@@ -1,0 +1,39 @@
+﻿@using System.Threading
+@implements IDisposable
+@inject IJSRuntime JSRuntime
+
+<div class="form-group">
+    <button class="@state.ButtonClass" @onclick="CopyTextToClipboard" disabled=@state.IsDisabled>
+        <i class="@state.IconClass"></i> @state.Text
+    </button>
+    <input class="form-control" readonly type="text" value="@Text" />
+</div>
+
+@code {
+    private record CopyState(string Text, string ButtonClass, string IconClass, bool IsDisabled = false);
+
+    private readonly CancellationTokenSource cts = new();
+
+    private CopyState state = new("Copy", "btn btn-primary", "oi oi-clipboard");
+
+    [Parameter]
+    public string Text { get; set; }
+
+    private async Task CopyTextToClipboard()
+    {
+        CopyState tempState = state;
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", Text);
+
+        state = new CopyState("Copied!", "btn btn-success", "oi oi-check", IsDisabled: true);
+        StateHasChanged();
+
+        await Task.Delay(TimeSpan.FromSeconds(2), cts.Token);
+        state = tempState;
+    }
+
+    public void Dispose()
+    {
+        cts.Cancel(); // Cancel Task.Delay
+        cts.Dispose();
+    }
+}

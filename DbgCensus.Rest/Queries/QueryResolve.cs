@@ -6,7 +6,7 @@ namespace DbgCensus.Rest.Queries
     /// <summary>
     /// Stores data required to perform a resolve in the Census REST API.
     /// </summary>
-    public struct QueryResolve
+    internal struct QueryResolve
     {
         private readonly string[] _showFields;
 

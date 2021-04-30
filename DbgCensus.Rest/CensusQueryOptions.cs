@@ -22,6 +22,11 @@
         /// </summary>
         public string? Language { get; set; }
 
+        /// <summary>
+        /// Optionally set a default limit for each query.
+        /// </summary>
+        public uint? Limit { get; set; }
+
         public CensusQueryOptions()
         {
             RootEndpoint = "https://census.daybreakgames.com";

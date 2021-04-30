@@ -18,6 +18,7 @@ namespace DbgCensus.Rest.Queries
         private readonly List<QueryResolve> _resolves; // Comma-separated
         private readonly List<string> _showHideFields; // Comma-separated
         private readonly List<string> _hasFields; // Comma-separated
+        private readonly List<QuerySortKey> _sortKeys; // Comma-separated
 
         private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
         private QueryType _verb;
@@ -31,6 +32,7 @@ namespace DbgCensus.Rest.Queries
         private bool _withTimings;
         private bool _retry; // True by default
         private string? _distinctField;
+        private uint _startIndex;
 
         /// <summary>
         /// Provides functions to build a query string.
@@ -48,6 +50,7 @@ namespace DbgCensus.Rest.Queries
             _resolves = new List<QueryResolve>();
             _showHideFields = new List<string>();
             _hasFields = new List<string>();
+            _sortKeys = new List<QuerySortKey>();
 
             _onCollection = string.Empty;
             _verb = QueryType.GET;
@@ -62,47 +65,58 @@ namespace DbgCensus.Rest.Queries
         {
             if (options.Language is not null)
                 SetLanguage(options.Language);
+
+            if (options.Limit is not null)
+                WithLimit((uint)options.Limit);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public Uri ConstructEndpoint()
         {
             UriBuilder builder = new(_rootEndpoint);
 
             builder.Path = $"s:{_serviceId}/{_verb.Value}/{_queryNamespace}/{_onCollection}";
 
-            // No query can be made on the collection result.
+            // A collection must be specified to perform a query
             if (string.IsNullOrEmpty(_onCollection))
                 return builder.Uri;
 
+            // Add distinct command
             if (_distinctField is not null)
             {
                 builder.Query = $"?c:distinct={_distinctField}";
-                return builder.Uri;
+                return builder.Uri; // Querying doesn't work in tandem with the distinct command
             }
 
             // Add filters
             foreach (QueryFilter filter in _filters)
                 builder.Query += filter.GetFilterString() + "&";
 
-            // Add 'has' fields
+            // Add has command
             if (_hasFields.Count > 0)
                 builder.Query += $"c:has={ string.Join(',', _hasFields) }&";
 
-            // Add show/hide operators
-            if (_isShowingFields && _showHideFields.Count > 0)
-                builder.Query += "c:show=";
-            else if (_showHideFields.Count > 0)
-                builder.Query += "c:hide=";
-            builder.Query += string.Join(',', _showHideFields) + "&";
+            // Add show/hide command
+            if (_showHideFields.Count > 0)
+            {
+                if (_isShowingFields)
+                    builder.Query += "c:show=";
+                else
+                    builder.Query += "c:hide=";
+                builder.Query += string.Join(',', _showHideFields) + "&";
+            }
 
-            // Add resolves
+            // Add resolve command
             if (_resolves.Count > 0)
                 builder.Query += $"c:resolve={ string.Join(',', _resolves.Select(r => r.GetResolveString())) }&";
 
-            // Add language, exact matching, case sensitivity and limits
-            builder.Query += $"c:lang={_language}&c:exactMatchFirst={_exactMatchesFirst}&c:case={_isCaseSensitive}&c:includeNull={_withNullFields}&c:retry={_retry}&c:timing={_withTimings}";
+            // Add sort command
+            if (_sortKeys.Count > 0)
+                builder.Query += $"c:sort={ string.Join(',', _sortKeys.Select(r => r.GetSortString())) }&";
 
+            builder.Query += $"c:start={_startIndex}&c:lang={_language}&c:exactMatchFirst={_exactMatchesFirst}&c:case={_isCaseSensitive}&c:includeNull={_withNullFields}&c:retry={_retry}&c:timing={_withTimings}";
+
+            // Add relevant limit command
             if (_limitPerDb is not null)
                 builder.Query += $"&c:limitPerDb={_limitPerDb}";
             else if (_limit is not null)
@@ -111,21 +125,21 @@ namespace DbgCensus.Rest.Queries
             return builder.Uri;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery OfQueryType(QueryType type)
         {
             _verb = type;
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery On(string collection)
         {
             _onCollection = collection;
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery WithLimit(uint limit)
         {
             _limit = limit;
@@ -133,7 +147,7 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery WithLimitPerDatabase(uint limit)
         {
             _limitPerDb = limit;
@@ -141,8 +155,16 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
-        /// <inheritdoc/>
-        public IQuery Where(string property, string filterValue, SearchModifier modifier)
+        /// <inheritdoc />
+        public IQuery WithStartIndex(uint index)
+        {
+            _startIndex = index;
+
+            return this;
+        }
+
+        /// <inheritdoc />
+        public IQuery Where<T>(string property, T filterValue, SearchModifier modifier) where T : notnull
         {
             QueryFilter queryOperator = new(property, filterValue, modifier);
             _filters.Add(queryOperator);
@@ -150,19 +172,15 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
-        /// <summary>
-        /// Performs a search on the collection.
-        /// </summary>
-        /// <param name="filter">The filter to utilise.</param>
-        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
-        public IQuery Where(QueryFilter filter)
+        /// <inheritdoc />
+        public IQuery WithSortOrder(string fieldName, SortOrder order = SortOrder.Ascending)
         {
-            _filters.Add(filter);
+            _sortKeys.Add(new QuerySortKey(fieldName, order));
 
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery WithExactMatchesFirst()
         {
             _exactMatchesFirst = true;
@@ -170,7 +188,7 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery WithResolve(string resolveTo, params string[] showFields)
         {
             _resolves.Add(new QueryResolve(resolveTo, showFields));
@@ -178,18 +196,7 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
-        /// <summary>
-        /// Performs a pre-determined resolve. Multiple resolves can be made in the same query.
-        /// </summary>
-        /// <param name="resolve">The resolve to make.</param>
-        public IQuery WithResolve(QueryResolve resolve)
-        {
-            _resolves.Add(resolve);
-
-            return this;
-        }
-
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery ShowFields(params string[] fieldNames)
         {
             // Show and hide are incompatible
@@ -202,7 +209,7 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery HideFields(params string[] fieldNames)
         {
             // Show and hide are incompatible
@@ -215,15 +222,7 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
-        /// <inheritdoc/>
-        public IQuery SetLanguage(string languageCode)
-        {
-            _language = languageCode;
-
-            return this;
-        }
-
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery HasFields(params string[] fieldNames)
         {
             _hasFields.AddRange(fieldNames);
@@ -231,7 +230,15 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
+        public IQuery SetLanguage(string languageCode)
+        {
+            _language = languageCode;
+
+            return this;
+        }
+
+        /// <inheritdoc />
         public IQuery IsCaseInsensitive()
         {
             _isCaseSensitive = false;
@@ -239,7 +246,7 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery WithNullFields()
         {
             _withNullFields = true;
@@ -247,7 +254,7 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery WithTimings()
         {
             _withTimings = true;
@@ -255,7 +262,7 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery WithoutOneTimeRetry()
         {
             _retry = false;
@@ -263,7 +270,7 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IQuery GetDistinctFieldValues(string fieldName)
         {
             if (string.IsNullOrEmpty(_onCollection))

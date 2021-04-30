@@ -41,11 +41,27 @@ namespace DbgCensus.Rest.Abstractions.Queries
         IQuery WithLimitPerDatabase(uint limit);
 
         /// <summary>
-        /// Performs a search on the collection.
+        /// Return items starting at the Nth index of the internal query. Use in tandem with <see cref="WithSortOrder(string, SortOrder)"/>
         /// </summary>
-        /// <param name="property">The collection property to filter on.</param>
-        /// <returns>An <see cref="IQueryFilter"/> instance to set the filter term.</returns>
-        IQuery Where(string property, string filterValue, SearchModifier modifier);
+        /// <remarks>This will have inconsistent behaviour when querying collections that span multiple databases, such as ps2/character.</remarks>
+        /// <param name="index">The index to return items from.</param>
+        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
+        IQuery WithStartIndex(uint index);
+
+        /// <summary>
+        /// Performs a search on the collection. Multiple fields can be searched.
+        /// </summary>
+        /// <param name="field">The collection field to filter on.</param>
+        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
+        IQuery Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull;
+
+        /// <summary>
+        /// Sorts items in the result. Sorting can be performed on multiple fields.
+        /// </summary>
+        /// <param name="fieldName">The name of the field to sort on.</param>
+        /// <param name="order">The sorting order.</param>
+        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
+        IQuery WithSortOrder(string fieldName, SortOrder order = SortOrder.Ascending);
 
         /// <summary>
         /// When filtering using a regex, returns exact matches at the top of the response list.
@@ -76,18 +92,18 @@ namespace DbgCensus.Rest.Abstractions.Queries
         IQuery HideFields(params string[] fieldNames);
 
         /// <summary>
-        /// Only returns the specified translation for internationalized fields.
-        /// </summary>
-        /// <param name="languageCode">The locale to return.</param>
-        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
-        IQuery SetLanguage(string languageCode);
-
-        /// <summary>
         /// Only returns items in which the specified field/s exist, regardless of their value.
         /// </summary>
         /// <param name="fieldNames">Names of the fields that must exist.</param>
         /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
         IQuery HasFields(params string[] fieldNames);
+
+        /// <summary>
+        /// Only returns the specified translation for internationalized fields.
+        /// </summary>
+        /// <param name="languageCode">The locale to return.</param>
+        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
+        IQuery SetLanguage(string languageCode);
 
         /// <summary>
         /// Indicates that filters/searches will be performed without using case-sensitive comparison.

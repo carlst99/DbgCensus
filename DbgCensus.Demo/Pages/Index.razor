@@ -1,9 +1,12 @@
-﻿@using DbgCensus.Rest.Abstractions.Queries;
+﻿@using DbgCensus.Rest.Abstractions.Queries
 
 @page "/"
-@inject IQueryFactory QueryFactory;
+@inject IJSRuntime JSRuntime
+@inject IQueryFactory QueryFactory
 
-<h4>@_queryString</h4>
+<h1>Query String</h1>
+
+<CopyToClipboard Text="@_queryString" />
 
 <SurveyPrompt Title="How is Blazor working for you?" />
 
@@ -12,13 +15,23 @@
 
     protected override void OnInitialized()
     {
+        //_queryString = QueryFactory.Get()
+        //    .On("outfit")
+        //    .Where("alias_lower", "uvoc", SearchModifier.EQUALS)
+        //    .WithResolve("leader", "name")
+        //    .WithResolve("member_online_status")
+        //    .HasFields("name_lower")
+        //    .HideFields("name")
+        //    .ConstructEndpoint().AbsoluteUri;
+
         _queryString = QueryFactory.Get()
             .On("outfit")
-            .Where("alias_lower", "uvoc", SearchModifier.EQUALS)
-            .WithResolve("leader", "name")
-            .WithResolve("member_online_status")
-            .HasFields("name_lower")
-            .HideFields("name")
+            .Where("member_count", 100, SearchModifier.GREATER_THAN)
+            .WithSortOrder("member_count", SortOrder.Ascending)
+            .WithSortOrder("name_lower", SortOrder.Ascending)
+            .WithLimit(10)
+            .WithTimings()
+            .WithStartIndex(9)
             .ConstructEndpoint().AbsoluteUri;
     }
 }
