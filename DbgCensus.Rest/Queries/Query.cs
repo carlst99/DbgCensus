@@ -172,8 +172,8 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
         {
-            QueryFilter queryOperator = new(field, filterValue, modifier);
-            _filters.Add(queryOperator);
+            QueryFilter queryFilter = new(field, filterValue, modifier);
+            _filters.Add(queryFilter);
 
             return this;
         }

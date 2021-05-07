@@ -11,9 +11,9 @@ namespace DbgCensus.Rest.Queries
         //private readonly List<QueryFilter> _filters;
         private readonly List<IJoin> _nestedJoins;
 
-        private readonly QueryCommandFormatter<QueryFilter> _filterTerms;
+        private readonly QueryCommandFormatter _filterTerms;
 
-        private QueryCommandFormatter<string> _showHideFields;
+        private QueryCommandFormatter _showHideFields;
         private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
         private string? _onField;
         private string? _toField;
@@ -111,8 +111,8 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IJoin Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
         {
-            QueryFilter queryOperator = new(field, filterValue, modifier);
-            _filterTerms.AddArgument(queryOperator);
+            QueryFilter queryFilter = new(field, filterValue, modifier);
+            _filterTerms.AddArgument(queryFilter);
 
             return this;
         }
@@ -126,12 +126,12 @@ namespace DbgCensus.Rest.Queries
             return nested;
         }
 
-        private static QueryCommandFormatter<T> GetQueryCommandFormatter<T>(string command, bool allowsMultipleArguments) where T : notnull
+        private static QueryCommandFormatter GetQueryCommandFormatter<T>(string command, bool allowsMultipleArguments) where T : notnull
         {
             if (allowsMultipleArguments)
-                return new QueryCommandFormatter<T>(command, '\'', ':');
+                return new QueryCommandFormatter(command, '\'', ':');
             else
-                return new QueryCommandFormatter<T>(command, ':');
+                return new QueryCommandFormatter(command, ':');
         }
     }
 }
