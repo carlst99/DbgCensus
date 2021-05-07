@@ -1,45 +1,44 @@
 ﻿using DbgCensus.Rest.Abstractions.Queries;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DbgCensus.Rest.Queries
 {
     public class Join : IJoin
     {
-        private readonly string _toCollection;
-        //private readonly List<string> _showHideFields; // Single quote (') delimited
-        //private readonly List<QueryFilter> _filters;
         private readonly List<IJoin> _nestedJoins;
 
+        private readonly QueryCommandFormatter _toCollection;
         private readonly QueryCommandFormatter _filterTerms;
+        private readonly QueryCommandFormatter _onField;
+        private readonly QueryCommandFormatter _toField;
+        private readonly QueryCommandFormatter _isList;
+        private readonly QueryCommandFormatter _injectAt;
+        private readonly QueryCommandFormatter _isOuter;
 
         private QueryCommandFormatter _showHideFields;
-        private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
-        private string? _onField;
-        private string? _toField;
-        private bool _isList;
-        private string? _injectAt;
-        private bool _isOuter;
+        private bool _isShowingFields; // Indicates whether, if present, fields in "_showHideFields" should be shown (or hidden).
 
-        public Join(string toCollection)
+        public Join()
         {
-            _toCollection = toCollection;
-
-            //_showHideFields = new List<string>();
-            _showHideFields = GetQueryCommandFormatter<string>("show", true);
-            _filterTerms = GetQueryCommandFormatter<QueryFilter>("terms", true);
             _nestedJoins = new List<IJoin>();
 
-            _isOuter = true;
+            _toCollection = GetQueryCommandFormatter("type", false);
+            _filterTerms = GetQueryCommandFormatter("terms", true);
+            _onField = GetQueryCommandFormatter("on", false);
+            _toField = GetQueryCommandFormatter("to", false);
+            _isList = GetQueryCommandFormatter("list", false, "0");
+            _injectAt = GetQueryCommandFormatter("inject_at", false);
+            _isOuter = GetQueryCommandFormatter("outer", false, "1");
+            _showHideFields = GetQueryCommandFormatter("show", true);
         }
 
-        /// <summary>
-        /// Constructs a well-formed join string, without the join command (c:join=).
-        /// </summary>
-        /// <returns>A well-formed join string.</returns>
-        public override string ToString()
+        /// <inheritdoc/>
+        public IJoin ToCollection(string collectionName)
         {
-            throw new NotImplementedException();
+            _toCollection.AddArgument(collectionName);
+
+            return this;
         }
 
         /// <inheritdoc />
@@ -47,7 +46,7 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (!_isShowingFields)
-                _showHideFields = GetQueryCommandFormatter<string>("show", true);
+                _showHideFields = GetQueryCommandFormatter("show", true);
 
             _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = true;
@@ -60,7 +59,7 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (_isShowingFields)
-                _showHideFields = GetQueryCommandFormatter<string>("hide", true);
+                _showHideFields = GetQueryCommandFormatter("hide", true);
 
             _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = false;
@@ -71,7 +70,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IJoin InjectAt(string name)
         {
-            _injectAt = name;
+            _injectAt.AddArgument(name);
 
             return this;
         }
@@ -79,7 +78,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IJoin IsList()
         {
-            _isList = true;
+            _isList.AddArgument("1");
 
             return this;
         }
@@ -87,7 +86,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IJoin IsInnerJoin()
         {
-            _isOuter = false;
+            _isOuter.AddArgument("0");
 
             return this;
         }
@@ -95,7 +94,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IJoin OnField(string fieldName)
         {
-            _onField = fieldName;
+            _onField.AddArgument(fieldName);
 
             return this;
         }
@@ -103,7 +102,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IJoin ToField(string fieldName)
         {
-            _toField = fieldName;
+            _toField.AddArgument(fieldName);
 
             return this;
         }
@@ -118,20 +117,38 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc/>
-        public IJoin WithNestedJoin(string collection)
+        public IJoin WithNestedJoin()
         {
-            IJoin nested = new Join(collection);
+            IJoin nested = new Join();
             _nestedJoins.Add(nested);
 
             return nested;
         }
 
-        private static QueryCommandFormatter GetQueryCommandFormatter<T>(string command, bool allowsMultipleArguments) where T : notnull
+        public static implicit operator string(Join j) => j.ToString();
+
+        /// <summary>
+        /// Constructs a well-formed join string, without the join command (c:join=).
+        /// </summary>
+        /// <returns>A well-formed join string.</returns>
+        public override string ToString()
+        {
+            string join = JoinWithoutNullOrEmptyValues('^', _toCollection, _onField, _toField, _isList, _showHideFields, _injectAt, _filterTerms, _isOuter);
+
+            if (_nestedJoins.Count > 0)
+                join += $"({ string.Join(',', _nestedJoins) })";
+
+            return join;
+        }
+
+        private static QueryCommandFormatter GetQueryCommandFormatter(string command, bool allowsMultipleArguments, string? defaultArgument = null)
         {
             if (allowsMultipleArguments)
-                return new QueryCommandFormatter(command, '\'', ':');
+                return new QueryCommandFormatter(command, ':', '\'', defaultArgument);
             else
-                return new QueryCommandFormatter(command, ':');
+                return new QueryCommandFormatter(command, ':', defaultArgument);
         }
+
+        private static string JoinWithoutNullOrEmptyValues(char separator, params string[] value) => string.Join(separator, value.Where(str => !string.IsNullOrEmpty(str)));
     }
 }

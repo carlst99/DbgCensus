@@ -43,6 +43,8 @@ namespace DbgCensus.Rest.Queries
             Modifier = modifier;
         }
 
+        public static implicit operator string(QueryFilter f) => f.ToString();
+
         /// <summary>
         /// Constructs a value that can be used to perform a search within a Census query.
         /// </summary>

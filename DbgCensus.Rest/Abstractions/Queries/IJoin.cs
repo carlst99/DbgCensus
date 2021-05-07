@@ -3,6 +3,13 @@
     public interface IJoin
     {
         /// <summary>
+        /// The collection to join to.
+        /// </summary>
+        /// <param name="collectionName">The name of a Census collection.</param>
+        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>
+        IJoin ToCollection(string collectionName);
+
+        /// <summary>
         /// The ID field on the base collection to join on.
         /// </summary>
         /// <param name="fieldName">The name of the field to join on.</param>
@@ -61,8 +68,7 @@
         /// <summary>
         /// Creates a nested join on this join.
         /// </summary>
-        /// <param name="collection">The collection to join to.</param>
         /// <returns>The nested join object.</returns>
-        IJoin WithNestedJoin(string collection);
+        IJoin WithNestedJoin();
     }
 }

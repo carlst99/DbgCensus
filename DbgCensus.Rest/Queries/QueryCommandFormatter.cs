@@ -40,8 +40,8 @@ namespace DbgCensus.Rest.Queries
         /// </summary>
         /// <param name="command">The command, i.e. c:join.</param>
         /// <param name="componentSeparator">The value used to separate each argument.</param>
-        public QueryCommandFormatter(string command, char componentSeparator)
-            : this(command, componentSeparator, char.MinValue)
+        public QueryCommandFormatter(string command, char componentSeparator, string? defaultArgument = null)
+            : this(command, componentSeparator, char.MinValue, defaultArgument)
         {
             AllowsMultipleArguments = false;
         }
@@ -52,7 +52,7 @@ namespace DbgCensus.Rest.Queries
         /// <param name="command">The command, i.e. c:join.</param>
         /// <param name="componentSeparator">The value used to separate the command and its arguments.</param>
         /// <param name="argumentSeparator">The value used to separate each argument.</param>
-        public QueryCommandFormatter(string command, char componentSeparator, char argumentSeparator)
+        public QueryCommandFormatter(string command, char componentSeparator, char argumentSeparator, string? defaultArgument = null)
         {
             _arguments = new List<string>();
             AllowsMultipleArguments = true;
@@ -60,6 +60,9 @@ namespace DbgCensus.Rest.Queries
             Command = command;
             ComponentSeparator = componentSeparator;
             ArgumentSeparator = argumentSeparator;
+
+            if (defaultArgument is not null)
+                AddArgument(defaultArgument);
         }
 
         public void AddArgument(string argument)
@@ -83,49 +86,13 @@ namespace DbgCensus.Rest.Queries
                 _arguments.Add(argument);
         }
 
-        /// <summary>
-        /// Parses a <see cref="QueryCommandFormatter{T}"/> from a string.
-        /// </summary>
-        /// <param name="value">The value to parse.</param>
-        /// <param name="argumentSeparator">The character used to separate each argument.</param>
-        /// <returns>A <see cref="QueryCommandFormatter{T}"/> instance.</returns>
-        /// <exception cref="FormatException">Throw when an invalid value is submitted.</exception>
-        public static QueryCommandFormatter Parse(string value, char argumentSeparator)
-        {
-            string[] components = value.Split('=', StringSplitOptions.RemoveEmptyEntries);
-            if (components.Length != 2)
-                throw new FormatException("Value is not in the format <command>=<arguments>.");
-
-            QueryCommandFormatter formatter = new(components[0], argumentSeparator);
-            formatter._arguments.AddRange(components[1].Split(argumentSeparator));
-
-            return formatter;
-        }
-
-        /// <summary>
-        /// Attempts to parse a <see cref="QueryCommandFormatter"/> from a string.
-        /// </summary>
-        /// <param name="value">The value to parse.</param>
-        /// <param name="argumentSeparator">The character used to separate each argument.</param>
-        /// <param name="queryCommand">The parsed <see cref="QueryCommandFormatter"/></param>
-        /// <returns>A boolean indicating whether the value was successfully parsed.</returns>
-        public static bool TryParse(string value, char argumentSeparator, out QueryCommandFormatter? queryCommand)
-        {
-            queryCommand = null;
-
-            string[] components = value.Split('=');
-            if (components.Length != 2)
-                return false;
-
-            queryCommand = new(components[0], argumentSeparator);
-            queryCommand._arguments.AddRange(components[1].Split(argumentSeparator));
-
-            return true;
-        }
+        public static implicit operator string(QueryCommandFormatter f) => f.ToString();
 
         /// <summary>
         /// Constructs a well-formed query command string.
         /// </summary>
-        public override string ToString() => Command + ComponentSeparator + string.Join(ArgumentSeparator, _arguments);
+        public override string ToString() => _arguments.Count > 0
+            ? Command + ComponentSeparator + string.Join(ArgumentSeparator, _arguments)
+            : string.Empty;
     }
 }

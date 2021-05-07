@@ -74,9 +74,8 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// <summary>
         /// Joins data from another collection to this result.
         /// </summary>
-        /// <param name="collection">The collection to join.</param>
         /// <returns>The join.</returns>
-        IJoin WithJoin(string collection);
+        IJoin WithJoin();
 
         /// <summary>
         /// Performs a pre-determined resolve. Multiple resolves can be made in the same query.

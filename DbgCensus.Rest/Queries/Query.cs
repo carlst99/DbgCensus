@@ -195,9 +195,9 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoin WithJoin(string collection)
+        public IJoin WithJoin()
         {
-            IJoin join = new Join(collection);
+            IJoin join = new Join();
             _joins.Add(join);
 
             return join;
