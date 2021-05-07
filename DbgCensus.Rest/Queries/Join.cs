@@ -7,10 +7,13 @@ namespace DbgCensus.Rest.Queries
     public class Join : IJoin
     {
         private readonly string _toCollection;
-        private readonly List<string> _showHideFields; // Single quote (') delimited
-        private readonly List<QueryFilter> _filters;
+        //private readonly List<string> _showHideFields; // Single quote (') delimited
+        //private readonly List<QueryFilter> _filters;
         private readonly List<IJoin> _nestedJoins;
 
+        private readonly QueryCommandFormatter<QueryFilter> _filterTerms;
+
+        private QueryCommandFormatter<string> _showHideFields;
         private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
         private string? _onField;
         private string? _toField;
@@ -22,8 +25,9 @@ namespace DbgCensus.Rest.Queries
         {
             _toCollection = toCollection;
 
-            _showHideFields = new List<string>();
-            _filters = new List<QueryFilter>();
+            //_showHideFields = new List<string>();
+            _showHideFields = GetQueryCommandFormatter<string>("show", true);
+            _filterTerms = GetQueryCommandFormatter<QueryFilter>("terms", true);
             _nestedJoins = new List<IJoin>();
 
             _isOuter = true;
@@ -43,9 +47,9 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (!_isShowingFields)
-                _showHideFields.Clear();
+                _showHideFields = GetQueryCommandFormatter<string>("show", true);
 
-            _showHideFields.AddRange(fieldNames);
+            _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = true;
 
             return this;
@@ -56,9 +60,9 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (_isShowingFields)
-                _showHideFields.Clear();
+                _showHideFields = GetQueryCommandFormatter<string>("hide", true);
 
-            _showHideFields.AddRange(fieldNames);
+            _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = false;
 
             return this;
@@ -108,7 +112,7 @@ namespace DbgCensus.Rest.Queries
         public IJoin Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
         {
             QueryFilter queryOperator = new(field, filterValue, modifier);
-            _filters.Add(queryOperator);
+            _filterTerms.AddArgument(queryOperator);
 
             return this;
         }
@@ -120,6 +124,14 @@ namespace DbgCensus.Rest.Queries
             _nestedJoins.Add(nested);
 
             return nested;
+        }
+
+        private static QueryCommandFormatter<T> GetQueryCommandFormatter<T>(string command, bool allowsMultipleArguments) where T : notnull
+        {
+            if (allowsMultipleArguments)
+                return new QueryCommandFormatter<T>(command, '\'', ':');
+            else
+                return new QueryCommandFormatter<T>(command, ':');
         }
     }
 }

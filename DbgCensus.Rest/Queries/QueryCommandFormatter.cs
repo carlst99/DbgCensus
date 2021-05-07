@@ -23,17 +23,51 @@ namespace DbgCensus.Rest.Queries
         public char ArgumentSeparator { get; }
 
         /// <summary>
+        /// Gets the value used to separate the command and its arguments.
+        /// </summary>
+        public char ComponentSeparator { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether multiple arguments can be added.
+        /// </summary>
+        public bool AllowsMultipleArguments { get; }
+
+        /// <summary>
         /// Gets the arguments used in the command.
         /// </summary>
         public IReadOnlyList<string> Arguments => _arguments.AsReadOnly();
 
         /// <summary>
-        /// Provides functions to build a query command.
+        /// Provides functions to build a query command with one argument.
         /// </summary>
         /// <param name="command">The command, i.e. c:join.</param>
+        /// <param name="componentSeparator">The value used to separate each argument.</param>
+        public QueryCommandFormatter(string command, char componentSeparator)
+            : this(command, componentSeparator, char.MinValue)
+        {
+            AllowsMultipleArguments = false;
+        }
+
+        /// <summary>
+        /// Provides functions to build a query command with one argument.
+        /// </summary>
+        /// <param name="command">The command, i.e. c:join.</param>
+        /// <param name="componentSeparator">The value used to separate each argument.</param>
+        /// <param name="converter">A function to convert an object of <see cref="T"/> into a string representation that is a valid argument.</param>
+        public QueryCommandFormatter(string command, char componentSeparator, Func<T, string?> converter)
+            : this(command, componentSeparator, char.MinValue, converter)
+        {
+            AllowsMultipleArguments = false;
+        }
+
+        /// <summary>
+        /// Provides functions to build a query command with multiple arguments.
+        /// </summary>
+        /// <param name="command">The command, i.e. c:join.</param>
+        /// <param name="componentSeparator">The value used to separate the command and its arguments.</param>
         /// <param name="argumentSeparator">The value used to separate each argument.</param>
-        public QueryCommandFormatter(string command, char argumentSeparator)
-            : this(command, argumentSeparator, (t) => t.ToString())
+        public QueryCommandFormatter(string command, char componentSeparator, char argumentSeparator)
+            : this(command, argumentSeparator, componentSeparator, (t) => t.ToString())
         {
         }
 
@@ -41,29 +75,50 @@ namespace DbgCensus.Rest.Queries
         /// Provides functions to build a query command.
         /// </summary>
         /// <param name="command">The command, i.e. c:join.</param>
+        /// <param name="componentSeparator">The value used to separate the command and its arguments.</param>
         /// <param name="argumentSeparator">The value used to separate each argument.</param>
         /// <param name="converter">A function to convert an object of <see cref="T"/> into a string representation that is a valid argument.</param>
-        public QueryCommandFormatter(string command, char argumentSeparator, Func<T, string?> converter)
+        public QueryCommandFormatter(string command, char componentSeparator, char argumentSeparator, Func<T, string?> converter)
         {
             _arguments = new List<string>();
+            AllowsMultipleArguments = true;
 
             Command = command;
+            ComponentSeparator = componentSeparator;
             ArgumentSeparator = argumentSeparator;
             _converter = converter;
+        }
+
+        public void AddArgument(T argument)
+        {
+            string? argumentStringValue = _converter(argument);
+            if (string.IsNullOrEmpty(argumentStringValue))
+                throw new ArgumentNullException(nameof(argument), nameof(argument) + ".ToString() returned a null or empty value.");
+
+            if (AllowsMultipleArguments || _arguments.Count == 0)
+                _arguments.Add(argumentStringValue);
+            else
+                _arguments[0] = argumentStringValue;
         }
 
         /// <summary>
         /// Adds an argument to the command.
         /// </summary>
-        /// <param name="argument">The argument.</param>
-        public void AddArgument(T argument)
+        /// <param name="arguments">The argument/s to add.</param>
+        public void AddArgumentRange(IEnumerable<T> arguments)
         {
-            string? argumentStringValue = _converter(argument);
+            if (!AllowsMultipleArguments)
+                throw new InvalidOperationException("Multiple arguments are not allowed.");
 
-            if (string.IsNullOrEmpty(argumentStringValue))
-                throw new ArgumentNullException(nameof(argument), nameof(argument) + ".ToString() returned a null or empty value.");
+            foreach (T argument in arguments)
+            {
+                string? argumentStringValue = _converter(argument);
 
-            _arguments.Add(argumentStringValue);
+                if (string.IsNullOrEmpty(argumentStringValue))
+                    throw new ArgumentNullException(nameof(arguments), nameof(arguments) + ".ToString() returned a null or empty value.");
+
+                _arguments.Add(argumentStringValue);
+            }
         }
 
         /// <summary>
@@ -109,6 +164,6 @@ namespace DbgCensus.Rest.Queries
         /// <summary>
         /// Constructs a well-formed query command string.
         /// </summary>
-        public override string ToString() => $"{ Command }={ string.Join(ArgumentSeparator, _arguments) }";
+        public override string ToString() => Command + ComponentSeparator + string.Join(ArgumentSeparator, _arguments);
     }
 }
