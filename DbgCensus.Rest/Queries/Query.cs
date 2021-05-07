@@ -19,6 +19,7 @@ namespace DbgCensus.Rest.Queries
         private readonly List<string> _showHideFields; // Comma-separated
         private readonly List<string> _hasFields; // Comma-separated
         private readonly List<QuerySortKey> _sortKeys; // Comma-separated
+        private readonly List<IJoin> _joins; // Comma-separated
 
         private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
         private QueryType _verb;
@@ -51,6 +52,7 @@ namespace DbgCensus.Rest.Queries
             _showHideFields = new List<string>();
             _hasFields = new List<string>();
             _sortKeys = new List<QuerySortKey>();
+            _joins = new List<IJoin>();
 
             _onCollection = string.Empty;
             _verb = QueryType.GET;
@@ -90,7 +92,7 @@ namespace DbgCensus.Rest.Queries
 
             // Add filters
             foreach (QueryFilter filter in _filters)
-                builder.Query += filter.GetFilterString() + "&";
+                builder.Query += filter.ToString() + "&";
 
             // Add has command
             if (_hasFields.Count > 0)
@@ -108,11 +110,15 @@ namespace DbgCensus.Rest.Queries
 
             // Add resolve command
             if (_resolves.Count > 0)
-                builder.Query += $"c:resolve={ string.Join(',', _resolves.Select(r => r.GetResolveString())) }&";
+                builder.Query += $"c:resolve={ string.Join(',', _resolves.Select(r => r.ToString())) }&";
+
+            // TODO: Check if resolves and joins are compatible
+            if (_joins.Count > 0)
+                builder.Query += $"c:join={ string.Join(',', _joins.Select(j => j.ToString())) }&";
 
             // Add sort command
             if (_sortKeys.Count > 0)
-                builder.Query += $"c:sort={ string.Join(',', _sortKeys.Select(r => r.GetSortString())) }&";
+                builder.Query += $"c:sort={ string.Join(',', _sortKeys.Select(r => r.ToString())) }&";
 
             builder.Query += $"c:start={_startIndex}&c:lang={_language}&c:exactMatchFirst={_exactMatchesFirst}&c:case={_isCaseSensitive}&c:includeNull={_withNullFields}&c:retry={_retry}&c:timing={_withTimings}";
 
@@ -164,9 +170,9 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery Where<T>(string property, T filterValue, SearchModifier modifier) where T : notnull
+        public IQuery Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
         {
-            QueryFilter queryOperator = new(property, filterValue, modifier);
+            QueryFilter queryOperator = new(field, filterValue, modifier);
             _filters.Add(queryOperator);
 
             return this;
@@ -186,6 +192,15 @@ namespace DbgCensus.Rest.Queries
             _exactMatchesFirst = true;
 
             return this;
+        }
+
+        /// <inheritdoc />
+        public IJoin WithJoin(string collection)
+        {
+            IJoin join = new Join(collection);
+            _joins.Add(join);
+
+            return join;
         }
 
         /// <inheritdoc />
@@ -280,5 +295,7 @@ namespace DbgCensus.Rest.Queries
 
             return this;
         }
+
+        public override string ToString() => ConstructEndpoint().ToString();
     }
 }

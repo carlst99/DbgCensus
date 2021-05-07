@@ -9,9 +9,9 @@ namespace DbgCensus.Rest.Queries
     internal struct QueryFilter
     {
         /// <summary>
-        /// Gets the property to filter on.
+        /// Gets the field to filter on.
         /// </summary>
-        public string Property { get; }
+        public string Field { get; }
 
         /// <summary>
         /// Gets the filter value.
@@ -26,19 +26,19 @@ namespace DbgCensus.Rest.Queries
         /// <summary>
         /// Stores the data required to perform a search on a collection in the Census REST API.
         /// </summary>
-        /// <param name="property">The collection property to search on.</param>
+        /// <param name="field">The collection property to search on.</param>
         /// <param name="filterValue">The value to filter by.</param>
         /// <param name="modifier">The search modifier.</param>
         /// <exception cref="ArgumentNullException">Thrown when a null or empty string is passed in as the 'property' and/or 'filterValue' parameter/s.</exception>
-        public QueryFilter(string property, object filterValue, SearchModifier modifier)
+        public QueryFilter(string field, object filterValue, SearchModifier modifier)
         {
-            if (string.IsNullOrEmpty(property))
-                throw new ArgumentNullException(nameof(property));
+            if (string.IsNullOrEmpty(field))
+                throw new ArgumentNullException(nameof(field));
 
             if (filterValue is null || string.IsNullOrEmpty(filterValue.ToString()) || filterValue.ToString() == filterValue.GetType().FullName)
-                throw new ArgumentException(nameof(filterValue), "filterValue must not be null and filterValue.ToString() must be fully implemented.");
+                throw new ArgumentException($"{ nameof(filterValue) } must not be null and { nameof(filterValue.ToString) } must be fully implemented.", nameof(filterValue));
 
-            Property = property;
+            Field = field;
             Value = filterValue;
             Modifier = modifier;
         }
@@ -47,6 +47,6 @@ namespace DbgCensus.Rest.Queries
         /// Constructs a value that can be used to perform a search within a Census query.
         /// </summary>
         /// <returns>A well-formed filter string.</returns>
-        public string GetFilterString() => Property + "=" + Modifier.Value + Value;
+        public override string ToString() => Field + "=" + Modifier.Value + Value;
     }
 }

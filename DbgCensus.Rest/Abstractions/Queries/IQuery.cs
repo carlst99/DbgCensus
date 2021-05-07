@@ -52,6 +52,8 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// Performs a search on the collection. Multiple fields can be searched.
         /// </summary>
         /// <param name="field">The collection field to filter on.</param>
+        /// <param name="filterValue">The value to filter by.</param>
+        /// <param name="modifier">The comparison operator.</param>
         /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
         IQuery Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull;
 
@@ -68,6 +70,13 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// </summary>
         /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
         IQuery WithExactMatchesFirst();
+
+        /// <summary>
+        /// Joins data from another collection to this result.
+        /// </summary>
+        /// <param name="collection">The collection to join.</param>
+        /// <returns>The join.</returns>
+        IJoin WithJoin(string collection);
 
         /// <summary>
         /// Performs a pre-determined resolve. Multiple resolves can be made in the same query.

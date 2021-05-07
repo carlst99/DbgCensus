@@ -39,6 +39,6 @@ namespace DbgCensus.Rest.Queries
         /// Constructs a well-formed resolve string, without the query operator (c:resolve=).
         /// </summary>
         /// <returns>A well-formed resolve string.</returns>
-        public string GetResolveString() => $"{ResolveTo}({string.Join(',', _showFields)})";
+        public override string ToString() => $"{ResolveTo}({string.Join(',', _showFields)})";
     }
 }

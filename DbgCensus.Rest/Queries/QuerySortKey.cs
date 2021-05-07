@@ -33,9 +33,9 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <summary>
-        /// Constructs a well-formed sort string, without the query operator (c:sort=).
+        /// Constructs a well-formed sort string, without the sort command (c:sort=).
         /// </summary>
         /// <returns>A well-formed sort string.</returns>
-        public string GetSortString() => $"{FieldName}:{(int)Order}";
+        public override string ToString() => $"{FieldName}:{(int)Order}";
     }
 }
