@@ -1,4 +1,5 @@
 ﻿using DbgCensus.Rest.Abstractions.Queries;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -110,7 +111,11 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IJoin Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
         {
-            QueryFilter queryFilter = new(field, filterValue, modifier);
+            string? filterValueString = filterValue.ToString();
+            if (string.IsNullOrEmpty(filterValueString) || filterValueString.Equals(typeof(T).FullName))
+                throw new ArgumentException(nameof(filterValue) + " must have properly implemented ToString()", nameof(filterValue));
+
+            QueryFilter queryFilter = new(field, filterValueString, modifier);
             _filterTerms.AddArgument(queryFilter);
 
             return this;

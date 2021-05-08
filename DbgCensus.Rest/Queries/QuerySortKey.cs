@@ -6,7 +6,7 @@ namespace DbgCensus.Rest.Queries
     /// <summary>
     /// Stores data required to perform a sort in the Census REST API.
     /// </summary>
-    internal struct QuerySortKey
+    internal class QuerySortKey
     {
         /// <summary>
         /// The field to sort on.

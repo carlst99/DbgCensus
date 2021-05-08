@@ -70,7 +70,7 @@ namespace DbgCensus.Rest.Tests.Queries
             formatter.AddArgument("argument1");
             formatter.AddArgument("argument2");
             Assert.Equal("command=argument1,argument2", formatter.ToString());
-            Assert.Equal("command=argument1,argument2", formatter);
+            Assert.Equal(formatter.ToString(), formatter); // Test implicit casting
         }
     }
 }

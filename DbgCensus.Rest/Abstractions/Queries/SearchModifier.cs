@@ -3,7 +3,7 @@
     /// <summary>
     /// Contains modifiers used to enhance searches in the Census REST API.
     /// </summary>
-    public struct SearchModifier
+    public sealed class SearchModifier
     {
         /// <summary>
         /// Search for values that exactly equal to the filter.
@@ -58,5 +58,11 @@
         public static implicit operator string(SearchModifier m) => m.ToString();
 
         public override string ToString() => Value;
+
+        public override bool Equals(object? obj)
+            => obj is SearchModifier qt
+            && qt.Value.Equals(Value);
+
+        public override int GetHashCode() => Value.GetHashCode();
     }
 }

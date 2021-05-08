@@ -6,7 +6,7 @@ namespace DbgCensus.Rest.Queries
     /// <summary>
     /// Stores data required to perform a resolve in the Census REST API.
     /// </summary>
-    internal struct QueryResolve
+    internal class QueryResolve
     {
         private readonly string[] _showFields;
 
@@ -34,6 +34,8 @@ namespace DbgCensus.Rest.Queries
             ResolveTo = resolveTo;
             _showFields = showFields;
         }
+
+        public static implicit operator string(QueryResolve r) => r.ToString();
 
         /// <summary>
         /// Constructs a well-formed resolve string, without the query operator (c:resolve=).

@@ -66,7 +66,7 @@ namespace DbgCensus.Rest.Queries
             : this(options.ServiceId, options.Namespace, options.RootEndpoint)
         {
             if (options.LanguageCode is not null)
-                WithLanguage(options.LanguageCode);
+                WithLanguage((CensusLanguage)options.LanguageCode);
 
             if (options.Limit is not null)
                 WithLimit((uint)options.Limit);
@@ -172,7 +172,11 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
         {
-            QueryFilter queryFilter = new(field, filterValue, modifier);
+            string? filterValueString = filterValue.ToString();
+            if (string.IsNullOrEmpty(filterValueString) || filterValueString.Equals(typeof(T).FullName))
+                throw new ArgumentException(nameof(filterValue) + " must have properly implemented ToString()", nameof(filterValue));
+
+            QueryFilter queryFilter = new(field, filterValueString, modifier);
             _filters.Add(queryFilter);
 
             return this;

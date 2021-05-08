@@ -6,7 +6,7 @@ namespace DbgCensus.Rest.Queries
     /// <summary>
     /// Stores the data required to perform a search on a collection in the Census REST API.
     /// </summary>
-    internal struct QueryFilter
+    internal class QueryFilter
     {
         /// <summary>
         /// Gets the field to filter on.
@@ -16,7 +16,7 @@ namespace DbgCensus.Rest.Queries
         /// <summary>
         /// Gets the filter value.
         /// </summary>
-        public object Value { get; }
+        public string Value { get; }
 
         /// <summary>
         /// Gets the search modifier.
@@ -30,13 +30,13 @@ namespace DbgCensus.Rest.Queries
         /// <param name="filterValue">The value to filter by.</param>
         /// <param name="modifier">The search modifier.</param>
         /// <exception cref="ArgumentNullException">Thrown when a null or empty string is passed in as the 'property' and/or 'filterValue' parameter/s.</exception>
-        public QueryFilter(string field, object filterValue, SearchModifier modifier)
+        public QueryFilter(string field, string filterValue, SearchModifier modifier)
         {
             if (string.IsNullOrEmpty(field))
                 throw new ArgumentNullException(nameof(field));
 
-            if (filterValue is null || string.IsNullOrEmpty(filterValue.ToString()) || filterValue.ToString() == filterValue.GetType().FullName)
-                throw new ArgumentException($"{ nameof(filterValue) } must not be null and { nameof(filterValue.ToString) } must be fully implemented.", nameof(filterValue));
+            if (string.IsNullOrEmpty(filterValue))
+                throw new ArgumentNullException(nameof(filterValue));
 
             Field = field;
             Value = filterValue;
