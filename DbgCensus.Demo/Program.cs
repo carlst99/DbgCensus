@@ -20,7 +20,7 @@ namespace DbgCensus.Demo
             builder.Services.AddCensusRestServices();
             builder.Services.Configure<CensusQueryOptions>((o) =>
             {
-                o.Language = CensusLanguage.ENGLISH;
+                o.LanguageCode = CensusLanguage.ENGLISH;
                 o.Namespace = CensusNamespace.PS2;
                 o.Limit = 100;
                 o.ServiceId = "***REMOVED***"; // TODO: REMOVE!!!

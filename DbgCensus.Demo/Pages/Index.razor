@@ -25,7 +25,7 @@
         //    .ConstructEndpoint().AbsoluteUri;
 
         _queryString = QueryFactory.Get()
-            .On("outfit")
+            .OnCollection("outfit")
             .Where("member_count", 100, SearchModifier.GREATER_THAN)
             .WithSortOrder("member_count", SortOrder.Ascending)
             .WithSortOrder("name_lower", SortOrder.Ascending)

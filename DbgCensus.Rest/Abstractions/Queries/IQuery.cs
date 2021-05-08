@@ -24,7 +24,7 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// </summary>
         /// <param name="collection">The name of the collection.</param>
         /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
-        IQuery On(string collection);
+        IQuery OnCollection(string collection);
 
         /// <summary>
         /// Limits the number of items returned by the query.
@@ -109,9 +109,9 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// <summary>
         /// Only returns the specified translation for internationalized fields.
         /// </summary>
-        /// <param name="languageCode">The locale to return.</param>
+        /// <param name="language">The locale to return.</param>
         /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
-        IQuery SetLanguage(string languageCode);
+        IQuery WithLanguage(CensusLanguage language);
 
         /// <summary>
         /// Indicates that filters/searches will be performed without using case-sensitive comparison.
@@ -143,6 +143,6 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// </summary>
         /// <param name="fieldName">The field to get distinct values of.</param>
         /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
-        IQuery GetDistinctFieldValues(string fieldName);
+        IQuery WithDistinctFieldValues(string fieldName);
     }
 }

@@ -24,5 +24,9 @@
         {
             Value = modifier;
         }
+
+        public static implicit operator string(QueryType t) => t.ToString();
+
+        public override string ToString() => Value;
     }
 }

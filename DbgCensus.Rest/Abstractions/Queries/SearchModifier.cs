@@ -54,5 +54,9 @@
         {
             Value = modifier;
         }
+
+        public static implicit operator string(SearchModifier m) => m.ToString();
+
+        public override string ToString() => Value;
     }
 }

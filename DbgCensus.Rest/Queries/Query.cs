@@ -27,7 +27,7 @@ namespace DbgCensus.Rest.Queries
         private uint? _limit;
         private uint? _limitPerDb;
         private bool _exactMatchesFirst;
-        private string? _language;
+        private CensusLanguage? _language;
         private bool _isCaseSensitive; // True by default
         private bool _withNullFields;
         private bool _withTimings;
@@ -65,8 +65,8 @@ namespace DbgCensus.Rest.Queries
         public Query(CensusQueryOptions options)
             : this(options.ServiceId, options.Namespace, options.RootEndpoint)
         {
-            if (options.Language is not null)
-                SetLanguage(options.Language);
+            if (options.LanguageCode is not null)
+                WithLanguage(options.LanguageCode);
 
             if (options.Limit is not null)
                 WithLimit((uint)options.Limit);
@@ -139,7 +139,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery On(string collection)
+        public IQuery OnCollection(string collection)
         {
             _onCollection = collection;
             return this;
@@ -246,7 +246,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery SetLanguage(string languageCode)
+        public IQuery WithLanguage(CensusLanguage languageCode)
         {
             _language = languageCode;
 
@@ -286,7 +286,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery GetDistinctFieldValues(string fieldName)
+        public IQuery WithDistinctFieldValues(string fieldName)
         {
             if (string.IsNullOrEmpty(_onCollection))
                 throw new InvalidOperationException("This operation can only be performed on a collection.");
