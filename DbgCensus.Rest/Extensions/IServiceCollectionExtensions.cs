@@ -10,8 +10,10 @@ namespace DbgCensus.Rest.Extensions
     {
         public static void AddCensusRestServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.TryAddSingleton<IQueryFactory, QueryFactory>();
+            serviceCollection.AddHttpClient<CensusRestClient>();
             serviceCollection.TryAddSingleton<ICensusRestClient, CensusRestClient>();
+
+            serviceCollection.TryAddSingleton<IQueryFactory, QueryFactory>();
         }
     }
 }
