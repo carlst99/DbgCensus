@@ -36,6 +36,11 @@ namespace DbgCensus.Rest.Queries
         public IReadOnlyList<string> Arguments => _arguments.AsReadOnly();
 
         /// <summary>
+        /// Gets a value indicating whether any arguments have been added to this query command.
+        /// </summary>
+        public bool AnyValue => _arguments.Count > 0;
+
+        /// <summary>
         /// Provides functions to build a query command with one argument.
         /// </summary>
         /// <param name="command">The command, i.e. c:join.</param>

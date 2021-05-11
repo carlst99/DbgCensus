@@ -32,6 +32,8 @@ namespace DbgCensus.Rest.Queries
             Order = order;
         }
 
+        public static implicit operator string(QuerySortKey qsk) => qsk.ToString();
+
         /// <summary>
         /// Constructs a well-formed sort string, without the sort command (c:sort=).
         /// </summary>

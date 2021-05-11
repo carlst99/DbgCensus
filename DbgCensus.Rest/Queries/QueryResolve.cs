@@ -38,9 +38,16 @@ namespace DbgCensus.Rest.Queries
         public static implicit operator string(QueryResolve r) => r.ToString();
 
         /// <summary>
-        /// Constructs a well-formed resolve string, without the query operator (c:resolve=).
+        /// Constructs a well-formed resolve string, without the query command (c:resolve=).
         /// </summary>
         /// <returns>A well-formed resolve string.</returns>
-        public override string ToString() => $"{ResolveTo}({string.Join(',', _showFields)})";
+        public override string ToString()
+        {
+            string resolve = ResolveTo;
+            if (_showFields.Length > 0)
+                resolve += $"({ string.Join(',', _showFields) })";
+
+            return resolve;
+        }
     }
 }

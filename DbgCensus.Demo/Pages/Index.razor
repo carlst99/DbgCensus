@@ -4,27 +4,37 @@
 @inject IJSRuntime JSRuntime
 @inject IQueryFactory QueryFactory
 
-<h1>Query String</h1>
+<h1>Query String One</h1>
 
-<CopyToClipboard Text="@_queryString" />
+<CopyToClipboard Text="@_queryStringOne" />
+
+<h1>Query String Two</h1>
+
+<CopyToClipboard Text="@_queryStringTwo" />
+
+<h1>Join String</h1>
+
+<CopyToClipboard Text="@_joinString" />
 
 <SurveyPrompt Title="How is Blazor working for you?" />
 
 @code {
-    private string _queryString;
+    private string _queryStringOne;
+    private string _queryStringTwo;
+    private string _joinString;
 
     protected override void OnInitialized()
     {
-        //_queryString = QueryFactory.Get()
-        //    .On("outfit")
-        //    .Where("alias_lower", "uvoc", SearchModifier.EQUALS)
-        //    .WithResolve("leader", "name")
-        //    .WithResolve("member_online_status")
-        //    .HasFields("name_lower")
-        //    .HideFields("name")
-        //    .ConstructEndpoint().AbsoluteUri;
+        _queryStringOne = QueryFactory.Get()
+            .OnCollection("outfit")
+            .Where("alias_lower", "uvoc", SearchModifier.EQUALS)
+            .WithResolve("leader", "name")
+            .WithResolve("member_online_status")
+            .HasFields("name_lower")
+            .HideFields("name")
+            .ConstructEndpoint().AbsoluteUri;
 
-        _queryString = QueryFactory.Get()
+        _queryStringTwo = QueryFactory.Get()
             .OnCollection("outfit")
             .Where("member_count", 100, SearchModifier.GREATER_THAN)
             .WithSortOrder("member_count", SortOrder.Ascending)
@@ -39,6 +49,6 @@
         join.WithNestedJoin().ToCollection("character").Where("name", "Falcon", SearchModifier.EQUALS);
         join.WithNestedJoin().ToCollection("item").OnField("item_id");
 
-        _queryString = join.ToString();
+        _joinString = join.ToString();
     }
 }

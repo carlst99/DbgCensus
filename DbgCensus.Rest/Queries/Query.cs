@@ -15,25 +15,25 @@ namespace DbgCensus.Rest.Queries
         private readonly string _queryNamespace;
 
         private readonly List<QueryFilter> _filters;
-        private readonly List<QueryResolve> _resolves; // Comma-separated
-        private readonly List<string> _showHideFields; // Comma-separated
-        private readonly List<string> _hasFields; // Comma-separated
-        private readonly List<QuerySortKey> _sortKeys; // Comma-separated
-        private readonly List<IJoin> _joins; // Comma-separated
+        private readonly QueryCommandFormatter _resolves;
+        private readonly QueryCommandFormatter _hasFields;
+        private readonly QueryCommandFormatter _sortKeys;
+        private readonly QueryCommandFormatter _joins;
+        private readonly QueryCommandFormatter _limit;
+        private readonly QueryCommandFormatter _limitPerDb;
+        private readonly QueryCommandFormatter _exactMatchesFirst;
+        private readonly QueryCommandFormatter _language;
+        private readonly QueryCommandFormatter _isCaseSensitive; // True by default
+        private readonly QueryCommandFormatter _withNullFields;
+        private readonly QueryCommandFormatter _withTimings;
+        private readonly QueryCommandFormatter _retry; // True by default
+        private readonly QueryCommandFormatter _distinctField;
+        private readonly QueryCommandFormatter _startIndex;
 
-        private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
         private QueryType _verb;
         private string _onCollection;
-        private uint? _limit;
-        private uint? _limitPerDb;
-        private bool _exactMatchesFirst;
-        private CensusLanguage? _language;
-        private bool _isCaseSensitive; // True by default
-        private bool _withNullFields;
-        private bool _withTimings;
-        private bool _retry; // True by default
-        private string? _distinctField;
-        private uint _startIndex;
+        private QueryCommandFormatter _showHideFields;
+        private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
 
         /// <summary>
         /// Provides functions to build a query string.
@@ -48,18 +48,24 @@ namespace DbgCensus.Rest.Queries
             _queryNamespace = queryNamespace;
 
             _filters = new List<QueryFilter>();
-            _resolves = new List<QueryResolve>();
-            _showHideFields = new List<string>();
-            _hasFields = new List<string>();
-            _sortKeys = new List<QuerySortKey>();
-            _joins = new List<IJoin>();
+            _resolves = GetQueryCommandFormatter("c:resolve", true);
+            _hasFields = GetQueryCommandFormatter("c:has", true);
+            _sortKeys = GetQueryCommandFormatter("c:sort", true);
+            _joins = GetQueryCommandFormatter("c:join", true);
+            _limit = GetQueryCommandFormatter("c:limit", false, 100.ToString());
+            _limitPerDb = GetQueryCommandFormatter("c:limitPerDB", false);
+            _exactMatchesFirst = GetQueryCommandFormatter("c:exactMatchFirst", false);
+            _language = GetQueryCommandFormatter("c:lang", false);
+            _isCaseSensitive = GetQueryCommandFormatter("c:case", false);
+            _withNullFields = GetQueryCommandFormatter("c:includeNull", false);
+            _withTimings = GetQueryCommandFormatter("c:timing", false);
+            _retry = GetQueryCommandFormatter("c:retry", false);
+            _distinctField = GetQueryCommandFormatter("c:distinct", false);
+            _startIndex = GetQueryCommandFormatter("c:start", false);
 
             _onCollection = string.Empty;
             _verb = QueryType.GET;
-            _limit = null;
-            _limitPerDb = null;
-            _isCaseSensitive = true;
-            _retry = true;
+            _showHideFields = GetQueryCommandFormatter("c:show", true);
         }
 
         public Query(CensusQueryOptions options)
@@ -84,9 +90,9 @@ namespace DbgCensus.Rest.Queries
                 return builder.Uri;
 
             // Add distinct command
-            if (_distinctField is not null)
+            if (_distinctField.AnyValue)
             {
-                builder.Query = $"?c:distinct={_distinctField}";
+                builder.Query = _distinctField;
                 return builder.Uri; // Querying doesn't work in tandem with the distinct command
             }
 
@@ -94,39 +100,13 @@ namespace DbgCensus.Rest.Queries
             foreach (QueryFilter filter in _filters)
                 builder.Query += filter.ToString() + "&";
 
-            // Add has command
-            if (_hasFields.Count > 0)
-                builder.Query += $"c:has={ string.Join(',', _hasFields) }&";
-
-            // Add show/hide command
-            if (_showHideFields.Count > 0)
-            {
-                if (_isShowingFields)
-                    builder.Query += "c:show=";
-                else
-                    builder.Query += "c:hide=";
-                builder.Query += string.Join(',', _showHideFields) + "&";
-            }
-
-            // Add resolve command
-            if (_resolves.Count > 0)
-                builder.Query += $"c:resolve={ string.Join(',', _resolves.Select(r => r.ToString())) }&";
-
-            // TODO: Check if resolves and joins are compatible
-            if (_joins.Count > 0)
-                builder.Query += $"c:join={ string.Join(',', _joins.Select(j => j.ToString())) }&";
-
-            // Add sort command
-            if (_sortKeys.Count > 0)
-                builder.Query += $"c:sort={ string.Join(',', _sortKeys.Select(r => r.ToString())) }&";
-
-            builder.Query += $"c:start={_startIndex}&c:lang={_language}&c:exactMatchFirst={_exactMatchesFirst}&c:case={_isCaseSensitive}&c:includeNull={_withNullFields}&c:retry={_retry}&c:timing={_withTimings}";
+            builder.Query += JoinWithoutNullOrEmptyValues('&', _hasFields, _showHideFields, _resolves, _joins, _sortKeys, _startIndex, _language, _exactMatchesFirst, _isCaseSensitive, _withNullFields, _withTimings, _retry);
 
             // Add relevant limit command
-            if (_limitPerDb is not null)
-                builder.Query += $"&c:limitPerDb={_limitPerDb}";
+            if (_limitPerDb.AnyValue)
+                builder.Query += '&' + _limitPerDb;
             else if (_limit is not null)
-                builder.Query += $"&c:limit={_limit}";
+                builder.Query += '&' + _limit;
 
             return builder.Uri;
         }
@@ -148,7 +128,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery WithLimit(uint limit)
         {
-            _limit = limit;
+            _limit.AddArgument(limit.ToString());
 
             return this;
         }
@@ -156,7 +136,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery WithLimitPerDatabase(uint limit)
         {
-            _limitPerDb = limit;
+            _limitPerDb.AddArgument(limit.ToString());
 
             return this;
         }
@@ -164,7 +144,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery WithStartIndex(uint index)
         {
-            _startIndex = index;
+            _startIndex.AddArgument(index.ToString());
 
             return this;
         }
@@ -185,7 +165,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery WithSortOrder(string fieldName, SortOrder order = SortOrder.Ascending)
         {
-            _sortKeys.Add(new QuerySortKey(fieldName, order));
+            _sortKeys.AddArgument(new QuerySortKey(fieldName, order));
 
             return this;
         }
@@ -193,7 +173,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery WithExactMatchesFirst()
         {
-            _exactMatchesFirst = true;
+            _exactMatchesFirst.AddArgument(true.ToString());
 
             return this;
         }
@@ -201,8 +181,8 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IJoin WithJoin()
         {
-            IJoin join = new Join();
-            _joins.Add(join);
+            Join join = new();
+            _joins.AddArgument(join);
 
             return join;
         }
@@ -210,7 +190,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery WithResolve(string resolveTo, params string[] showFields)
         {
-            _resolves.Add(new QueryResolve(resolveTo, showFields));
+            _resolves.AddArgument(new QueryResolve(resolveTo, showFields));
 
             return this;
         }
@@ -220,9 +200,9 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (!_isShowingFields)
-                _showHideFields.Clear();
+                _showHideFields = GetQueryCommandFormatter("show", true);
 
-            _showHideFields.AddRange(fieldNames);
+            _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = true;
 
             return this;
@@ -233,9 +213,9 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (_isShowingFields)
-                _showHideFields.Clear();
+                GetQueryCommandFormatter("hide", true);
 
-            _showHideFields.AddRange(fieldNames);
+            _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = false;
 
             return this;
@@ -244,7 +224,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery HasFields(params string[] fieldNames)
         {
-            _hasFields.AddRange(fieldNames);
+            _hasFields.AddArgumentRange(fieldNames);
 
             return this;
         }
@@ -252,7 +232,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery WithLanguage(CensusLanguage languageCode)
         {
-            _language = languageCode;
+            _language.AddArgument(languageCode);
 
             return this;
         }
@@ -260,7 +240,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery IsCaseInsensitive()
         {
-            _isCaseSensitive = false;
+            _isCaseSensitive.AddArgument(false.ToString());
 
             return this;
         }
@@ -268,7 +248,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery WithNullFields()
         {
-            _withNullFields = true;
+            _withNullFields.AddArgument(true.ToString());
 
             return this;
         }
@@ -276,7 +256,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery WithTimings()
         {
-            _withTimings = true;
+            _withTimings.AddArgument(true.ToString());
 
             return this;
         }
@@ -284,7 +264,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery WithoutOneTimeRetry()
         {
-            _retry = false;
+            _retry.AddArgument(false.ToString());
 
             return this;
         }
@@ -295,11 +275,21 @@ namespace DbgCensus.Rest.Queries
             if (string.IsNullOrEmpty(_onCollection))
                 throw new InvalidOperationException("This operation can only be performed on a collection.");
 
-            _distinctField = fieldName;
+            _distinctField.AddArgument(fieldName);
 
             return this;
         }
 
         public override string ToString() => ConstructEndpoint().ToString();
+
+        private static QueryCommandFormatter GetQueryCommandFormatter(string command, bool allowsMultipleArguments, string? defaultArgument = null)
+        {
+            if (allowsMultipleArguments)
+                return new QueryCommandFormatter(command, '=', ',', defaultArgument);
+            else
+                return new QueryCommandFormatter(command, '=', defaultArgument);
+        }
+
+        private static string JoinWithoutNullOrEmptyValues(char separator, params string[] value) => string.Join(separator, value.Where(str => !string.IsNullOrEmpty(str)));
     }
 }
