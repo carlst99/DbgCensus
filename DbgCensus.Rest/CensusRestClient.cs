@@ -3,6 +3,9 @@ using DbgCensus.Rest.Abstractions.Queries;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DbgCensus.Rest
@@ -18,14 +21,15 @@ namespace DbgCensus.Rest
             _client = client;
         }
 
-        public async Task<T?> GetAsync<T>(IQuery query) where T : new()
+        public async Task<T?> GetAsync<T>(IQuery query, CancellationToken ct = default) where T : new()
         {
-            return await GetAsync<T>(query.ConstructEndpoint().AbsoluteUri).ConfigureAwait(false);
+            return await GetAsync<T>(query.ConstructEndpoint().AbsoluteUri, ct).ConfigureAwait(false);
         }
 
-        public async Task<T?> GetAsync<T>(string query) where T : new()
+        public async Task<T?> GetAsync<T>(string query, CancellationToken ct = default) where T : new()
         {
-            HttpResponseMessage response = await _client.GetAsync(query).ConfigureAwait(false);
+            //T? result = await _client.GetFromJsonAsync<T>(query, ct);
+            HttpResponseMessage response = await _client.GetAsync(query, ct).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -34,6 +38,11 @@ namespace DbgCensus.Rest
             }
 
             // Check for failed query message
+            // Un-nest from root object
+            // Check for list vs single
+            // Check that object count matches returned results count if list
+            await response.Content.ReadFromJsonAsync<T>(new JsonSerializerOptions(), ct);
+            return await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false), cancellationToken: ct).ConfigureAwait(false); // TODO: Inject json options
         }
     }
 }
