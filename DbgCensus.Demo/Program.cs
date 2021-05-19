@@ -23,7 +23,7 @@ namespace DbgCensus.Demo
                 o.LanguageCode = CensusLanguage.ENGLISH;
                 o.Namespace = CensusNamespace.PS2;
                 o.Limit = 100;
-                o.ServiceId = "***REMOVED***"; // TODO: REMOVE!!!
+                o.ServiceId = "example";
             });
 
             await builder.Build().RunAsync().ConfigureAwait(false);

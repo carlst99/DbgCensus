@@ -8,6 +8,7 @@ namespace DbgCensus.Rest.Extensions
 {
     public static class IServiceCollectionExtensions
     {
+        // TODO: Add func to resolve CensusQueryOptions
         public static void AddCensusRestServices(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddHttpClient<CensusRestClient>();

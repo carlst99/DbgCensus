@@ -1,5 +1,6 @@
 ﻿using DbgCensus.Rest.Abstractions;
 using DbgCensus.Rest.Abstractions.Queries;
+using DbgCensus.Rest.Json;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Http;
@@ -14,11 +15,18 @@ namespace DbgCensus.Rest
     {
         private readonly ILogger<CensusRestClient> _logger;
         private readonly HttpClient _client;
+        private readonly JsonSerializerOptions _jsonOptions;
 
-        public CensusRestClient(ILogger<CensusRestClient> logger, HttpClient client)
+        public CensusRestClient(ILogger<CensusRestClient> logger, HttpClient client, JsonSerializerOptions jsonOptions) // TODO: Figure out how this would be injected
         {
             _logger = logger;
             _client = client;
+
+            _jsonOptions = new JsonSerializerOptions(jsonOptions)
+            {
+                NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,
+                PropertyNamingPolicy = new CamelToSnakeCaseJsonNamingPolicy()
+            };
         }
 
         public async Task<T?> GetAsync<T>(IQuery query, CancellationToken ct = default) where T : new()
@@ -41,7 +49,7 @@ namespace DbgCensus.Rest
             // Un-nest from root object
             // Check for list vs single
             // Check that object count matches returned results count if list
-            await response.Content.ReadFromJsonAsync<T>(new JsonSerializerOptions(), ct);
+            await response.Content.ReadFromJsonAsync<T>(_jsonOptions, ct).ConfigureAwait(false);
             return await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false), cancellationToken: ct).ConfigureAwait(false); // TODO: Inject json options
         }
     }
