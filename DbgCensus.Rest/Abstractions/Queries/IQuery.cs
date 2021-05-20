@@ -3,10 +3,15 @@
 namespace DbgCensus.Rest.Abstractions.Queries
 {
     /// <summary>
-    /// Provides functions to build a query string.
+    /// Provides functions to build a query string for the Census REST API.
     /// </summary>
     public interface IQuery
     {
+        /// <summary>
+        /// The collection to perform the query on.
+        /// </summary>
+        string? CollectionName { get; }
+
         /// <summary>
         /// Builds the query URI.
         /// </summary>

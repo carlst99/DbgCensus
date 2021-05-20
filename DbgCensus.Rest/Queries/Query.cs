@@ -6,7 +6,7 @@ using System.Linq;
 namespace DbgCensus.Rest.Queries
 {
     /// <summary>
-    /// Provides functions to build a query string.
+    /// Provides functions to build a query string for the Census REST API.
     /// </summary>
     public class Query : IQuery
     {
@@ -31,12 +31,13 @@ namespace DbgCensus.Rest.Queries
         private readonly QueryCommandFormatter _startIndex;
 
         private QueryType _verb;
-        private string _onCollection;
         private QueryCommandFormatter _showHideFields;
         private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
 
+        public string? CollectionName { get; protected set; }
+
         /// <summary>
-        /// Provides functions to build a query string.
+        /// Provides functions to build a query string for the Census REST API.
         /// </summary>
         /// <param name="serviceId">A Census service ID.</param>
         /// <param name="queryNamespace">The Census namespace to query.</param>
@@ -63,11 +64,15 @@ namespace DbgCensus.Rest.Queries
             _distinctField = GetQueryCommandFormatter("c:distinct", false);
             _startIndex = GetQueryCommandFormatter("c:start", false);
 
-            _onCollection = string.Empty;
+            CollectionName = null;
             _verb = QueryType.GET;
             _showHideFields = GetQueryCommandFormatter("c:show", true);
         }
 
+        /// <summary>
+        /// Provides functions to build a query string for the Census REST API.
+        /// </summary>
+        /// <param name="options">Default configuration for the query.</param>
         public Query(CensusQueryOptions options)
             : this(options.ServiceId, options.Namespace, options.RootEndpoint)
         {
@@ -83,10 +88,12 @@ namespace DbgCensus.Rest.Queries
         {
             UriBuilder builder = new(_rootEndpoint);
 
-            builder.Path = $"s:{_serviceId}/{_verb.Value}/{_queryNamespace}/{_onCollection}";
+            builder.Path = $"s:{_serviceId}/{_verb.Value}/{_queryNamespace}";
+            if (CollectionName is not null)
+                builder.Path += $"/{CollectionName}";
 
             // A collection must be specified to perform a query
-            if (string.IsNullOrEmpty(_onCollection))
+            if (CollectionName is null)
                 return builder.Uri;
 
             // Add distinct command
@@ -121,7 +128,10 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery OnCollection(string collection)
         {
-            _onCollection = collection;
+            if (string.IsNullOrEmpty(collection))
+                throw new ArgumentNullException(nameof(collection));
+
+            CollectionName = collection;
             return this;
         }
 
@@ -154,7 +164,7 @@ namespace DbgCensus.Rest.Queries
         {
             string? filterValueString = filterValue.ToString();
             if (string.IsNullOrEmpty(filterValueString) || filterValueString.Equals(typeof(T).FullName))
-                throw new ArgumentException(nameof(filterValue) + " must have properly implemented ToString()", nameof(filterValue));
+                throw new ArgumentException("The type of " + nameof(filterValue) + " must have properly implemented ToString()", nameof(filterValue));
 
             QueryFilter queryFilter = new(field, filterValueString, modifier);
             _filters.Add(queryFilter);
@@ -272,7 +282,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public IQuery WithDistinctFieldValues(string fieldName)
         {
-            if (string.IsNullOrEmpty(_onCollection))
+            if (string.IsNullOrEmpty(CollectionName))
                 throw new InvalidOperationException("This operation can only be performed on a collection.");
 
             _distinctField.AddArgument(fieldName);
