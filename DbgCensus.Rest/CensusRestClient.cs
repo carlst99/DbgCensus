@@ -32,13 +32,13 @@ namespace DbgCensus.Rest
         }
 
         /// <inheritdoc />
-        public async Task<T> GetAsync<T>(IQuery query, CancellationToken ct = default) where T : new()
+        public async Task<T?> GetAsync<T>(IQuery query, CancellationToken ct = default) where T : new()
         {
             return await GetAsync<T>(query.ConstructEndpoint().AbsoluteUri, query.CollectionName, ct).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public async Task<T> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default) where T : new()
+        public async Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default) where T : new()
         {
             _logger.LogTrace("Performing Census GET request with query: {query}", query);
 
@@ -50,7 +50,7 @@ namespace DbgCensus.Rest
                 throw new CensusServiceUnavailableException();
             }
 
-            return await DeserializeResponseContent<T>(response.Content, collectionName, ct).ConfigureAwait(false);
+            return await DeserializeResponseContentAsync<T>(response.Content, collectionName, ct).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace DbgCensus.Rest
         /// <param name="collectionName">The name of the collection that was queried.</param>
         /// <param name="ct">A token which can be used to cancel asynchronous logic.</param>
         /// <returns></returns>
-        protected virtual async Task<T> DeserializeResponseContent<T>(HttpContent content, string? collectionName, CancellationToken ct = default)
+        protected virtual async Task<T?> DeserializeResponseContentAsync<T>(HttpContent content, string? collectionName, CancellationToken ct = default)
         {
             JsonDocument data = await JsonDocument.ParseAsync(await content.ReadAsStreamAsync(ct).ConfigureAwait(false), cancellationToken: ct).ConfigureAwait(false);
 
