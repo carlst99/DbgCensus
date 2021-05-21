@@ -19,7 +19,7 @@ namespace DbgCensus.Rest
 
         public bool IsDisposed { get; protected set; }
 
-        public CensusRestClient(ILogger<CensusRestClient> logger, HttpClient client, JsonSerializerOptions jsonOptions) // TODO: Figure out how this would be injected
+        public CensusRestClient(ILogger<CensusRestClient> logger, HttpClient client, JsonSerializerOptions jsonOptions)
         {
             _logger = logger;
             _client = client;
@@ -27,8 +27,9 @@ namespace DbgCensus.Rest
             _jsonOptions = new JsonSerializerOptions(jsonOptions)
             {
                 NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,
-                PropertyNamingPolicy = new CamelToSnakeCaseJsonNamingPolicy()
+                PropertyNamingPolicy = new SnakeCaseJsonNamingPolicy()
             };
+            _jsonOptions.Converters.Add(new BooleanJsonConverter());
         }
 
         /// <inheritdoc />

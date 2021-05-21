@@ -1,6 +1,5 @@
 ﻿using DbgCensus.Rest.Abstractions.Queries;
 using Microsoft.Extensions.Options;
-using System;
 
 namespace DbgCensus.Rest.Queries
 {
@@ -9,14 +8,17 @@ namespace DbgCensus.Rest.Queries
     /// </summary>
     public class QueryFactory : IQueryFactory
     {
-        private readonly Func<IQuery> _getQuery;
+        private readonly CensusQueryOptions _defaultOptions;
 
         public QueryFactory(IOptions<CensusQueryOptions> queryOptions)
         {
-            _getQuery = () => new Query(queryOptions.Value);
+            _defaultOptions = queryOptions.Value;
         }
 
         /// <inheritdoc />
-        public IQuery Get() => _getQuery.Invoke();
+        public IQuery Get() => new Query(_defaultOptions);
+
+        /// <inheritdoc />
+        public IQuery Get(CensusQueryOptions options) => new Query(_defaultOptions);
     }
 }

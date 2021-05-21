@@ -7,7 +7,7 @@ namespace DbgCensus.Rest.Abstractions
 {
     public interface ICensusRestClient : IDisposable
     {
-        Task<T?> GetAsync<T>(IQuery query, CancellationToken ct) where T : new();
-        Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct) where T : new();
+        Task<T?> GetAsync<T>(IQuery query, CancellationToken ct = default) where T : new();
+        Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default) where T : new();
     }
 }
