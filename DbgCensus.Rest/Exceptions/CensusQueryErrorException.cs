@@ -1,4 +1,4 @@
-﻿using System;
+﻿using DbgCensus.Core.Exceptions;
 
 namespace DbgCensus.Rest.Exceptions
 {
@@ -6,7 +6,7 @@ namespace DbgCensus.Rest.Exceptions
     /// Stores information about an error that occured during an internal Census query.
     /// </summary>
 #pragma warning disable RCS1194 // Implement exception constructors.
-    public class CensusQueryErrorException : Exception
+    public class CensusQueryErrorException : CensusException
 #pragma warning restore RCS1194 // Implement exception constructors.
     {
         /// <summary>
@@ -26,8 +26,8 @@ namespace DbgCensus.Rest.Exceptions
         /// <summary>
         /// Stores information about an error that occured during an internal Census query.
         /// </summary>
-        /// <param name="code">The returned Census error code.</param>
         /// <param name="message">The returned Census error message.</param>
+        /// <param name="code">The returned Census error code.</param>
         public CensusQueryErrorException(string? message, int? code)
             : base(message)
         {

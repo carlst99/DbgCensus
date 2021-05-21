@@ -1,4 +1,4 @@
-﻿using System;
+﻿using DbgCensus.Core.Exceptions;
 
 namespace DbgCensus.Rest.Exceptions
 {
@@ -6,7 +6,7 @@ namespace DbgCensus.Rest.Exceptions
     /// Indicates that a Census service is unavailable.
     /// </summary>
 #pragma warning disable RCS1194 // Implement exception constructors.
-    public class CensusServiceUnavailableException : Exception
+    public class CensusServiceUnavailableException : CensusException
 #pragma warning restore RCS1194 // Implement exception constructors.
     {
         /// <summary>

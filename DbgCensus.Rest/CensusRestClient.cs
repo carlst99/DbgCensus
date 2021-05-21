@@ -1,4 +1,5 @@
-﻿using DbgCensus.Rest.Abstractions;
+﻿using DbgCensus.Core.Exceptions;
+using DbgCensus.Rest.Abstractions;
 using DbgCensus.Rest.Abstractions.Queries;
 using DbgCensus.Rest.Exceptions;
 using DbgCensus.Rest.Json;

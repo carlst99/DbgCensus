@@ -1,3 +1,4 @@
+using DbgCensus.Core.Exceptions;
 using DbgCensus.Rest.Abstractions;
 using DbgCensus.Rest.Abstractions.Queries;
 using Microsoft.Extensions.Hosting;
@@ -43,19 +44,34 @@ namespace CensusEndpointMonitor.Cli
                 {
                     collections = await _censusClient.GetAsync<List<CensusCollection>>(collectionsQuery, stoppingToken).ConfigureAwait(false);
                 }
+                catch (CensusException ex)
+                {
+                    _logger.LogError(ex, "An error occured within the Census API.");
+                    continue;
+                }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Could not get census collections");
+                    _logger.LogError(ex, "Failed to make the Census request.");
                     continue;
                 }
 
                 if (collections is null)
                 {
-                    _logger.LogError("The collections result could not be parsed.");
+                    _logger.LogError("No collections were returned. Is the API dead?");
                     continue;
                 }
 
                 _logger.LogInformation("Collection count: {count}", collections.Count);
+                await CheckCollections(collections).ConfigureAwait(false);
+            }
+        }
+
+        private async Task CheckCollections(List<CensusCollection> collections)
+        {
+            foreach (CensusCollection collection in collections)
+            {
+                IQuery query = _queryFactory.Get();
+                query.OnCollection(collection.Name);
             }
         }
     }
