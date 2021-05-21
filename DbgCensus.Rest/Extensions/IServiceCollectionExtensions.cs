@@ -21,10 +21,11 @@ namespace DbgCensus.Rest.Extensions
         {
             serviceCollection.AddHttpClient<CensusRestClient>();
 
-            serviceCollection.TryAddSingleton<ICensusRestClient>((s) => new CensusRestClient(
-                s.GetRequiredService<ILogger<CensusRestClient>>(),
-                s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(CensusRestClient)),
-                serializerOptions.Invoke(s)));
+            serviceCollection.TryAddSingleton<ICensusRestClient>((s) =>
+                new CensusRestClient(
+                    s.GetRequiredService<ILogger<CensusRestClient>>(),
+                    s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(CensusRestClient)),
+                    serializerOptions.Invoke(s)));
 
             serviceCollection.TryAddSingleton<IQueryFactory, QueryFactory>();
         }

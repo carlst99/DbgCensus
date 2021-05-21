@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,9 +27,12 @@ namespace DbgCensus.Rest
 
             _jsonOptions = new JsonSerializerOptions(jsonOptions)
             {
-                NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,
-                PropertyNamingPolicy = new SnakeCaseJsonNamingPolicy()
+                NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals
             };
+
+            if (_jsonOptions.PropertyNamingPolicy is null)
+                _jsonOptions.PropertyNamingPolicy = new SnakeCaseJsonNamingPolicy();
+
             _jsonOptions.Converters.Add(new BooleanJsonConverter());
         }
 
