@@ -41,7 +41,7 @@ namespace CensusEndpointMonitor.Cli
                 List<CensusCollection>? collections;
                 try
                 {
-                    collections = await _censusClient.GetAsync<List<CensusCollection>>(collectionsQuery).ConfigureAwait(false);
+                    collections = await _censusClient.GetAsync<List<CensusCollection>>(collectionsQuery, stoppingToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {

@@ -1,0 +1,50 @@
+﻿<#@ template hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ output extension=".cs" #>
+<#
+Type[] types = new[] {
+    typeof(Int16), typeof(Int32), typeof(Int64),
+    typeof(UInt16), typeof(UInt32), typeof(UInt64)
+    };
+#>
+using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace DbgCensus.Rest.Json
+{
+<#
+foreach (Type type in types)
+{
+#>
+    public class <#= type.Name #>JsonConverter : JsonConverter<<#= type.Name #>>
+    {
+        public override <#= type.Name #> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.Number)
+                return reader.Get<#= type.Name #>();
+            else if (reader.TokenType != JsonTokenType.String)
+                throw new JsonException("The token could not be converted to an <#= type.Name #>");
+
+            string? data = reader.GetString();
+            if (data is null)
+                return 0;
+
+            if (<#= type.Name #>.TryParse(data, out <#= type.Name #> result))
+                return result;
+            else if (data == "?" || data == "dynamic")
+                return 0;
+            else
+                throw new JsonException("The token could not be converted to an <#= type.Name #>: " + data);
+        }
+
+        public override void Write(Utf8JsonWriter writer, <#= type.Name #> value, JsonSerializerOptions options)
+        {
+            writer.WriteNumberValue(value);
+        }
+    }
+
+<#
+}
+#>
+}
