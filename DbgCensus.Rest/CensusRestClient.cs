@@ -68,26 +68,22 @@ namespace DbgCensus.Rest
 
             CheckForResponseError(data);
 
-            if (collectionName is not null)
-            {
-                //if (!data.RootElement.TryGetProperty("returned", out JsonElement returnedElement) || !returnedElement.TryGetUInt64(out ulong returnedCount))
-                //    throw new CensusInvalidDataException("Expected a valid 'returned' element.", data.RootElement.GetString());
+            if (collectionName is null)
+                collectionName = "datatype";
 
-                // TODO: Test with distinct and other commands that vastly modify the result
-                // Check for list vs single?
-                // Check that object count matches returned results count if list?
-                if (!data.RootElement.TryGetProperty(collectionName + "_list", out JsonElement collectionElement))
-                {
-                    _logger.LogWarning("Returned data was not in the expected format: {data}", data.RootElement.GetRawText());
-                    throw new CensusInvalidDataException("Returned data was not in the expected format.", data.RootElement.GetRawText());
-                }
+            //if (!data.RootElement.TryGetProperty("returned", out JsonElement returnedElement) || !returnedElement.TryGetUInt64(out ulong returnedCount))
+            //    throw new CensusInvalidDataException("Expected a valid 'returned' element.", data.RootElement.GetString());
 
-                return JsonSerializer.Deserialize<T>(collectionElement.GetRawText(), _jsonOptions);
-            }
-            else
+            // TODO: Test with distinct and other commands that vastly modify the result
+            // Check for list vs single?
+            // Check that object count matches returned results count if list?
+            if (!data.RootElement.TryGetProperty(collectionName + "_list", out JsonElement collectionElement))
             {
-                return JsonSerializer.Deserialize<T>(data.RootElement.GetRawText(), _jsonOptions);
+                _logger.LogWarning("Returned data was not in the expected format: {data}", data.RootElement.GetRawText());
+                throw new CensusInvalidDataException("Returned data was not in the expected format.", data.RootElement.GetRawText());
             }
+
+            return JsonSerializer.Deserialize<T>(collectionElement.GetRawText(), _jsonOptions);
         }
 
         /// <summary>
