@@ -83,11 +83,22 @@ namespace DbgCensus.Rest.Abstractions.Queries
         IJoin WithJoin();
 
         /// <summary>
+        /// Reformats the returned data by placing it into groups based on a given field.
+        /// </summary>
+        /// <param name="groupingField">The field to group data by. Will be removed from the data source.</param>
+        /// <param name="groupingFieldIsList">Indicates that the grouped data is a list.</param>
+        /// <param name="prefix">A prefix to add to each group name in the tree.</param>
+        /// <param name="start">A field within the result (including joins and resolves) at which to start the tree, rather than performing the operation on the original query.</param>
+        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
+        IQuery AsTree(string groupingField, bool groupingFieldIsList = false, string? prefix = null, string? start = null);
+
+        /// <summary>
         /// Performs a pre-determined resolve. Multiple resolves can be made in the same query.
         /// </summary>
         /// <remarks>Note that the resolve will only function if the initial query is showing the field that the resolve is keyed on.</remarks>
         /// <param name="resolveTo">The resolve to make.</param>
         /// <param name="showFields">The fields to be shown from the resolved collection.</param>
+        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
         IQuery WithResolve(string resolveTo, params string[] showFields);
 
         /// <summary>

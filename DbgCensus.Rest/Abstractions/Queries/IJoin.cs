@@ -1,14 +1,10 @@
 ﻿namespace DbgCensus.Rest.Abstractions.Queries
 {
+    /// <summary>
+    /// Functions to build a join string for the Census REST API.
+    /// </summary>
     public interface IJoin
     {
-        /// <summary>
-        /// The collection to join to.
-        /// </summary>
-        /// <param name="collectionName">The name of a Census collection.</param>
-        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>
-        IJoin ToCollection(string collectionName);
-
         /// <summary>
         /// The ID field on the base collection to join on.
         /// </summary>
@@ -68,7 +64,8 @@
         /// <summary>
         /// Creates a nested join on this join.
         /// </summary>
+        /// <param name="toCollection">The name of the collection to create a nested join on.</param>
         /// <returns>The nested join object.</returns>
-        IJoin WithNestedJoin();
+        IJoin WithNestedJoin(string toCollection);
     }
 }

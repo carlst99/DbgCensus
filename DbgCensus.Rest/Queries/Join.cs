@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace DbgCensus.Rest.Queries
 {
+    /// <summary>
+    /// Functions to build a join string for the Census REST API.
+    /// </summary>
     public class Join : IJoin
     {
         private readonly List<IJoin> _nestedJoins;
@@ -20,11 +23,15 @@ namespace DbgCensus.Rest.Queries
         private QueryCommandFormatter _showHideFields;
         private bool _isShowingFields; // Indicates whether, if present, fields in "_showHideFields" should be shown (or hidden).
 
-        public Join()
+        /// <summary>
+        /// Initialises a new instance of the <see cref="Join"/> class.
+        /// </summary>
+        /// <param name="toCollection">The name of the collection to join to.</param>
+        public Join(string toCollection)
         {
             _nestedJoins = new List<IJoin>();
 
-            _toCollection = GetQueryCommandFormatter("type", false);
+            _toCollection = GetQueryCommandFormatter("type", false, toCollection);
             _filterTerms = GetQueryCommandFormatter("terms", true);
             _onField = GetQueryCommandFormatter("on", false);
             _toField = GetQueryCommandFormatter("to", false);
@@ -32,14 +39,6 @@ namespace DbgCensus.Rest.Queries
             _injectAt = GetQueryCommandFormatter("inject_at", false);
             _isOuter = GetQueryCommandFormatter("outer", false, "1");
             _showHideFields = GetQueryCommandFormatter("show", true);
-        }
-
-        /// <inheritdoc/>
-        public IJoin ToCollection(string collectionName)
-        {
-            _toCollection.AddArgument(collectionName);
-
-            return this;
         }
 
         /// <inheritdoc />
@@ -122,9 +121,9 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc/>
-        public IJoin WithNestedJoin()
+        public IJoin WithNestedJoin(string toCollection)
         {
-            IJoin nested = new Join();
+            IJoin nested = new Join(toCollection);
             _nestedJoins.Add(nested);
 
             return nested;
