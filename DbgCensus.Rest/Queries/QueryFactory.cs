@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 namespace DbgCensus.Rest.Queries
 {
     /// <summary>
-    /// A factory for <see cref="Query"/> objects. Objects are constructed using the values of an <see cref="CensusQueryOptions"/> options instance retrieved from the IoC container.
+    /// A factory for <see cref="QueryBuilder"/> objects. Objects are constructed using the values of an <see cref="CensusQueryOptions"/> options instance retrieved from the IoC container.
     /// </summary>
     public class QueryFactory : IQueryFactory
     {
@@ -16,9 +16,9 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery Get() => new Query(_defaultOptions);
+        public IQueryBuilder Get() => new QueryBuilder(_defaultOptions);
 
         /// <inheritdoc />
-        public IQuery Get(CensusQueryOptions options) => new Query(_defaultOptions);
+        public IQueryBuilder Get(CensusQueryOptions options) => new QueryBuilder(_defaultOptions);
     }
 }

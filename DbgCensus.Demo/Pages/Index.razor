@@ -48,7 +48,7 @@
             .WithStartIndex(9)
             .ConstructEndpoint().AbsoluteUri;
 
-        IJoin join = QueryFactory.Get().WithJoin().ToCollection("outfit").IsList().InjectAt("injectedHere").HideFields("show1", "show2");
+        IJoinBuilder join = QueryFactory.Get().WithJoin().ToCollection("outfit").IsList().InjectAt("injectedHere").HideFields("show1", "show2");
 
         join.WithNestedJoin().ToCollection("character").Where("name", "Falcon", SearchModifier.EQUALS);
         join.WithNestedJoin().ToCollection("item").OnField("item_id");

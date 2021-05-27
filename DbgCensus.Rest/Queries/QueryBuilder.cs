@@ -8,7 +8,7 @@ namespace DbgCensus.Rest.Queries
     /// <summary>
     /// Provides functions to build a query string for the Census REST API.
     /// </summary>
-    public class Query : IQuery
+    public class QueryBuilder : IQueryBuilder
     {
         private readonly string _rootEndpoint;
         private readonly string _serviceId;
@@ -43,7 +43,7 @@ namespace DbgCensus.Rest.Queries
         /// <param name="serviceId">A Census service ID.</param>
         /// <param name="queryNamespace">The Census namespace to query.</param>
         /// <param name="rootEndpoint">The root endpoint of the Census REST API.</param>
-        public Query(string serviceId, string queryNamespace, string rootEndpoint = "https://census.daybreakgames.com")
+        public QueryBuilder(string serviceId, string queryNamespace, string rootEndpoint = "https://census.daybreakgames.com")
         {
             _rootEndpoint = rootEndpoint;
             _serviceId = serviceId;
@@ -75,7 +75,7 @@ namespace DbgCensus.Rest.Queries
         /// Provides functions to build a query string for the Census REST API.
         /// </summary>
         /// <param name="options">Default configuration for the query.</param>
-        public Query(CensusQueryOptions options)
+        public QueryBuilder(CensusQueryOptions options)
             : this(options.ServiceId, options.Namespace, options.RootEndpoint)
         {
             if (options.LanguageCode is not null)
@@ -121,14 +121,14 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery OfQueryType(QueryType type)
+        public IQueryBuilder OfQueryType(QueryType type)
         {
             _verb = type;
             return this;
         }
 
         /// <inheritdoc />
-        public IQuery OnCollection(string collection)
+        public IQueryBuilder OnCollection(string collection)
         {
             if (string.IsNullOrEmpty(collection))
                 throw new ArgumentNullException(nameof(collection));
@@ -138,7 +138,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery WithLimit(uint limit)
+        public IQueryBuilder WithLimit(uint limit)
         {
             _limit.AddArgument(limit.ToString());
 
@@ -146,7 +146,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery WithLimitPerDatabase(uint limit)
+        public IQueryBuilder WithLimitPerDatabase(uint limit)
         {
             _limitPerDb.AddArgument(limit.ToString());
 
@@ -154,7 +154,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery WithStartIndex(uint index)
+        public IQueryBuilder WithStartIndex(uint index)
         {
             _startIndex.AddArgument(index.ToString());
 
@@ -162,7 +162,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
+        public IQueryBuilder Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
         {
             string? filterValueString = filterValue.ToString();
             if (string.IsNullOrEmpty(filterValueString) || filterValueString.Equals(typeof(T).FullName))
@@ -175,7 +175,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery WithSortOrder(string fieldName, SortOrder order = SortOrder.Ascending)
+        public IQueryBuilder WithSortOrder(string fieldName, SortOrder order = SortOrder.Ascending)
         {
             _sortKeys.AddArgument(new QuerySortKey(fieldName, order));
 
@@ -183,7 +183,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery WithExactMatchesFirst()
+        public IQueryBuilder WithExactMatchesFirst()
         {
             _exactMatchesFirst.AddArgument(true.ToString());
 
@@ -191,18 +191,18 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoin WithJoin(string toCollection)
+        public IJoinBuilder WithJoin(string toCollection)
         {
-            Join join = new(toCollection);
+            JoinBuilder join = new(toCollection);
             _joins.AddArgument(join);
 
             return join;
         }
 
         /// <inheritdoc />
-        public IQuery WithJoin(string collectionName, Action<IJoin> configureJoin)
+        public IQueryBuilder WithJoin(string collectionName, Action<IJoinBuilder> configureJoin)
         {
-            Join join = new(collectionName);
+            JoinBuilder join = new(collectionName);
             configureJoin(join);
             _joins.AddArgument(join);
 
@@ -210,7 +210,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery WithResolve(string resolveTo, params string[] showFields)
+        public IQueryBuilder WithResolve(string resolveTo, params string[] showFields)
         {
             _resolves.AddArgument(new QueryResolve(resolveTo, showFields));
 
@@ -218,7 +218,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery ShowFields(params string[] fieldNames)
+        public IQueryBuilder ShowFields(params string[] fieldNames)
         {
             // Show and hide are incompatible
             if (!_isShowingFields)
@@ -231,7 +231,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery HideFields(params string[] fieldNames)
+        public IQueryBuilder HideFields(params string[] fieldNames)
         {
             // Show and hide are incompatible
             if (_isShowingFields)
@@ -244,7 +244,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery HasFields(params string[] fieldNames)
+        public IQueryBuilder HasFields(params string[] fieldNames)
         {
             _hasFields.AddArgumentRange(fieldNames);
 
@@ -252,7 +252,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery WithLanguage(CensusLanguage languageCode)
+        public IQueryBuilder WithLanguage(CensusLanguage languageCode)
         {
             _language.AddArgument(languageCode);
 
@@ -260,7 +260,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery IsCaseInsensitive()
+        public IQueryBuilder IsCaseInsensitive()
         {
             _isCaseSensitive.AddArgument(false.ToString());
 
@@ -268,7 +268,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery WithNullFields()
+        public IQueryBuilder WithNullFields()
         {
             _withNullFields.AddArgument(true.ToString());
 
@@ -276,7 +276,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery WithTimings()
+        public IQueryBuilder WithTimings()
         {
             _withTimings.AddArgument(true.ToString());
 
@@ -284,7 +284,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery WithoutOneTimeRetry()
+        public IQueryBuilder WithoutOneTimeRetry()
         {
             _retry.AddArgument(false.ToString());
 
@@ -292,7 +292,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQuery WithDistinctFieldValues(string fieldName)
+        public IQueryBuilder WithDistinctFieldValues(string fieldName)
         {
             if (string.IsNullOrEmpty(CollectionName))
                 throw new InvalidOperationException("This operation can only be performed on a collection.");

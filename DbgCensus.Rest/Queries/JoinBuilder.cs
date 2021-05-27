@@ -8,9 +8,9 @@ namespace DbgCensus.Rest.Queries
     /// <summary>
     /// Functions to build a join string for the Census REST API.
     /// </summary>
-    public class Join : IJoin
+    public class JoinBuilder : IJoinBuilder
     {
-        private readonly List<IJoin> _nestedJoins;
+        private readonly List<IJoinBuilder> _nestedJoins;
 
         private readonly QueryCommandFormatter _toCollection;
         private readonly QueryCommandFormatter _filterTerms;
@@ -24,12 +24,12 @@ namespace DbgCensus.Rest.Queries
         private bool _isShowingFields; // Indicates whether, if present, fields in "_showHideFields" should be shown (or hidden).
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="Join"/> class.
+        /// Initialises a new instance of the <see cref="JoinBuilder"/> class.
         /// </summary>
         /// <param name="toCollection">The name of the collection to join to.</param>
-        public Join(string toCollection)
+        public JoinBuilder(string toCollection)
         {
-            _nestedJoins = new List<IJoin>();
+            _nestedJoins = new List<IJoinBuilder>();
 
             _toCollection = GetQueryCommandFormatter("type", false, toCollection);
             _filterTerms = GetQueryCommandFormatter("terms", true);
@@ -42,7 +42,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoin ShowFields(params string[] fieldNames)
+        public IJoinBuilder ShowFields(params string[] fieldNames)
         {
             // Show and hide are incompatible
             if (!_isShowingFields)
@@ -55,7 +55,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoin HideFields(params string[] fieldNames)
+        public IJoinBuilder HideFields(params string[] fieldNames)
         {
             // Show and hide are incompatible
             if (_isShowingFields)
@@ -68,7 +68,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoin InjectAt(string name)
+        public IJoinBuilder InjectAt(string name)
         {
             _injectAt.AddArgument(name);
 
@@ -76,7 +76,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoin IsList()
+        public IJoinBuilder IsList()
         {
             _isList.AddArgument("1");
 
@@ -84,7 +84,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoin IsInnerJoin()
+        public IJoinBuilder IsInnerJoin()
         {
             _isOuter.AddArgument("0");
 
@@ -92,7 +92,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoin OnField(string fieldName)
+        public IJoinBuilder OnField(string fieldName)
         {
             _onField.AddArgument(fieldName);
 
@@ -100,7 +100,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoin ToField(string fieldName)
+        public IJoinBuilder ToField(string fieldName)
         {
             _toField.AddArgument(fieldName);
 
@@ -108,7 +108,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoin Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
+        public IJoinBuilder Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
         {
             string? filterValueString = filterValue.ToString();
             if (string.IsNullOrEmpty(filterValueString) || filterValueString.Equals(typeof(T).FullName))
@@ -121,25 +121,25 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc/>
-        public IJoin WithNestedJoin(string toCollection)
+        public IJoinBuilder WithNestedJoin(string toCollection)
         {
-            Join nested = new(toCollection);
+            JoinBuilder nested = new(toCollection);
             _nestedJoins.Add(nested);
 
             return nested;
         }
 
         /// <inheritdoc />
-        public IJoin WithNestedJoin(string toCollection, Action<IJoin> configureJoin)
+        public IJoinBuilder WithNestedJoin(string toCollection, Action<IJoinBuilder> configureJoin)
         {
-            Join nested = new(toCollection);
+            JoinBuilder nested = new(toCollection);
             configureJoin(nested);
             _nestedJoins.Add(nested);
 
             return nested;
         }
 
-        public static implicit operator string(Join j) => j.ToString();
+        public static implicit operator string(JoinBuilder j) => j.ToString();
 
         /// <summary>
         /// Constructs a well-formed join string, without the join command (c:join=).

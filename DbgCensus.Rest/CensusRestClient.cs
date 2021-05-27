@@ -46,7 +46,7 @@ namespace DbgCensus.Rest
         }
 
         /// <inheritdoc />
-        public async Task<T?> GetAsync<T>(IQuery query, CancellationToken ct = default) where T : new()
+        public async Task<T?> GetAsync<T>(IQueryBuilder query, CancellationToken ct = default) where T : new()
         {
             return await GetAsync<T>(query.ConstructEndpoint().AbsoluteUri, query.CollectionName, ct).ConfigureAwait(false);
         }

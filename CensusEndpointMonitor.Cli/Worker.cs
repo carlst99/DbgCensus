@@ -37,7 +37,7 @@ namespace CensusEndpointMonitor.Cli
                 else
                     await Task.Delay(60000, stoppingToken).ConfigureAwait(false);
 
-                IQuery collectionsQuery = _queryFactory.Get();
+                IQueryBuilder collectionsQuery = _queryFactory.Get();
 
                 List<CensusCollection>? collections;
                 try
@@ -70,7 +70,7 @@ namespace CensusEndpointMonitor.Cli
         {
             foreach (CensusCollection collection in collections)
             {
-                IQuery query = _queryFactory.Get();
+                IQueryBuilder query = _queryFactory.Get();
                 query.OnCollection(collection.Name);
             }
         }

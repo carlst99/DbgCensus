@@ -5,48 +5,48 @@ namespace DbgCensus.Rest.Abstractions.Queries
     /// <summary>
     /// Functions to build a join string for the Census REST API.
     /// </summary>
-    public interface IJoin
+    public interface IJoinBuilder
     {
         /// <summary>
         /// The ID field on the base collection to join on.
         /// </summary>
         /// <param name="fieldName">The name of the field to join on.</param>
-        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>
-        IJoin OnField(string fieldName);
+        /// <returns>An <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
+        IJoinBuilder OnField(string fieldName);
 
         /// <summary>
         /// The ID field on the joined collection to join to.
         /// </summary>
         /// <param name="fieldName">The field to join to.</param>
-        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>
-        IJoin ToField(string fieldName);
+        /// <returns>An <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
+        IJoinBuilder ToField(string fieldName);
 
         /// <summary>
         /// Sets a value indicating that the joined data is a list.
         /// </summary>
-        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>
-        IJoin IsList();
+        /// <returns>An <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
+        IJoinBuilder IsList();
 
         /// <summary>
         /// Only includes the provided fields in the result. This method is incompatible with <see cref="HideFields(string[])"/>.
         /// </summary>
         /// <param name="fieldNames">The names of the fields that should be shown in the result.</param>
-        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>
-        IJoin ShowFields(params string[] fieldNames);
+        /// <returns>An <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
+        IJoinBuilder ShowFields(params string[] fieldNames);
 
         /// <summary>
         /// Includes all but the provided fields in the result. This method is incompatible with <see cref="ShowFields(string[])"/>.
         /// </summary>
         /// <param name="fieldNames">The names of the fields that should be hidden from the result.</param>
-        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>/
-        IJoin HideFields(params string[] fieldNames);
+        /// <returns>An <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>/
+        IJoinBuilder HideFields(params string[] fieldNames);
 
         /// <summary>
         /// Creates a new field on the base collection, where the joined data should be injected to.
         /// </summary>
         /// <param name="name">The name of the field.</param>
-        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>
-        IJoin InjectAt(string name);
+        /// <returns>An <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
+        IJoinBuilder InjectAt(string name);
 
         /// <summary>
         /// Performs a filter on the joined collection. Multiple filters can be performed.
@@ -54,28 +54,28 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// <param name="field">The collection field to filter on.</param>
         /// <param name="filterValue">The value to filter by.</param>
         /// <param name="modifier">The comparison operator.</param>
-        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>
-        IJoin Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull;
+        /// <returns>An <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
+        IJoinBuilder Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull;
 
         /// <summary>
         /// By default, all queries are treated as an 'outer' join. As in SQL, this means that results will be included for joins that do not match the criteria defined via terms. You can set a query to use 'inner' join behaviour, which allows filtering of a parent join via a term defined for its child if both are using 'inner' join behaviour.
         /// </summary>
-        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>
-        IJoin IsInnerJoin();
+        /// <returns>An <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
+        IJoinBuilder IsInnerJoin();
 
         /// <summary>
         /// Creates a nested join on this join.
         /// </summary>
         /// <param name="toCollection">The name of the collection to create a nested join to.</param>
         /// <returns>The nested join object.</returns>
-        IJoin WithNestedJoin(string toCollection);
+        IJoinBuilder WithNestedJoin(string toCollection);
 
         /// <summary>
         /// Creates a nested join on this join.
         /// </summary>
         /// <param name="toCollection">The name of the collection to create a nested join to.</param>
         /// <param name="configureJoin">A delegate to configure the join.</param>
-        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>
-        IJoin WithNestedJoin(string toCollection, Action<IJoin> configureJoin);
+        /// <returns>An <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
+        IJoinBuilder WithNestedJoin(string toCollection, Action<IJoinBuilder> configureJoin);
     }
 }

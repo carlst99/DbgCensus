@@ -16,7 +16,7 @@ namespace DbgCensus.Rest.Tests.Queries
                 ServiceId = "testID"
             }));
 
-            IQuery query = factory.Get();
+            IQueryBuilder query = factory.Get();
             Assert.NotNull(query);
 
             Assert.Contains("testendpoint/s:testid", query.ConstructEndpoint().AbsoluteUri.ToLower());
