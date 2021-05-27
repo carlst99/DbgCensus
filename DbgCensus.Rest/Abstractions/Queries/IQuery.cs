@@ -79,8 +79,17 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// <summary>
         /// Joins data from another collection to this result.
         /// </summary>
+        /// <param name="toCollection">The name of the collection to join to.</param>
         /// <returns>The join.</returns>
-        IJoin WithJoin();
+        IJoin WithJoin(string toCollection);
+
+        /// <summary>
+        /// Joins data from another collection to this result.
+        /// </summary>
+        /// <param name="toCollection">The name of the collection to join to.</param>
+        /// <param name="configureJoin">A delegate to configure the join with.</param>
+        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
+        IQuery WithJoin(string toCollection, Action<IJoin> configureJoin);
 
         /// <summary>
         /// Reformats the returned data by placing it into groups based on a given field.

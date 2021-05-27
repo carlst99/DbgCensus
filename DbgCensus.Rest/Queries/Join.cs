@@ -123,7 +123,17 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc/>
         public IJoin WithNestedJoin(string toCollection)
         {
-            IJoin nested = new Join(toCollection);
+            Join nested = new(toCollection);
+            _nestedJoins.Add(nested);
+
+            return nested;
+        }
+
+        /// <inheritdoc />
+        public IJoin WithNestedJoin(string toCollection, Action<IJoin> configureJoin)
+        {
+            Join nested = new(toCollection);
+            configureJoin(nested);
             _nestedJoins.Add(nested);
 
             return nested;

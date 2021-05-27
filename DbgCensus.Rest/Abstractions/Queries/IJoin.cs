@@ -1,4 +1,6 @@
-﻿namespace DbgCensus.Rest.Abstractions.Queries
+﻿using System;
+
+namespace DbgCensus.Rest.Abstractions.Queries
 {
     /// <summary>
     /// Functions to build a join string for the Census REST API.
@@ -52,7 +54,7 @@
         /// <param name="field">The collection field to filter on.</param>
         /// <param name="filterValue">The value to filter by.</param>
         /// <param name="modifier">The comparison operator.</param>
-        /// <returns>An <see cref="IQuery"/> instance so that calls may be chained.</returns>
+        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>
         IJoin Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull;
 
         /// <summary>
@@ -64,8 +66,16 @@
         /// <summary>
         /// Creates a nested join on this join.
         /// </summary>
-        /// <param name="toCollection">The name of the collection to create a nested join on.</param>
+        /// <param name="toCollection">The name of the collection to create a nested join to.</param>
         /// <returns>The nested join object.</returns>
         IJoin WithNestedJoin(string toCollection);
+
+        /// <summary>
+        /// Creates a nested join on this join.
+        /// </summary>
+        /// <param name="toCollection">The name of the collection to create a nested join to.</param>
+        /// <param name="configureJoin">A delegate to configure the join.</param>
+        /// <returns>An <see cref="IJoin"/> instance so that calls may be chained.</returns>
+        IJoin WithNestedJoin(string toCollection, Action<IJoin> configureJoin);
     }
 }

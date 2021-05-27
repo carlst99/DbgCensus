@@ -19,6 +19,7 @@ namespace DbgCensus.Rest.Queries
         private readonly QueryCommandFormatter _hasFields;
         private readonly QueryCommandFormatter _sortKeys;
         private readonly QueryCommandFormatter _joins;
+        private readonly QueryCommandFormatter _trees;
         private readonly QueryCommandFormatter _limit;
         private readonly QueryCommandFormatter _limitPerDb;
         private readonly QueryCommandFormatter _exactMatchesFirst;
@@ -53,6 +54,7 @@ namespace DbgCensus.Rest.Queries
             _hasFields = GetQueryCommandFormatter("c:has", true);
             _sortKeys = GetQueryCommandFormatter("c:sort", true);
             _joins = GetQueryCommandFormatter("c:join", true);
+            _trees = GetQueryCommandFormatter("c:tree", false);
             _limit = GetQueryCommandFormatter("c:limit", false, 100.ToString());
             _limitPerDb = GetQueryCommandFormatter("c:limitPerDB", false);
             _exactMatchesFirst = GetQueryCommandFormatter("c:exactMatchFirst", false);
@@ -189,12 +191,22 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoin WithJoin()
+        public IJoin WithJoin(string toCollection)
         {
-            Join join = new();
+            Join join = new(toCollection);
             _joins.AddArgument(join);
 
             return join;
+        }
+
+        /// <inheritdoc />
+        public IQuery WithJoin(string collectionName, Action<IJoin> configureJoin)
+        {
+            Join join = new(collectionName);
+            configureJoin(join);
+            _joins.AddArgument(join);
+
+            return this;
         }
 
         /// <inheritdoc />
