@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-alpha.2</Version>
+    <Version>1.0.0-alpha.4</Version>
     <Authors>Carl Stephens</Authors>
     <Company />
     <PackageLicenseFile>LICENSE</PackageLicenseFile>

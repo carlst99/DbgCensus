@@ -4,7 +4,7 @@
 @page "/"
 @inject IJSRuntime JSRuntime
 @inject ICensusRestClient CensusRestClient
-@inject IQueryFactory QueryFactory
+@inject IQueryBuilderFactory QueryFactory
 
 <h1>Query Online Outfit Members</h1>
 
@@ -31,7 +31,7 @@
     {
         _queryStringOne = QueryFactory.Get()
             .OnCollection("outfit")
-            .Where("alias_lower", "uvoc", SearchModifier.EQUALS)
+            .Where("alias_lower", SearchModifier.EQUALS, "uvoc")
             .AddResolve("leader", "name")
             .AddResolve("member_online_status")
             .HasFields("name_lower")
@@ -40,7 +40,7 @@
 
         _queryStringTwo = QueryFactory.Get()
             .OnCollection("outfit")
-            .Where("member_count", 100, SearchModifier.GREATER_THAN)
+            .Where("member_count", SearchModifier.GREATER_THAN, 100)
             .WithSortOrder("member_count", SortOrder.Ascending)
             .WithSortOrder("name_lower", SortOrder.Ascending)
             .WithLimit(10)

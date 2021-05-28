@@ -161,11 +161,13 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public virtual IQueryBuilder Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
+        public virtual IQueryBuilder Where<T>(string field, SearchModifier modifier, params T[] filterValues) where T : notnull
         {
-            string? filterValueString = filterValue.ToString();
-            if (string.IsNullOrEmpty(filterValueString) || filterValueString.Equals(typeof(T).FullName))
-                throw new ArgumentException("The type of " + nameof(filterValue) + " must have properly implemented ToString()", nameof(filterValue));
+            string? testFilterValue = filterValues[0].ToString();
+            if (string.IsNullOrEmpty(testFilterValue) || testFilterValue.Equals(typeof(T).FullName))
+                throw new ArgumentException("The type of " + nameof(filterValues) + " must have properly implemented ToString()", nameof(filterValues));
+
+            string filterValueString = string.Join(',', filterValues);
 
             QueryFilter queryFilter = new(field, filterValueString, modifier);
             _filters.Add(queryFilter);
