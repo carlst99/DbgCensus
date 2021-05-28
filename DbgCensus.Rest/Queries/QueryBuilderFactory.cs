@@ -6,11 +6,11 @@ namespace DbgCensus.Rest.Queries
     /// <summary>
     /// A factory for <see cref="QueryBuilder"/> objects. Objects are constructed using the values of an <see cref="CensusQueryOptions"/> options instance retrieved from the IoC container.
     /// </summary>
-    public sealed class QueryFactory : IQueryFactory
+    public sealed class QueryBuilderFactory : IQueryBuilderFactory
     {
         private readonly CensusQueryOptions _defaultOptions;
 
-        public QueryFactory(IOptions<CensusQueryOptions> queryOptions)
+        public QueryBuilderFactory(IOptions<CensusQueryOptions> queryOptions)
         {
             _defaultOptions = queryOptions.Value;
         }

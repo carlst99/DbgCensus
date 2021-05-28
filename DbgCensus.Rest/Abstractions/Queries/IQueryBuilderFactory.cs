@@ -3,7 +3,7 @@
     /// <summary>
     /// A factory for <see cref="IQueryBuilder"/> items.
     /// </summary>
-    public interface IQueryFactory
+    public interface IQueryBuilderFactory
     {
         /// <summary>
         /// Constructs an <see cref="IQueryBuilder"/> object

@@ -11,7 +11,7 @@ namespace DbgCensus.Tests.Rest.Queries
         [Fact]
         public void TestGet()
         {
-            QueryFactory factory = GetDefaultFactory();
+            QueryBuilderFactory factory = GetDefaultFactory();
 
             IQueryBuilder query = factory.Get();
             Assert.NotNull(query);
@@ -24,7 +24,7 @@ namespace DbgCensus.Tests.Rest.Queries
         public void TestGetWithOptions()
         {
             const string rootEndpoint = "aaabbbccc123";
-            QueryFactory factory = GetDefaultFactory();
+            QueryBuilderFactory factory = GetDefaultFactory();
 
             CensusQueryOptions options = GetDefaultOptions();
             options.RootEndpoint = rootEndpoint;
@@ -34,7 +34,7 @@ namespace DbgCensus.Tests.Rest.Queries
             Assert.Contains(rootEndpoint, query.ConstructEndpoint().AbsoluteUri.ToLower());
         }
 
-        private static QueryFactory GetDefaultFactory() => new(Options.Create(GetDefaultOptions()));
+        private static QueryBuilderFactory GetDefaultFactory() => new(Options.Create(GetDefaultOptions()));
 
         private static CensusQueryOptions GetDefaultOptions() => new()
         {

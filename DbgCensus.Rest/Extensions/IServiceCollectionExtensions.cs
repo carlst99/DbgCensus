@@ -38,7 +38,7 @@ namespace DbgCensus.Rest.Extensions
                     s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(CensusRestClient)),
                     serializerOptions.Invoke(s)));
 
-            serviceCollection.TryAddSingleton<IQueryFactory, QueryFactory>();
+            serviceCollection.TryAddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
 
             return serviceCollection;
         }
