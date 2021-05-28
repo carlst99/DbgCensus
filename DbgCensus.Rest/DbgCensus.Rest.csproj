@@ -4,13 +4,15 @@
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-alpha.1</Version>
+    <Version>1.0.0-alpha.2</Version>
     <Authors>Carl Stephens</Authors>
     <Company />
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
     <RepositoryUrl>https://github.com/carlst99/DbgCensus</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <Description>A low-level c# wrapper for the REST component of Daybreak Game Company's Census API.</Description>
+    <PackageTags>planetside2 daybreak-games daybreak-census</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

@@ -12,10 +12,21 @@ namespace DbgCensus.Rest.Extensions
 {
     public static class IServiceCollectionExtensions
     {
-        public static void AddCensusRestServices(this IServiceCollection serviceCollection)
+        /// <summary>
+        /// Adds required services for interacting with the Census REST API.
+        /// </summary>
+        /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
+        /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
+        public static IServiceCollection AddCensusRestServices(this IServiceCollection serviceCollection)
             => AddCensusRestServices(serviceCollection, (_) => new JsonSerializerOptions());
 
-        public static void AddCensusRestServices(
+        /// <summary>
+        /// Adds required services for interacting with the Census REST API.
+        /// </summary>
+        /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
+        /// <param name="serializerOptions"></param>
+        /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
+        public static IServiceCollection AddCensusRestServices(
             this IServiceCollection serviceCollection,
             Func<IServiceProvider, JsonSerializerOptions> serializerOptions)
         {
@@ -28,6 +39,8 @@ namespace DbgCensus.Rest.Extensions
                     serializerOptions.Invoke(s)));
 
             serviceCollection.TryAddSingleton<IQueryFactory, QueryFactory>();
+
+            return serviceCollection;
         }
     }
 }
