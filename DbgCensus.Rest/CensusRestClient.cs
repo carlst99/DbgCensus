@@ -1,8 +1,8 @@
 ﻿using DbgCensus.Core.Exceptions;
+using DbgCensus.Core.Json;
 using DbgCensus.Rest.Abstractions;
 using DbgCensus.Rest.Abstractions.Queries;
 using DbgCensus.Rest.Exceptions;
-using DbgCensus.Rest.Json;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Http;
@@ -126,11 +126,11 @@ namespace DbgCensus.Rest
             if (data.RootElement.TryGetProperty("errorCode", out JsonElement errorCode))
             {
                 if (data.RootElement.TryGetProperty("errorMessage", out errorValue))
-                    _logger.LogError("Census query failed with error code {code} and message {message}", errorCode.GetInt32(), errorValue.GetRawText());
+                    _logger.LogError("Census query failed with error code {code} and message {message}", errorCode.GetRawText(), errorValue.GetRawText());
                 else
                     _logger.LogError("Census query failed with error code: {code}", errorCode.GetRawText());
 
-                throw new CensusQueryErrorException(errorValue.GetRawText(), errorCode.GetInt32());
+                throw new CensusQueryErrorException(errorValue.GetRawText(), errorCode.GetRawText());
             }
         }
 

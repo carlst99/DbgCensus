@@ -2,7 +2,7 @@
 using System;
 using Xunit;
 
-namespace DbgCensus.Rest.Tests.Queries
+namespace DbgCensus.Tests.Rest.Queries
 {
     public class QueryCommandFormatterTests
     {
@@ -59,6 +59,15 @@ namespace DbgCensus.Rest.Tests.Queries
 
             Assert.Contains("argument1", formatter.Arguments);
             Assert.Contains("argument2", formatter.Arguments);
+        }
+
+        [Fact]
+        public void TestPropAnyValue()
+        {
+            QueryCommandFormatter formatter = new("command", '=');
+            formatter.AddArgument("argument1");
+
+            Assert.True(formatter.AnyValue);
         }
 
         [Fact]

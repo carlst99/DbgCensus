@@ -1,25 +1,22 @@
-﻿using DbgCensus.Rest.Abstractions.Queries;
+﻿using DbgCensus.Core.Utils;
+using DbgCensus.Rest.Abstractions.Queries;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DbgCensus.Rest.Queries
 {
     /// <summary>
-    /// Provides functions to build a query string for the Census REST API.
+    /// Provides functions to build a query URI for the Census REST API.
     /// </summary>
     public class QueryBuilder : IQueryBuilder
     {
         private readonly string _rootEndpoint;
-        private readonly string _serviceId;
-        private readonly string _queryNamespace;
-
         private readonly List<QueryFilter> _filters;
         private readonly QueryCommandFormatter _resolves;
         private readonly QueryCommandFormatter _hasFields;
         private readonly QueryCommandFormatter _sortKeys;
         private readonly QueryCommandFormatter _joins;
-        private readonly QueryCommandFormatter _trees;
+        private readonly QueryCommandFormatter _tree;
         private readonly QueryCommandFormatter _limit;
         private readonly QueryCommandFormatter _limitPerDb;
         private readonly QueryCommandFormatter _exactMatchesFirst;
@@ -31,6 +28,8 @@ namespace DbgCensus.Rest.Queries
         private readonly QueryCommandFormatter _distinctField;
         private readonly QueryCommandFormatter _startIndex;
 
+        private string _serviceId;
+        private string _queryNamespace;
         private QueryType _verb;
         private QueryCommandFormatter _showHideFields;
         private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
@@ -41,20 +40,20 @@ namespace DbgCensus.Rest.Queries
         /// Provides functions to build a query string for the Census REST API.
         /// </summary>
         /// <param name="serviceId">A Census service ID.</param>
-        /// <param name="queryNamespace">The Census namespace to query.</param>
+        /// <param name="censusNamespace">The Census namespace to query.</param>
         /// <param name="rootEndpoint">The root endpoint of the Census REST API.</param>
-        public QueryBuilder(string serviceId, string queryNamespace, string rootEndpoint = "https://census.daybreakgames.com")
+        public QueryBuilder(string serviceId, string censusNamespace, string rootEndpoint = "https://census.daybreakgames.com")
         {
             _rootEndpoint = rootEndpoint;
             _serviceId = serviceId;
-            _queryNamespace = queryNamespace;
+            _queryNamespace = censusNamespace;
 
             _filters = new List<QueryFilter>();
             _resolves = GetQueryCommandFormatter("c:resolve", true);
             _hasFields = GetQueryCommandFormatter("c:has", true);
             _sortKeys = GetQueryCommandFormatter("c:sort", true);
             _joins = GetQueryCommandFormatter("c:join", true);
-            _trees = GetQueryCommandFormatter("c:tree", false);
+            _tree = GetQueryCommandFormatter("c:tree", false);
             _limit = GetQueryCommandFormatter("c:limit", false, 100.ToString());
             _limitPerDb = GetQueryCommandFormatter("c:limitPerDB", false);
             _exactMatchesFirst = GetQueryCommandFormatter("c:exactMatchFirst", false);
@@ -109,7 +108,7 @@ namespace DbgCensus.Rest.Queries
             foreach (QueryFilter filter in _filters)
                 builder.Query += filter.ToString() + "&";
 
-            builder.Query += JoinWithoutNullOrEmptyValues('&', _hasFields, _showHideFields, _resolves, _joins, _sortKeys, _startIndex, _language, _exactMatchesFirst, _isCaseSensitive, _withNullFields, _withTimings, _retry);
+            builder.Query += StringUtils.JoinWithoutNullOrEmptyValues('&', _hasFields, _showHideFields, _resolves, _joins, _sortKeys, _startIndex, _language, _exactMatchesFirst, _isCaseSensitive, _withNullFields, _withTimings, _retry);
 
             // Add relevant limit command
             if (_limitPerDb.AnyValue)
@@ -191,7 +190,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoinBuilder WithJoin(string toCollection)
+        public IJoinBuilder AddJoin(string toCollection)
         {
             JoinBuilder join = new(toCollection);
             _joins.AddArgument(join);
@@ -200,7 +199,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithJoin(string collectionName, Action<IJoinBuilder> configureJoin)
+        public IQueryBuilder AddJoin(string collectionName, Action<IJoinBuilder> configureJoin)
         {
             JoinBuilder join = new(collectionName);
             configureJoin(join);
@@ -210,7 +209,26 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithResolve(string resolveTo, params string[] showFields)
+        public ITreeBuilder WithTree(string onField)
+        {
+            TreeBuilder tree = new(onField);
+            _tree.AddArgument(tree);
+
+            return tree;
+        }
+
+        /// <inheritdoc />
+        public IQueryBuilder WithTree(string onField, Action<ITreeBuilder> configureTree)
+        {
+            TreeBuilder tree = new(onField);
+            configureTree(tree);
+            _tree.AddArgument(tree);
+
+            return this;
+        }
+
+        /// <inheritdoc />
+        public IQueryBuilder AddResolve(string resolveTo, params string[] showFields)
         {
             _resolves.AddArgument(new QueryResolve(resolveTo, showFields));
 
@@ -302,6 +320,22 @@ namespace DbgCensus.Rest.Queries
             return this;
         }
 
+        /// <inheritdoc />
+        public IQueryBuilder WithServiceId(string serviceId)
+        {
+            _serviceId = serviceId;
+
+            return this;
+        }
+
+        /// <inheritdoc />
+        public IQueryBuilder OnNamespace(string censusNamespace)
+        {
+            _queryNamespace = censusNamespace;
+
+            return this;
+        }
+
         public override string ToString() => ConstructEndpoint().ToString();
 
         private static QueryCommandFormatter GetQueryCommandFormatter(string command, bool allowsMultipleArguments, string? defaultArgument = null)
@@ -311,7 +345,5 @@ namespace DbgCensus.Rest.Queries
             else
                 return new QueryCommandFormatter(command, '=', defaultArgument);
         }
-
-        private static string JoinWithoutNullOrEmptyValues(char separator, params string[] value) => string.Join(separator, value.Where(str => !string.IsNullOrEmpty(str)));
     }
 }

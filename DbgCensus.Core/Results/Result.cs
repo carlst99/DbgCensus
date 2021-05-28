@@ -2,7 +2,7 @@
 
 namespace DbgCensus.Core.Results
 {
-    public class Result : IResult
+    internal class Result : IResult
     {
         /// <inheritdoc/>
         public bool IsSuccess { get; }
@@ -34,7 +34,7 @@ namespace DbgCensus.Core.Results
         public static Result FromSuccess() => new(true, null);
     }
 
-    public class Result<T> : IResult<T>
+    internal class Result<T> : IResult<T>
     {
         public bool IsSuccess { get; }
 

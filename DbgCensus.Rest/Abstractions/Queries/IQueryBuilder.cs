@@ -3,7 +3,7 @@
 namespace DbgCensus.Rest.Abstractions.Queries
 {
     /// <summary>
-    /// Provides functions to build a query string for the Census REST API.
+    /// Defines functions to build a query URI for the Census REST API.
     /// </summary>
     public interface IQueryBuilder
     {
@@ -80,8 +80,8 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// Joins data from another collection to this result.
         /// </summary>
         /// <param name="toCollection">The name of the collection to join to.</param>
-        /// <returns>The join.</returns>
-        IJoinBuilder WithJoin(string toCollection);
+        /// <returns>An <see cref="IJoinBuilder"/> instance to configure the join.</returns>
+        IJoinBuilder AddJoin(string toCollection);
 
         /// <summary>
         /// Joins data from another collection to this result.
@@ -89,17 +89,22 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// <param name="toCollection">The name of the collection to join to.</param>
         /// <param name="configureJoin">A delegate to configure the join with.</param>
         /// <returns>An <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
-        IQueryBuilder WithJoin(string toCollection, Action<IJoinBuilder> configureJoin);
+        IQueryBuilder AddJoin(string toCollection, Action<IJoinBuilder> configureJoin);
 
         /// <summary>
         /// Reformats the returned data by placing it into groups based on a given field.
         /// </summary>
-        /// <param name="groupingField">The field to group data by. Will be removed from the data source.</param>
-        /// <param name="groupingFieldIsList">Indicates that the grouped data is a list.</param>
-        /// <param name="prefix">A prefix to add to each group name in the tree.</param>
-        /// <param name="start">A field within the result (including joins and resolves) at which to start the tree, rather than performing the operation on the original query.</param>
+        /// <param name="onField">Sets the field to group data by. Will be removed from the data source.</param>
+        /// <returns>An <see cref="ITreeBuilder"/> instance to configure the tree.</returns>
+        ITreeBuilder WithTree(string onField);
+
+        /// <summary>
+        /// Reformats the returned data by placing it into groups based on a given field.
+        /// </summary>
+        /// <param name="onField">Sets the field to group data by. Will be removed from the data source.</param>
+        /// <param name="configureTree">A delegate to configure the tree with.</param>
         /// <returns>An <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
-        IQueryBuilder AsTree(string groupingField, bool groupingFieldIsList = false, string? prefix = null, string? start = null);
+        IQueryBuilder WithTree(string onField, Action<ITreeBuilder> configureTree);
 
         /// <summary>
         /// Performs a pre-determined resolve. Multiple resolves can be made in the same query.
@@ -108,7 +113,7 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// <param name="resolveTo">The resolve to make.</param>
         /// <param name="showFields">The fields to be shown from the resolved collection.</param>
         /// <returns>An <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
-        IQueryBuilder WithResolve(string resolveTo, params string[] showFields);
+        IQueryBuilder AddResolve(string resolveTo, params string[] showFields);
 
         /// <summary>
         /// Only includes the provided fields in the result. This method is incompatible with <see cref="HideFields(string[])"/>.
@@ -169,5 +174,19 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// <param name="fieldName">The field to get distinct values of.</param>
         /// <returns>An <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
         IQueryBuilder WithDistinctFieldValues(string fieldName);
+
+        /// <summary>
+        /// The Census service ID to perform the query with.
+        /// </summary>
+        /// <param name="serviceId">A valid Census service id.</param>
+        /// <returns>An <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
+        IQueryBuilder WithServiceId(string serviceId);
+
+        /// <summary>
+        /// The namespace to perform the query on.
+        /// </summary>
+        /// <param name="censusNamespace">The namespace.</param>
+        /// <returns>An <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
+        IQueryBuilder OnNamespace(string censusNamespace);
     }
 }

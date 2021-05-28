@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace DbgCensus.Rest.Json
+namespace DbgCensus.Core.Json
 {
     public class SnakeCaseJsonNamingPolicy : JsonNamingPolicy
     {

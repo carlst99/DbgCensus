@@ -32,8 +32,8 @@
         _queryStringOne = QueryFactory.Get()
             .OnCollection("outfit")
             .Where("alias_lower", "uvoc", SearchModifier.EQUALS)
-            .WithResolve("leader", "name")
-            .WithResolve("member_online_status")
+            .AddResolve("leader", "name")
+            .AddResolve("member_online_status")
             .HasFields("name_lower")
             .HideFields("name")
             .ConstructEndpoint().AbsoluteUri;
@@ -48,10 +48,10 @@
             .WithStartIndex(9)
             .ConstructEndpoint().AbsoluteUri;
 
-        IJoinBuilder join = QueryFactory.Get().WithJoin().ToCollection("outfit").IsList().InjectAt("injectedHere").HideFields("show1", "show2");
+        IJoinBuilder join = QueryFactory.Get().AddJoin("outfit").IsList().InjectAt("injectedHere").HideFields("show1", "show2");
 
-        join.WithNestedJoin().ToCollection("character").Where("name", "Falcon", SearchModifier.EQUALS);
-        join.WithNestedJoin().ToCollection("item").OnField("item_id");
+        join.AddNestedJoin("character").Where("name", "Falcon", SearchModifier.EQUALS);
+        join.AddNestedJoin("item").OnField("item_id");
 
         _joinString = join.ToString();
     }

@@ -3,10 +3,17 @@
 namespace DbgCensus.Rest.Abstractions.Queries
 {
     /// <summary>
-    /// Functions to build a join string for the Census REST API.
+    /// Defines functions to build a join command for the Census REST API.
     /// </summary>
     public interface IJoinBuilder
     {
+        /// <summary>
+        /// The collection to join to.
+        /// </summary>
+        /// <param name="collectionName">The name of the collection.</param>
+        /// <returns>An <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
+        IJoinBuilder ToCollection(string collectionName);
+
         /// <summary>
         /// The ID field on the base collection to join on.
         /// </summary>
@@ -67,8 +74,8 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// Creates a nested join on this join.
         /// </summary>
         /// <param name="toCollection">The name of the collection to create a nested join to.</param>
-        /// <returns>The nested join object.</returns>
-        IJoinBuilder WithNestedJoin(string toCollection);
+        /// <returns>An <see cref="IJoinBuilder"/> instance to configure the nested join.</returns>
+        IJoinBuilder AddNestedJoin(string toCollection);
 
         /// <summary>
         /// Creates a nested join on this join.
@@ -76,6 +83,6 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// <param name="toCollection">The name of the collection to create a nested join to.</param>
         /// <param name="configureJoin">A delegate to configure the join.</param>
         /// <returns>An <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
-        IJoinBuilder WithNestedJoin(string toCollection, Action<IJoinBuilder> configureJoin);
+        IJoinBuilder AddNestedJoin(string toCollection, Action<IJoinBuilder> configureJoin);
     }
 }

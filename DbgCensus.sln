@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbgCensus.Rest", "DbgCensus
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbgCensus.Demo", "DbgCensus.Demo\DbgCensus.Demo.csproj", "{3DEECA4F-CE0F-4D2E-B777-3D76DBACF3D7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbgCensus.Rest.Tests", "DbgCensus.Rest.Tests\DbgCensus.Rest.Tests.csproj", "{B1EE538E-9C94-4773-BBF0-C0B5E94FA3F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbgCensus.Tests", "DbgCensus.Tests\DbgCensus.Tests.csproj", "{B1EE538E-9C94-4773-BBF0-C0B5E94FA3F1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CensusEndpointMonitor.Cli", "CensusEndpointMonitor.Cli\CensusEndpointMonitor.Cli.csproj", "{ABDE577E-5E62-44A0-94BD-6629EFF3BE99}"
 EndProject

@@ -1,4 +1,5 @@
-﻿using DbgCensus.Rest.Abstractions.Queries;
+﻿using DbgCensus.Core.Utils;
+using DbgCensus.Rest.Abstractions.Queries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Linq;
 namespace DbgCensus.Rest.Queries
 {
     /// <summary>
-    /// Functions to build a join string for the Census REST API.
+    /// Provides functions to build a join command for the Census REST API.
     /// </summary>
     public class JoinBuilder : IJoinBuilder
     {
@@ -31,7 +32,7 @@ namespace DbgCensus.Rest.Queries
         {
             _nestedJoins = new List<IJoinBuilder>();
 
-            _toCollection = GetQueryCommandFormatter("type", false, toCollection);
+            _toCollection = GetQueryCommandFormatter("type", false);
             _filterTerms = GetQueryCommandFormatter("terms", true);
             _onField = GetQueryCommandFormatter("on", false);
             _toField = GetQueryCommandFormatter("to", false);
@@ -39,6 +40,16 @@ namespace DbgCensus.Rest.Queries
             _injectAt = GetQueryCommandFormatter("inject_at", false);
             _isOuter = GetQueryCommandFormatter("outer", false, "1");
             _showHideFields = GetQueryCommandFormatter("show", true);
+
+            ToCollection(toCollection);
+        }
+
+        /// <inheritdoc/>
+        public IJoinBuilder ToCollection(string collectionName)
+        {
+            _toCollection.AddArgument(collectionName);
+
+            return this;
         }
 
         /// <inheritdoc />
@@ -121,7 +132,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc/>
-        public IJoinBuilder WithNestedJoin(string toCollection)
+        public IJoinBuilder AddNestedJoin(string toCollection)
         {
             JoinBuilder nested = new(toCollection);
             _nestedJoins.Add(nested);
@@ -130,7 +141,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoinBuilder WithNestedJoin(string toCollection, Action<IJoinBuilder> configureJoin)
+        public IJoinBuilder AddNestedJoin(string toCollection, Action<IJoinBuilder> configureJoin)
         {
             JoinBuilder nested = new(toCollection);
             configureJoin(nested);
@@ -139,21 +150,21 @@ namespace DbgCensus.Rest.Queries
             return nested;
         }
 
-        public static implicit operator string(JoinBuilder j) => j.ToString();
-
         /// <summary>
         /// Constructs a well-formed join string, without the join command (c:join=).
         /// </summary>
         /// <returns>A well-formed join string.</returns>
         public override string ToString()
         {
-            string join = JoinWithoutNullOrEmptyValues('^', _toCollection, _onField, _toField, _isList, _showHideFields, _injectAt, _filterTerms, _isOuter);
+            string join = StringUtils.JoinWithoutNullOrEmptyValues('^', _toCollection, _onField, _toField, _isList, _showHideFields, _injectAt, _filterTerms, _isOuter);
 
             if (_nestedJoins.Count > 0)
                 join += $"({ string.Join(',', _nestedJoins) })";
 
             return join;
         }
+
+        public static implicit operator string(JoinBuilder j) => j.ToString();
 
         private static QueryCommandFormatter GetQueryCommandFormatter(string command, bool allowsMultipleArguments, string? defaultArgument = null)
         {
@@ -162,7 +173,5 @@ namespace DbgCensus.Rest.Queries
             else
                 return new QueryCommandFormatter(command, ':', defaultArgument);
         }
-
-        private static string JoinWithoutNullOrEmptyValues(char separator, params string[] value) => string.Join(separator, value.Where(str => !string.IsNullOrEmpty(str)));
     }
 }

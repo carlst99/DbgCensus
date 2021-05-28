@@ -3,7 +3,7 @@ using DbgCensus.Rest.Queries;
 using System;
 using Xunit;
 
-namespace DbgCensus.Rest.Tests.Queries
+namespace DbgCensus.Tests.Rest.Queries
 {
     public class QueryFilterTests
     {

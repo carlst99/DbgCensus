@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace DbgCensus.Rest.Json
+namespace DbgCensus.Core.Json
 {
     public class Int16JsonConverter : JsonConverter<Int16>
     {

@@ -1,7 +1,7 @@
-﻿using DbgCensus.Rest.Json;
+﻿using DbgCensus.Core.Json;
 using Xunit;
 
-namespace DbgCensus.Rest.Tests.Json
+namespace DbgCensus.Tests.Core.Json
 {
     public class SnakeCaseJsonNamingPolicyTests
     {

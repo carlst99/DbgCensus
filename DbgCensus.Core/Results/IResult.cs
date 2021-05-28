@@ -2,7 +2,7 @@
 
 namespace DbgCensus.Core.Results
 {
-    public interface IResult
+    internal interface IResult
     {
         /// <summary>
         /// Gets a value indicating whether this is a successful result
@@ -15,7 +15,7 @@ namespace DbgCensus.Core.Results
         Exception? Error { get; }
     }
 
-    public interface IResult<T> : IResult
+    internal interface IResult<T> : IResult
     {
         /// <summary>
         /// A value that may have been obtained while processing the result

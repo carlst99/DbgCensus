@@ -12,7 +12,7 @@ namespace DbgCensus.Rest.Exceptions
         /// <summary>
         /// The Census error code.
         /// </summary>
-        public int? Code { get; }
+        public string? Code { get; }
 
         /// <summary>
         /// Stores information about an error that occured during an internal Census query.
@@ -28,7 +28,7 @@ namespace DbgCensus.Rest.Exceptions
         /// </summary>
         /// <param name="message">The returned Census error message.</param>
         /// <param name="code">The returned Census error code.</param>
-        public CensusQueryErrorException(string? message, int? code)
+        public CensusQueryErrorException(string? message, string? code)
             : base(message)
         {
             Code = code;
