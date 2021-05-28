@@ -46,13 +46,13 @@ namespace DbgCensus.Rest
         }
 
         /// <inheritdoc />
-        public async Task<T?> GetAsync<T>(IQueryBuilder query, CancellationToken ct = default) where T : new()
+        public virtual async Task<T?> GetAsync<T>(IQueryBuilder query, CancellationToken ct = default) where T : new()
         {
             return await GetAsync<T>(query.ConstructEndpoint().AbsoluteUri, query.CollectionName, ct).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public async Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default) where T : new()
+        public virtual async Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default) where T : new()
         {
             _logger.LogTrace("Performing Census GET request with query: {query}", query);
 

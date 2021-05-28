@@ -28,7 +28,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public ITreeBuilder IsList()
+        public virtual ITreeBuilder IsList()
         {
             _isList.AddArgument("1");
 
@@ -36,7 +36,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public ITreeBuilder OnField(string fieldName)
+        public virtual ITreeBuilder OnField(string fieldName)
         {
             _onField.AddArgument(fieldName);
 
@@ -44,7 +44,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public ITreeBuilder StartOn(string fieldName)
+        public virtual ITreeBuilder StartOn(string fieldName)
         {
             _startOn.AddArgument(fieldName);
 
@@ -52,7 +52,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public ITreeBuilder WithPrefix(string prefix)
+        public virtual ITreeBuilder WithPrefix(string prefix)
         {
             _prefix.AddArgument(prefix);
 

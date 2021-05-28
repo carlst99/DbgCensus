@@ -2,7 +2,6 @@
 using DbgCensus.Rest.Abstractions.Queries;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DbgCensus.Rest.Queries
 {
@@ -45,7 +44,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc/>
-        public IJoinBuilder ToCollection(string collectionName)
+        public virtual IJoinBuilder ToCollection(string collectionName)
         {
             _toCollection.AddArgument(collectionName);
 
@@ -53,7 +52,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoinBuilder ShowFields(params string[] fieldNames)
+        public virtual IJoinBuilder ShowFields(params string[] fieldNames)
         {
             // Show and hide are incompatible
             if (!_isShowingFields)
@@ -66,7 +65,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoinBuilder HideFields(params string[] fieldNames)
+        public virtual IJoinBuilder HideFields(params string[] fieldNames)
         {
             // Show and hide are incompatible
             if (_isShowingFields)
@@ -79,7 +78,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoinBuilder InjectAt(string name)
+        public virtual IJoinBuilder InjectAt(string name)
         {
             _injectAt.AddArgument(name);
 
@@ -87,7 +86,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoinBuilder IsList()
+        public virtual IJoinBuilder IsList()
         {
             _isList.AddArgument("1");
 
@@ -95,7 +94,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoinBuilder IsInnerJoin()
+        public virtual IJoinBuilder IsInnerJoin()
         {
             _isOuter.AddArgument("0");
 
@@ -103,7 +102,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoinBuilder OnField(string fieldName)
+        public virtual IJoinBuilder OnField(string fieldName)
         {
             _onField.AddArgument(fieldName);
 
@@ -111,7 +110,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoinBuilder ToField(string fieldName)
+        public virtual IJoinBuilder ToField(string fieldName)
         {
             _toField.AddArgument(fieldName);
 
@@ -119,7 +118,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoinBuilder Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
+        public virtual IJoinBuilder Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
         {
             string? filterValueString = filterValue.ToString();
             if (string.IsNullOrEmpty(filterValueString) || filterValueString.Equals(typeof(T).FullName))
@@ -132,7 +131,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc/>
-        public IJoinBuilder AddNestedJoin(string toCollection)
+        public virtual IJoinBuilder AddNestedJoin(string toCollection)
         {
             JoinBuilder nested = new(toCollection);
             _nestedJoins.Add(nested);
@@ -141,7 +140,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoinBuilder AddNestedJoin(string toCollection, Action<IJoinBuilder> configureJoin)
+        public virtual IJoinBuilder AddNestedJoin(string toCollection, Action<IJoinBuilder> configureJoin)
         {
             JoinBuilder nested = new(toCollection);
             configureJoin(nested);

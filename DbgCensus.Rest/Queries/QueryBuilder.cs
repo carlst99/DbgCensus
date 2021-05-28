@@ -85,7 +85,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public Uri ConstructEndpoint()
+        public virtual Uri ConstructEndpoint()
         {
             UriBuilder builder = new(_rootEndpoint);
 
@@ -120,14 +120,14 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder OfQueryType(QueryType type)
+        public virtual IQueryBuilder OfQueryType(QueryType type)
         {
             _verb = type;
             return this;
         }
 
         /// <inheritdoc />
-        public IQueryBuilder OnCollection(string collection)
+        public virtual IQueryBuilder OnCollection(string collection)
         {
             if (string.IsNullOrEmpty(collection))
                 throw new ArgumentNullException(nameof(collection));
@@ -137,7 +137,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithLimit(uint limit)
+        public virtual IQueryBuilder WithLimit(uint limit)
         {
             _limit.AddArgument(limit.ToString());
 
@@ -145,7 +145,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithLimitPerDatabase(uint limit)
+        public virtual IQueryBuilder WithLimitPerDatabase(uint limit)
         {
             _limitPerDb.AddArgument(limit.ToString());
 
@@ -153,7 +153,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithStartIndex(uint index)
+        public virtual IQueryBuilder WithStartIndex(uint index)
         {
             _startIndex.AddArgument(index.ToString());
 
@@ -161,7 +161,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
+        public virtual IQueryBuilder Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
         {
             string? filterValueString = filterValue.ToString();
             if (string.IsNullOrEmpty(filterValueString) || filterValueString.Equals(typeof(T).FullName))
@@ -174,7 +174,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithSortOrder(string fieldName, SortOrder order = SortOrder.Ascending)
+        public virtual IQueryBuilder WithSortOrder(string fieldName, SortOrder order = SortOrder.Ascending)
         {
             _sortKeys.AddArgument(new QuerySortKey(fieldName, order));
 
@@ -182,7 +182,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithExactMatchesFirst()
+        public virtual IQueryBuilder WithExactMatchesFirst()
         {
             _exactMatchesFirst.AddArgument(true.ToString());
 
@@ -190,7 +190,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IJoinBuilder AddJoin(string toCollection)
+        public virtual IJoinBuilder AddJoin(string toCollection)
         {
             JoinBuilder join = new(toCollection);
             _joins.AddArgument(join);
@@ -199,7 +199,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder AddJoin(string collectionName, Action<IJoinBuilder> configureJoin)
+        public virtual IQueryBuilder AddJoin(string collectionName, Action<IJoinBuilder> configureJoin)
         {
             JoinBuilder join = new(collectionName);
             configureJoin(join);
@@ -209,7 +209,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public ITreeBuilder WithTree(string onField)
+        public virtual ITreeBuilder WithTree(string onField)
         {
             TreeBuilder tree = new(onField);
             _tree.AddArgument(tree);
@@ -218,7 +218,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithTree(string onField, Action<ITreeBuilder> configureTree)
+        public virtual IQueryBuilder WithTree(string onField, Action<ITreeBuilder> configureTree)
         {
             TreeBuilder tree = new(onField);
             configureTree(tree);
@@ -228,7 +228,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder AddResolve(string resolveTo, params string[] showFields)
+        public virtual IQueryBuilder AddResolve(string resolveTo, params string[] showFields)
         {
             _resolves.AddArgument(new QueryResolve(resolveTo, showFields));
 
@@ -236,7 +236,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder ShowFields(params string[] fieldNames)
+        public virtual IQueryBuilder ShowFields(params string[] fieldNames)
         {
             // Show and hide are incompatible
             if (!_isShowingFields)
@@ -249,7 +249,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder HideFields(params string[] fieldNames)
+        public virtual IQueryBuilder HideFields(params string[] fieldNames)
         {
             // Show and hide are incompatible
             if (_isShowingFields)
@@ -262,7 +262,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder HasFields(params string[] fieldNames)
+        public virtual IQueryBuilder HasFields(params string[] fieldNames)
         {
             _hasFields.AddArgumentRange(fieldNames);
 
@@ -270,7 +270,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithLanguage(CensusLanguage languageCode)
+        public virtual IQueryBuilder WithLanguage(CensusLanguage languageCode)
         {
             _language.AddArgument(languageCode);
 
@@ -278,7 +278,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder IsCaseInsensitive()
+        public virtual IQueryBuilder IsCaseInsensitive()
         {
             _isCaseSensitive.AddArgument(false.ToString());
 
@@ -286,7 +286,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithNullFields()
+        public virtual IQueryBuilder WithNullFields()
         {
             _withNullFields.AddArgument(true.ToString());
 
@@ -294,7 +294,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithTimings()
+        public virtual IQueryBuilder WithTimings()
         {
             _withTimings.AddArgument(true.ToString());
 
@@ -302,7 +302,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithoutOneTimeRetry()
+        public virtual IQueryBuilder WithoutOneTimeRetry()
         {
             _retry.AddArgument(false.ToString());
 
@@ -310,7 +310,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithDistinctFieldValues(string fieldName)
+        public virtual IQueryBuilder WithDistinctFieldValues(string fieldName)
         {
             if (string.IsNullOrEmpty(CollectionName))
                 throw new InvalidOperationException("This operation can only be performed on a collection.");
@@ -321,7 +321,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder WithServiceId(string serviceId)
+        public virtual IQueryBuilder WithServiceId(string serviceId)
         {
             _serviceId = serviceId;
 
@@ -329,7 +329,7 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder OnNamespace(string censusNamespace)
+        public virtual IQueryBuilder OnNamespace(string censusNamespace)
         {
             _queryNamespace = censusNamespace;
 
