@@ -11,11 +11,11 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>planetside2 daybreak-games daybreak-census</PackageTags>
     <Description>Contains core components for the DbgCensus.* libraries.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>C:\Users\carls\source\repos\_Planetside\DbgCensus\DbgCensus.Core\DbgCensus.Core.xml</DocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
