@@ -139,9 +139,9 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// <summary>
         /// Only returns the specified translation for internationalized fields.
         /// </summary>
-        /// <param name="language">The locale to return.</param>
+        /// <param name="languageCode">The locale to return.</param>
         /// <returns>An <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
-        IQueryBuilder WithLanguage(CensusLanguage language);
+        IQueryBuilder WithLanguage(string languageCode);
 
         /// <summary>
         /// Indicates that filters/searches will be performed without using case-sensitive comparison.

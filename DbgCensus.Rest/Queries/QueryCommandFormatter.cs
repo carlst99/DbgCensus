@@ -108,6 +108,8 @@ namespace DbgCensus.Rest.Queries
         /// </summary>
         public T? Argument { get; private set; }
 
+        public bool HasValue { get; private set; }
+
         public SingleQueryCommandFormatter(string command, char componentSeparator)
             : base(command, componentSeparator)
         {
@@ -123,6 +125,7 @@ namespace DbgCensus.Rest.Queries
                 throw new ArgumentNullException(nameof(argument));
 
             Argument = argument;
+            HasValue = true;
         }
 
         /// <inheritdoc />

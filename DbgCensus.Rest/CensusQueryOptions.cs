@@ -20,7 +20,7 @@
         /// <summary>
         /// Optionally remove all translations from internationalized strings except the one specified.
         /// </summary>
-        public CensusLanguage? LanguageCode { get; set; } // TODO: Test with json serialisation
+        public string? LanguageCode { get; set; } // TODO: Test with json serialisation
 
         /// <summary>
         /// Optionally set a default limit for each query.
