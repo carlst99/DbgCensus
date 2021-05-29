@@ -21,6 +21,10 @@ namespace DbgCensus.Rest
 
         public bool IsDisposed { get; protected set; }
 
+        public CensusRestClient(ILogger<CensusRestClient> logger, HttpClient client)
+            : this(logger, client, new JsonSerializerOptions())
+        { }
+
         public CensusRestClient(ILogger<CensusRestClient> logger, HttpClient client, JsonSerializerOptions jsonOptions)
         {
             _logger = logger;
@@ -88,7 +92,6 @@ namespace DbgCensus.Rest
             //    throw new CensusInvalidDataException("Expected a valid 'returned' element.", data.RootElement.GetString());
 
             // TODO: Test with distinct and other commands that vastly modify the result
-            // Check for list vs single?
             // Check that object count matches returned results count if list?
             if (!data.RootElement.TryGetProperty(collectionName + "_list", out JsonElement collectionElement))
             {
@@ -96,7 +99,12 @@ namespace DbgCensus.Rest
                 throw new CensusInvalidDataException("Returned data was not in the expected format.", data.RootElement.GetRawText());
             }
 
-            return JsonSerializer.Deserialize<T>(collectionElement.GetRawText(), _jsonOptions);
+            if (typeof(T).IsAssignableTo(typeof(System.Collections.IEnumerable)))
+                return JsonSerializer.Deserialize<T>(collectionElement.GetRawText(), _jsonOptions);
+            else if (collectionElement.GetArrayLength() == 1)
+                return JsonSerializer.Deserialize<T>(collectionElement.GetRawText().Trim('[', ']'), _jsonOptions);
+            else
+                throw new JsonException("Cannot deserialise an array to a single object");
         }
 
         /// <summary>

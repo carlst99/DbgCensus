@@ -24,7 +24,7 @@ namespace DbgCensus.Rest.Queries
 
         public static string VerifyAndToString(object value)
         {
-            string? typeName = value.GetType().FullName; // TODO: Verify this works
+            string? typeName = value.GetType().FullName;
             string? valueString = value.ToString();
 
             if (string.IsNullOrEmpty(valueString) || valueString == typeName)

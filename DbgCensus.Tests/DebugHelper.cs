@@ -1,7 +1,12 @@
 ﻿using DbgCensus.Rest;
+using DbgCensus.Rest.Abstractions;
 using DbgCensus.Rest.Abstractions.Queries;
 using DbgCensus.Rest.Queries;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using Xunit;
 
 namespace DbgCensus.Tests
@@ -9,37 +14,45 @@ namespace DbgCensus.Tests
     public class DebugHelper
     {
         [Fact]
-        public void Test()
+        public async void Test()
         {
             IQueryBuilderFactory queryFactory = new QueryBuilderFactory(Options.Create(new CensusQueryOptions()));
-            IQueryBuilder builder = queryFactory.Get();
+            IQueryBuilder builder = queryFactory.Get()
+                .OnCollection("world")
+                .Where("world_id", SearchModifier.Equals, 1, 10);
 
-            builder.OnCollection("testCollection")
-                .Where("outfit_alias", SearchModifier.Equals, "uvoc")
-                .ShowFields("name", "outfit_id", "alias")
-                .AddJoin("outfit_member")
-                    .InjectAt("members")
-                    .ShowFields("character_id")
-                    .IsList();
+            ICensusRestClient client = new CensusRestClient(new Logger<CensusRestClient>(new LoggerFactory()), new System.Net.Http.HttpClient(), new System.Text.Json.JsonSerializerOptions());
 
-            string uri = builder.ConstructEndpoint().AbsoluteUri;
+            List<World>? worldResult =  await client.GetAsync<List<World>>(builder).ConfigureAwait(false);
 
-            return;
-                    //.AddNestedJoin("character")
-                    //    .OnField("character_id")
-                    //    .InjectAt("character")
-                    //    .ShowFields("name.first")
-                    //    .IsInnerJoin()
-                    //    .AddNestedJoin("characters_online_status")
-                    //        .InjectAt("online_status")
-                    //        .ShowFields("online_status")
-                    //        .IsInnerJoin()
-                    //        .AddNestedJoin("world")
-                    //            .OnField("online_status")
-                    //            .ToField("world_id")
-                    //            .InjectAt("ignore_this")
-                    //            .ShowFields("world_id")
-                    //            .IsInnerJoin();
+            if (worldResult?.Count != 2)
+                throw new Exception("No result was returned.");
+        }
+
+        public record World
+        {
+            public int WorldId { get; init; }
+
+            public string State { get; init; }
+
+            TranslationProperty Name { get; init; }
+
+            public World()
+            {
+                State = string.Empty;
+                Name = new TranslationProperty();
+            }
+        }
+
+        public record TranslationProperty
+        {
+            [JsonPropertyName("en")]
+            public string English { get; init; }
+
+            public TranslationProperty()
+            {
+                English = string.Empty;
+            }
         }
     }
 }
