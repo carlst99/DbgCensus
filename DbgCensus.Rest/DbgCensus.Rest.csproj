@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-alpha.5</Version>
+    <Version>1.0.0-alpha.6</Version>
     <Authors>Carl Stephens</Authors>
     <Company />
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -13,6 +13,10 @@
     <RepositoryType>git</RepositoryType>
     <Description>A low-level c# wrapper for the REST component of Daybreak Game Company's Census API.</Description>
     <PackageTags>planetside2 daybreak-games daybreak-census</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>C:\Users\carls\source\repos\_Planetside\DbgCensus\DbgCensus.Rest\DbgCensus.Rest.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

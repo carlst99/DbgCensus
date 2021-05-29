@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <Version>1.0.0-alpha.2</Version>
+    <Version>1.0.0-alpha.3</Version>
     <Authors>Carl Stephens</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
@@ -12,6 +12,10 @@
     <PackageTags>planetside2 daybreak-games daybreak-census</PackageTags>
     <Description>Contains core components for the DbgCensus.* libraries.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>C:\Users\carls\source\repos\_Planetside\DbgCensus\DbgCensus.Core\DbgCensus.Core.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

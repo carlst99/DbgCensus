@@ -1,0 +1,859 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DbgCensus.Rest</name>
+    </assembly>
+    <members>
+        <member name="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder">
+            <summary>
+            Defines functions to build a join command for the Census REST API.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.ToCollection(System.String)">
+            <summary>
+            The collection to join to.
+            </summary>
+            <param name="collectionName">The name of the collection.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.OnField(System.String)">
+            <summary>
+            The ID field on the base collection to join on.
+            </summary>
+            <param name="fieldName">The name of the field to join on.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.ToField(System.String)">
+            <summary>
+            The ID field on the joined collection to join to.
+            </summary>
+            <param name="fieldName">The field to join to.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.IsList">
+            <summary>
+            Sets a value indicating that the joined data is a list.
+            </summary>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.ShowFields(System.String[])">
+            <summary>
+            Only includes the provided fields in the result. This method is incompatible with <see cref="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.HideFields(System.String[])"/>.
+            </summary>
+            <param name="fieldNames">The names of the fields that should be shown in the result.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.HideFields(System.String[])">
+            <summary>
+            Includes all but the provided fields in the result. This method is incompatible with <see cref="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.ShowFields(System.String[])"/>.
+            </summary>
+            <param name="fieldNames">The names of the fields that should be hidden from the result.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder"/> instance so that calls may be chained.</returns>/
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.InjectAt(System.String)">
+            <summary>
+            Creates a new field on the base collection, where the joined data should be injected to.
+            </summary>
+            <param name="name">The name of the field.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.Where``1(System.String,DbgCensus.Rest.Abstractions.Queries.SearchModifier,``0[])">
+            <summary>
+            Performs a filter on the joined collection. Multiple filters can be performed.
+            </summary>
+            <param name="field">The collection field to filter on.</param>
+            <param name="modifier">The comparison operator.</param>
+            <param name="filterValues">The values to filter by.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.IsInnerJoin">
+            <summary>
+            By default, all queries are treated as an 'outer' join. As in SQL, this means that results will be included for joins that do not match the criteria defined via terms. You can set a query to use 'inner' join behaviour, which allows filtering of a parent join via a term defined for its child if both are using 'inner' join behaviour.
+            </summary>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.AddNestedJoin(System.String)">
+            <summary>
+            Creates a nested join on this join.
+            </summary>
+            <param name="toCollection">The name of the collection to create a nested join to.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder"/> instance to configure the nested join.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder.AddNestedJoin(System.String,System.Action{DbgCensus.Rest.Abstractions.Queries.IJoinBuilder})">
+            <summary>
+            Creates a nested join on this join.
+            </summary>
+            <param name="toCollection">The name of the collection to create a nested join to.</param>
+            <param name="configureJoin">A delegate to configure the join.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder">
+            <summary>
+            Defines functions to build a query URI for the Census REST API.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.CollectionName">
+            <summary>
+            The collection to perform the query on.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.ConstructEndpoint">
+            <summary>
+            Builds the query URI.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.OfQueryType(DbgCensus.Rest.Abstractions.Queries.QueryType)">
+            <summary>
+            The type of query to perform. Known as the 'Verb' by the Census REST API.
+            </summary>
+            <param name="type">The query type / verb.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.OnCollection(System.String)">
+            <summary>
+            The collection to perform the query on.
+            </summary>
+            <param name="collection">The name of the collection.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithLimit(System.UInt32)">
+            <summary>
+            Limits the number of items returned by the query.
+            </summary>
+            <param name="limit">The maximum number of items.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithLimitPerDatabase(System.UInt32)">
+            <summary>
+            Limits the number of items returned from each database. More predictable than <see cref="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithLimit(System.UInt32)"/> for collections that are spread across multiple databases, such as ps2/character.
+            </summary>
+            <param name="limit">The number of items to return per database.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithStartIndex(System.UInt32)">
+            <summary>
+            Return items starting at the Nth index of the internal query. Use in tandem with <see cref="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithSortOrder(System.String,DbgCensus.Rest.Abstractions.Queries.SortOrder)"/>
+            </summary>
+            <remarks>This will have inconsistent behaviour when querying collections that span multiple databases, such as ps2/character.</remarks>
+            <param name="index">The index to return items from.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.Where``1(System.String,DbgCensus.Rest.Abstractions.Queries.SearchModifier,``0[])">
+            <summary>
+            Performs a search on the collection. Multiple fields can be searched.
+            </summary>
+            <param name="field">The collection field to filter on.</param>
+            <param name="modifier">The comparison operator.</param>
+            <param name="filterValues">The values to filter by.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithSortOrder(System.String,DbgCensus.Rest.Abstractions.Queries.SortOrder)">
+            <summary>
+            Sorts items in the result. Sorting can be performed on multiple fields.
+            </summary>
+            <param name="fieldName">The name of the field to sort on.</param>
+            <param name="order">The sorting order.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithExactMatchesFirst">
+            <summary>
+            When filtering using a regex, returns exact matches at the top of the response list.
+            </summary>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.AddJoin(System.String)">
+            <summary>
+            Joins data from another collection to this result.
+            </summary>
+            <param name="toCollection">The name of the collection to join to.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IJoinBuilder"/> instance to configure the join.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.AddJoin(System.String,System.Action{DbgCensus.Rest.Abstractions.Queries.IJoinBuilder})">
+            <summary>
+            Joins data from another collection to this result.
+            </summary>
+            <param name="toCollection">The name of the collection to join to.</param>
+            <param name="configureJoin">A delegate to configure the join with.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithTree(System.String)">
+            <summary>
+            Reformats the returned data by placing it into groups based on a given field.
+            </summary>
+            <param name="onField">Sets the field to group data by. Will be removed from the data source.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.ITreeBuilder"/> instance to configure the tree.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithTree(System.String,System.Action{DbgCensus.Rest.Abstractions.Queries.ITreeBuilder})">
+            <summary>
+            Reformats the returned data by placing it into groups based on a given field.
+            </summary>
+            <param name="onField">Sets the field to group data by. Will be removed from the data source.</param>
+            <param name="configureTree">A delegate to configure the tree with.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.AddResolve(System.String,System.String[])">
+            <summary>
+            Performs a pre-determined resolve. Multiple resolves can be made in the same query.
+            </summary>
+            <remarks>Note that the resolve will only function if the initial query is showing the field that the resolve is keyed on.</remarks>
+            <param name="resolveTo">The resolve to make.</param>
+            <param name="showFields">The fields to be shown from the resolved collection.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.ShowFields(System.String[])">
+            <summary>
+            Only includes the provided fields in the result. This method is incompatible with <see cref="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.HideFields(System.String[])"/>.
+            </summary>
+            <param name="fieldNames">The names of the fields that should be shown in the result.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.HideFields(System.String[])">
+            <summary>
+            Includes all but the provided fields in the result. This method is incompatible with <see cref="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.ShowFields(System.String[])"/>.
+            </summary>
+            <param name="fieldNames">The names of the fields that should be hidden from the result.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.HasFields(System.String[])">
+            <summary>
+            Only returns items in which the specified field/s exist, regardless of their value.
+            </summary>
+            <param name="fieldNames">Names of the fields that must exist.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithLanguage(DbgCensus.Rest.CensusLanguage)">
+            <summary>
+            Only returns the specified translation for internationalized fields.
+            </summary>
+            <param name="language">The locale to return.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.IsCaseInsensitive">
+            <summary>
+            Indicates that filters/searches will be performed without using case-sensitive comparison.
+            </summary>
+            <remarks>Using this command might slow down your query. If a lower case version of a field is available, use that instead for a faster result.</remarks>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithNullFields">
+            <summary>
+            Includes fields that have a null value in the response.
+            </summary>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithTimings">
+            <summary>
+            Includes the times taken for server-side queries and resolves to be made, in the response.
+            </summary>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithoutOneTimeRetry">
+            <summary>
+            Prevents the query from being re-attempted after a failure. Useful for quick failure.
+            </summary>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithDistinctFieldValues(System.String)">
+            <summary>
+            Gets the distinct values of the provided field.
+            </summary>
+            <param name="fieldName">The field to get distinct values of.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.WithServiceId(System.String)">
+            <summary>
+            The Census service ID to perform the query with.
+            </summary>
+            <param name="serviceId">A valid Census service id.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder.OnNamespace(System.String)">
+            <summary>
+            The namespace to perform the query on.
+            </summary>
+            <param name="censusNamespace">The namespace.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilderFactory">
+            <summary>
+            A factory for <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> items.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilderFactory.Get">
+            <summary>
+            Constructs an <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> object
+            </summary>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.IQueryBuilderFactory.Get(DbgCensus.Rest.CensusQueryOptions)">
+            <summary>
+            Constructs an <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> object.
+            </summary>
+            <param name="options">The default options to use.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.IQueryBuilder"/> instance.</returns>
+        </member>
+        <member name="T:DbgCensus.Rest.Abstractions.Queries.ITreeBuilder">
+            <summary>
+            Defines functions to build a tree command for the Census REST API.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.ITreeBuilder.OnField(System.String)">
+            <summary>
+            Sets the field to group data by. Will be removed from the data source.
+            </summary>
+            <param name="fieldName">The name of the field.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.ITreeBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.ITreeBuilder.IsList">
+            <summary>
+            Indicates that the field being grouped on is a list, allowing multiple results to be included in each group.
+            </summary>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.ITreeBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.ITreeBuilder.WithPrefix(System.String)">
+            <summary>
+            A value to prepend to each group name in the tree.
+            </summary>
+            <param name="prefix"></param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.ITreeBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Abstractions.Queries.ITreeBuilder.StartOn(System.String)">
+            <summary>
+            Sets the field within the result (including joins and resolves) at which to start the tree, rather than performing the operation on the original query.
+            </summary>
+            <param name="fieldName">The name of the field.</param>
+            <returns>An <see cref="T:DbgCensus.Rest.Abstractions.Queries.ITreeBuilder"/> instance so that calls may be chained.</returns>
+        </member>
+        <member name="T:DbgCensus.Rest.Abstractions.Queries.QueryType">
+            <summary>
+            Contains constant fields for the various query types. Known as the Verb by the Census REST API.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.Abstractions.Queries.QueryType.GET">
+            <summary>
+            A regular query.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.Abstractions.Queries.QueryType.COUNT">
+            <summary>
+            Returns the number of values matching the query.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Abstractions.Queries.QueryType.Value">
+            <summary>
+            Gets the value of the verb.
+            </summary>
+        </member>
+        <member name="T:DbgCensus.Rest.Abstractions.Queries.SearchModifier">
+            <summary>
+            Modifiers used to filter searches in the Census REST API.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.Abstractions.Queries.SearchModifier.Equals">
+            <summary>
+            Returns values that are equal to the value of the filter.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.Abstractions.Queries.SearchModifier.NotEquals">
+            <summary>
+            Returns values that are not equal to the value of the filter.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.Abstractions.Queries.SearchModifier.Contains">
+            <summary>
+            Returns values that contain the value of the filter.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.Abstractions.Queries.SearchModifier.LessThan">
+            <summary>
+            Returns values that are less than the value of the filter.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.Abstractions.Queries.SearchModifier.GreaterThan">
+            <summary>
+            Returns values that are greater than the value of the filter.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.Abstractions.Queries.SearchModifier.LessThanOrEqual">
+            <summary>
+            Returns values that are less than or equal to the value of the filter.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.Abstractions.Queries.SearchModifier.GreaterThanOrEqual">
+            <summary>
+            Returns values that are greater than or equal to the value of the filter.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.Abstractions.Queries.SearchModifier.StartsWith">
+            <summary>
+            Returns values that start with the value of the filter.
+            </summary>
+        </member>
+        <member name="T:DbgCensus.Rest.CensusLanguage">
+            <summary>
+            Contains constant fields for the various Census language codes.
+            </summary>
+        </member>
+        <member name="T:DbgCensus.Rest.CensusNamespace">
+            <summary>
+            Contains constant fields for the various Census namespaces.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.CensusNamespace.DCUO">
+            <summary>
+            DC Universe Online.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.CensusNamespace.EQ2">
+            <summary>
+            EverQuest II.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.CensusNamespace.GLOBAL">
+            <summary>
+            Server status information for all games that are part of the Census API.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.CensusNamespace.PS2">
+            <summary>
+            PlanetSide 2 (PC).
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.CensusNamespace.PS2PS4EU">
+            <summary>
+            PlanetSide 2 (PS4) - EU Server.
+            </summary>
+        </member>
+        <member name="F:DbgCensus.Rest.CensusNamespace.PS2PS4US">
+            <summary>
+            PlanetSide 2 (PS4) - US Server.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.CensusQueryOptions.RootEndpoint">
+            <summary>
+            The root endpoint of the Census API.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.CensusQueryOptions.ServiceId">
+            <summary>
+            The service ID used to authenticate with the Census API.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.CensusQueryOptions.Namespace">
+            <summary>
+            The Census namespace to retrieve data from.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.CensusQueryOptions.LanguageCode">
+            <summary>
+            Optionally remove all translations from internationalized strings except the one specified.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.CensusQueryOptions.Limit">
+            <summary>
+            Optionally set a default limit for each query.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.CensusRestClient.GetAsync``1(DbgCensus.Rest.Abstractions.Queries.IQueryBuilder,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.CensusRestClient.GetAsync``1(System.String,System.String,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.CensusRestClient.DeserializeResponseContentAsync``1(System.Net.Http.HttpContent,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Performs checks on the returned data and deserializes it.
+            </summary>
+            <typeparam name="T">The POCO type to deserialize to.</typeparam>
+            <param name="content">The result of the REST request.</param>
+            <param name="collectionName">The name of the collection that was queried.</param>
+            <param name="ct">A token which can be used to cancel asynchronous logic.</param>
+            <returns></returns>
+        </member>
+        <member name="M:DbgCensus.Rest.CensusRestClient.CheckForResponseError(System.Text.Json.JsonDocument)">
+            <summary>
+            Attempts to find an error displayed in the Census response (rather than an error in the returned data).
+            </summary>
+            <param name="data">The response.</param>
+        </member>
+        <member name="T:DbgCensus.Rest.Exceptions.CensusQueryErrorException">
+            <summary>
+            Stores information about an error that occured during an internal Census query.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Exceptions.CensusQueryErrorException.Code">
+            <summary>
+            The Census error code.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Exceptions.CensusQueryErrorException.#ctor(System.String)">
+            <summary>
+            Stores information about an error that occured during an internal Census query.
+            </summary>
+            <param name="message">The returned Census error messasge.</param>
+        </member>
+        <member name="M:DbgCensus.Rest.Exceptions.CensusQueryErrorException.#ctor(System.String,System.String)">
+            <summary>
+            Stores information about an error that occured during an internal Census query.
+            </summary>
+            <param name="message">The returned Census error message.</param>
+            <param name="code">The returned Census error code.</param>
+        </member>
+        <member name="T:DbgCensus.Rest.Exceptions.CensusServiceUnavailableException">
+            <summary>
+            Indicates that a Census service is unavailable.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Exceptions.CensusServiceUnavailableException.#ctor">
+            <summary>
+            Indicates that a Census service is unavailable.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Extensions.IServiceCollectionExtensions.AddCensusRestServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds required services for interacting with the Census REST API.
+            </summary>
+            <param name="serviceCollection">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to add the services to.</param>
+            <returns>A reference to this <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> so that calls may be chained.</returns>
+        </member>
+        <member name="M:DbgCensus.Rest.Extensions.IServiceCollectionExtensions.AddCensusRestServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Func{System.IServiceProvider,System.Text.Json.JsonSerializerOptions})">
+            <summary>
+            Adds required services for interacting with the Census REST API.
+            </summary>
+            <param name="serviceCollection">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to add the services to.</param>
+            <param name="serializerOptions"></param>
+            <returns>A reference to this <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> so that calls may be chained.</returns>
+        </member>
+        <member name="T:DbgCensus.Rest.Queries.JoinBuilder">
+            <summary>
+            Provides functions to build a join command for the Census REST API.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.#ctor(System.String)">
+            <summary>
+            Initialises a new instance of the <see cref="T:DbgCensus.Rest.Queries.JoinBuilder"/> class.
+            </summary>
+            <param name="toCollection">The name of the collection to join to.</param>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.ToCollection(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.ShowFields(System.String[])">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.HideFields(System.String[])">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.InjectAt(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.IsList">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.IsInnerJoin">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.OnField(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.ToField(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.Where``1(System.String,DbgCensus.Rest.Abstractions.Queries.SearchModifier,``0[])">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.AddNestedJoin(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.AddNestedJoin(System.String,System.Action{DbgCensus.Rest.Abstractions.Queries.IJoinBuilder})">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.JoinBuilder.ToString">
+            <summary>
+            Constructs a well-formed join string, without the join command (c:join=).
+            </summary>
+            <returns>A well-formed join string.</returns>
+        </member>
+        <member name="T:DbgCensus.Rest.Queries.QueryBuilder">
+            <summary>
+            Provides functions to build a query URI for the Census REST API.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Provides functions to build a query string for the Census REST API.
+            </summary>
+            <param name="serviceId">A Census service ID.</param>
+            <param name="censusNamespace">The Census namespace to query.</param>
+            <param name="rootEndpoint">The root endpoint of the Census REST API.</param>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.#ctor(DbgCensus.Rest.CensusQueryOptions)">
+            <summary>
+            Provides functions to build a query string for the Census REST API.
+            </summary>
+            <param name="options">Default configuration for the query.</param>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.ConstructEndpoint">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.OfQueryType(DbgCensus.Rest.Abstractions.Queries.QueryType)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.OnCollection(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithLimit(System.UInt32)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithLimitPerDatabase(System.UInt32)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithStartIndex(System.UInt32)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.Where``1(System.String,DbgCensus.Rest.Abstractions.Queries.SearchModifier,``0[])">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithSortOrder(System.String,DbgCensus.Rest.Abstractions.Queries.SortOrder)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithExactMatchesFirst">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.AddJoin(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.AddJoin(System.String,System.Action{DbgCensus.Rest.Abstractions.Queries.IJoinBuilder})">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithTree(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithTree(System.String,System.Action{DbgCensus.Rest.Abstractions.Queries.ITreeBuilder})">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.AddResolve(System.String,System.String[])">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.ShowFields(System.String[])">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.HideFields(System.String[])">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.HasFields(System.String[])">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithLanguage(DbgCensus.Rest.CensusLanguage)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.IsCaseInsensitive">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithNullFields">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithTimings">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithoutOneTimeRetry">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithDistinctFieldValues(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.WithServiceId(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilder.OnNamespace(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:DbgCensus.Rest.Queries.QueryBuilderFactory">
+            <summary>
+            A factory for <see cref="T:DbgCensus.Rest.Queries.QueryBuilder"/> objects. Objects are constructed using the values of an <see cref="T:DbgCensus.Rest.CensusQueryOptions"/> options instance retrieved from the IoC container.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilderFactory.Get">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryBuilderFactory.Get(DbgCensus.Rest.CensusQueryOptions)">
+            <inheritdoc />
+        </member>
+        <member name="T:DbgCensus.Rest.Queries.QueryCommandFormatter">
+            <summary>
+            Provides functions to build a query command.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QueryCommandFormatter.Command">
+            <summary>
+            Gets the command, i.e. c:join.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QueryCommandFormatter.ArgumentSeparator">
+            <summary>
+            Gets the value used to separate each argument.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QueryCommandFormatter.ComponentSeparator">
+            <summary>
+            Gets the value used to separate the command and its arguments.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QueryCommandFormatter.AllowsMultipleArguments">
+            <summary>
+            Gets a value indicating whether multiple arguments can be added.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QueryCommandFormatter.Arguments">
+            <summary>
+            Gets the arguments used in the command.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QueryCommandFormatter.AnyValue">
+            <summary>
+            Gets a value indicating whether any arguments have been added to this query command.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryCommandFormatter.#ctor(System.String,System.Char,System.String)">
+            <summary>
+            Provides functions to build a query command with one argument.
+            </summary>
+            <param name="command">The command, i.e. c:join.</param>
+            <param name="componentSeparator">The value used to separate each argument.</param>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryCommandFormatter.#ctor(System.String,System.Char,System.Char,System.String)">
+            <summary>
+            Provides functions to build a query command.
+            </summary>
+            <param name="command">The command, i.e. c:join.</param>
+            <param name="componentSeparator">The value used to separate the command and its arguments.</param>
+            <param name="argumentSeparator">The value used to separate each argument.</param>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryCommandFormatter.AddArgumentRange(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Adds an argument to the command.
+            </summary>
+            <param name="arguments">The argument/s to add.</param>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryCommandFormatter.ToString">
+            <summary>
+            Constructs a well-formed query command string.
+            </summary>
+        </member>
+        <member name="T:DbgCensus.Rest.Queries.QueryFilter">
+            <summary>
+            Stores the data required to perform a search on a collection in the Census REST API.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QueryFilter.Field">
+            <summary>
+            Gets the field to filter on.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QueryFilter.Value">
+            <summary>
+            Gets the filter value.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QueryFilter.Modifier">
+            <summary>
+            Gets the search modifier.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryFilter.#ctor(System.String,DbgCensus.Rest.Abstractions.Queries.SearchModifier,System.String[])">
+            <summary>
+            Stores the data required to perform a search on a collection in the Census REST API.
+            </summary>
+            <param name="field">The collection property to search on.</param>
+            <param name="modifier">The search modifier.</param>
+            <param name="filterValues">The value to filter by.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown when a null or empty string is passed in as the 'property' and/or one of the 'filterValues' parameter/s.</exception>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryFilter.ToString">
+            <summary>
+            Constructs a value that can be used to perform a search within a Census query.
+            </summary>
+            <returns>A well-formed filter string.</returns>
+        </member>
+        <member name="T:DbgCensus.Rest.Queries.QueryResolve">
+            <summary>
+            Stores data required to perform a resolve in the Census REST API.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QueryResolve.ResolveTo">
+            <summary>
+            Gets the resolve to be made.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QueryResolve.ShowFields">
+            <summary>
+            Gets the fields to show from the resolved collection.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryResolve.#ctor(System.String,System.String[])">
+            <summary>
+            Stores data required to perform a resolve in the Census REST API.
+            </summary>
+            <param name="resolveTo">The resolve to make.</param>
+            <param name="showFields">The fields to be shown from the resolved collection.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the 'resolveTo' parameter is null or empty.</exception>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QueryResolve.ToString">
+            <summary>
+            Constructs a well-formed resolve string, without the query command (c:resolve=).
+            </summary>
+            <returns>A well-formed resolve string.</returns>
+        </member>
+        <member name="T:DbgCensus.Rest.Queries.QuerySortKey">
+            <summary>
+            Stores data required to perform a sort in the Census REST API.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QuerySortKey.FieldName">
+            <summary>
+            The field to sort on.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Rest.Queries.QuerySortKey.Order">
+            <summary>
+            The sort order.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QuerySortKey.#ctor(System.String,DbgCensus.Rest.Abstractions.Queries.SortOrder)">
+            <summary>
+            Stores data required to perform a sort in the Census REST API.
+            </summary>
+            <param name="fieldName">The field to sort on.</param>
+            <param name="order">The sort order.</param>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.QuerySortKey.ToString">
+            <summary>
+            Constructs a well-formed sort string, without the sort command (c:sort=).
+            </summary>
+            <returns>A well-formed sort string.</returns>
+        </member>
+        <member name="T:DbgCensus.Rest.Queries.TreeBuilder">
+            <summary>
+            Provides functions to build a tree command for the Census REST API.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.TreeBuilder.#ctor(System.String)">
+            <summary>
+            Initialises a new instance of the <see cref="T:DbgCensus.Rest.Queries.TreeBuilder"/> class.
+            </summary>
+            <param name="onField">Sets the field to group data by. Will be removed from the data source.</param>
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.TreeBuilder.IsList">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.TreeBuilder.OnField(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.TreeBuilder.StartOn(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbgCensus.Rest.Queries.TreeBuilder.WithPrefix(System.String)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

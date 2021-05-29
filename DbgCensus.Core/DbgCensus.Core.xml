@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DbgCensus.Core</name>
+    </assembly>
+    <members>
+        <member name="T:DbgCensus.Core.Exceptions.CensusInvalidDataException">
+            <summary>
+            Stores information about invalid or unexpected data that was returned from the Census API.
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Core.Exceptions.CensusInvalidDataException.JsonData">
+            <summary>
+            The raw data that was returned.
+            </summary>
+        </member>
+        <member name="M:DbgCensus.Core.Exceptions.CensusInvalidDataException.#ctor(System.String,System.String)">
+            <summary>
+            Stores information about invalid or unexpected data that was returned from the Census API.
+            </summary>
+            <param name="message">The reason this exception was thrown.</param>
+            <param name="jsonData">The raw data that was returned.</param>
+        </member>
+        <member name="P:DbgCensus.Core.Results.IResult.IsSuccess">
+            <summary>
+            Gets a value indicating whether this is a successful result
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Core.Results.IResult.Error">
+            <summary>
+            An exception that may have occured while processing the result
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Core.Results.IResult`1.Value">
+            <summary>
+            A value that may have been obtained while processing the result
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Core.Results.Result.IsSuccess">
+            <inheritdoc/>
+        </member>
+        <member name="P:DbgCensus.Core.Results.Result.Error">
+            <inheritdoc/>
+        </member>
+        <member name="M:DbgCensus.Core.Results.Result.FromError(System.Exception)">
+            <summary>
+            Returns a failed result
+            </summary>
+            <param name="error">An optional error payload</param>
+        </member>
+        <member name="M:DbgCensus.Core.Results.Result.FromError(DbgCensus.Core.Results.IResult)">
+            <summary>
+            Returns a failed result
+            </summary>
+            <param name="failedResult">An existing failed result with an error</param>
+        </member>
+        <member name="M:DbgCensus.Core.Results.Result.FromSuccess">
+            <summary>
+            Returns a successful result
+            </summary>
+        </member>
+        <member name="P:DbgCensus.Core.Results.Result`1.Error">
+            <inheritdoc/>
+        </member>
+        <member name="P:DbgCensus.Core.Results.Result`1.Value">
+            <inheritdoc/>
+        </member>
+        <member name="M:DbgCensus.Core.Results.Result`1.FromError(System.Exception)">
+            <summary>
+            Returns a failed result
+            </summary>
+            <param name="error">An optional error payload</param>
+        </member>
+        <member name="M:DbgCensus.Core.Results.Result`1.FromError(DbgCensus.Core.Results.IResult)">
+            <summary>
+            Returns a failed result
+            </summary>
+            <param name="failedResult">An existing failed result with an error</param>
+        </member>
+        <member name="M:DbgCensus.Core.Results.Result`1.FromSuccess(`0)">
+            <summary>
+            Returns a successful result
+            </summary>
+            <param name="value">The value of the result</param>
+        </member>
+        <member name="M:DbgCensus.Core.Results.Result`1.FromSuccess(DbgCensus.Core.Results.Result{`0})">
+            <summary>
+            Returns a successful result
+            </summary>
+            <param name="successfulResult">An existing successful result with a value</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
