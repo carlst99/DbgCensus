@@ -9,15 +9,14 @@ namespace DbgCensus.Tests.Rest.Queries
     {
         private const string FIELD_NAME = "field";
         private const string FILTER_VALUE = "filterValue";
-        private static readonly SearchModifier MODIFIER = SearchModifier.CONTAINS;
+        private const SearchModifier MODIFIER = SearchModifier.Contains;
 
         [Fact]
         public void TestConstructor()
         {
-            Assert.Throws<ArgumentNullException>(() => new QueryFilter(string.Empty, FILTER_VALUE, MODIFIER));
-            Assert.Throws<ArgumentNullException>(() => new QueryFilter(FIELD_NAME, string.Empty, MODIFIER));
+            Assert.Throws<ArgumentNullException>(() => new QueryFilter(string.Empty, MODIFIER, FILTER_VALUE));
 
-            QueryFilter filter = new(FIELD_NAME, FILTER_VALUE, MODIFIER);
+            QueryFilter filter = new(FIELD_NAME, MODIFIER, FILTER_VALUE);
             Assert.Equal(FIELD_NAME, filter.Field);
             Assert.Equal(FILTER_VALUE, filter.Value);
             Assert.Equal(MODIFIER, filter.Modifier);
@@ -26,8 +25,8 @@ namespace DbgCensus.Tests.Rest.Queries
         [Fact]
         public void TestToString()
         {
-            QueryFilter filter = new(FIELD_NAME, FILTER_VALUE, MODIFIER);
-            Assert.Equal($"{FIELD_NAME}={MODIFIER}{FILTER_VALUE}", filter.ToString());
+            QueryFilter filter = new(FIELD_NAME, MODIFIER, FILTER_VALUE, FILTER_VALUE);
+            Assert.Equal($"{FIELD_NAME}={(char)MODIFIER}{FILTER_VALUE},{FILTER_VALUE}", filter.ToString());
             Assert.Equal(filter.ToString(), filter); // Test implicit casting
         }
     }

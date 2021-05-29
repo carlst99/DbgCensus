@@ -1,68 +1,48 @@
 ﻿namespace DbgCensus.Rest.Abstractions.Queries
 {
     /// <summary>
-    /// Contains modifiers used to enhance searches in the Census REST API.
+    /// Modifiers used to filter searches in the Census REST API.
     /// </summary>
-    public sealed class SearchModifier
+    public enum SearchModifier : byte
     {
         /// <summary>
-        /// Search for values that exactly equal to the filter.
+        /// Returns values that are equal to the value of the filter.
         /// </summary>
-        public static readonly SearchModifier EQUALS = new(string.Empty);
+        Equals = 0,
 
         /// <summary>
-        /// Search for values that are less than the filter.
+        /// Returns values that are not equal to the value of the filter.
         /// </summary>
-        public static readonly SearchModifier LESS_THAN = new("<");
+        NotEquals = (byte)'!',
 
         /// <summary>
-        /// Search for values that are less than or equal to the filter.
+        /// Returns values that contain the value of the filter.
         /// </summary>
-        public static readonly SearchModifier LESS_THAN_OR_EQUAL = new("[");
+        Contains = (byte)'*',
 
         /// <summary>
-        /// Search for values that are greater than the filter.
+        /// Returns values that are less than the value of the filter.
         /// </summary>
-        public static readonly SearchModifier GREATER_THAN = new(">");
+        LessThan = (byte)'<',
 
         /// <summary>
-        /// Search for values that are greater than or equal to the filter.
+        /// Returns values that are greater than the value of the filter.
         /// </summary>
-        public static readonly SearchModifier GREATER_THAN_OR_EQUAL = new("]");
+        GreaterThan = (byte)'>',
 
         /// <summary>
-        /// Search for values that start with the filter string.
+        /// Returns values that are less than or equal to the value of the filter.
         /// </summary>
-        public static readonly SearchModifier STARTS_WITH = new("^");
+        LessThanOrEqual = (byte)'[',
 
         /// <summary>
-        /// Search for values that contain the filter string.
+        /// Returns values that are greater than or equal to the value of the filter.
         /// </summary>
-        public static readonly SearchModifier CONTAINS = new("*");
+        GreaterThanOrEqual = (byte)']',
 
         /// <summary>
-        /// Search for values that are not equal to the filter string.
+        /// Returns values that start with the value of the filter.
         /// </summary>
-        public static readonly SearchModifier NOT_EQUALS = new("!");
-
-        /// <summary>
-        /// Gets the value required to use the modifier in the Census REST API.
-        /// </summary>
-        public string Value { get; }
-
-        private SearchModifier(string modifier)
-        {
-            Value = modifier;
-        }
-
-        public static implicit operator string(SearchModifier m) => m.ToString();
-
-        public override string ToString() => Value;
-
-        public override bool Equals(object? obj)
-            => obj is SearchModifier qt
-            && qt.Value.Equals(Value);
-
-        public override int GetHashCode() => Value.GetHashCode();
+        StartsWith = (byte)'^'
     }
 }

@@ -118,13 +118,21 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public virtual IJoinBuilder Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull
+        public virtual IJoinBuilder Where<T>(string field, SearchModifier modifier, params T[] filterValues) where T : notnull
         {
-            string? filterValueString = filterValue.ToString();
-            if (string.IsNullOrEmpty(filterValueString) || filterValueString.Equals(typeof(T).FullName))
-                throw new ArgumentException(nameof(filterValue) + " must have properly implemented ToString()", nameof(filterValue));
+            string[] stringValues = new string[filterValues.Length];
+            string? typeName = typeof(T).FullName;
 
-            QueryFilter queryFilter = new(field, filterValueString, modifier);
+            for (int i = 0; i < filterValues.Length; i++)
+            {
+                string? value = filterValues[i].ToString();
+                if (string.IsNullOrEmpty(value) || value == typeName)
+                    throw new ArgumentException("The type " + typeName + " must have properly implemented ToString()", nameof(filterValues));
+
+                stringValues[i] = value;
+            }
+
+            QueryFilter queryFilter = new(field, modifier, stringValues);
             _filterTerms.AddArgument(queryFilter);
 
             return this;

@@ -57,8 +57,8 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// Performs a search on the collection. Multiple fields can be searched.
         /// </summary>
         /// <param name="field">The collection field to filter on.</param>
-        /// <param name="filterValues">The values to filter by.</param>
         /// <param name="modifier">The comparison operator.</param>
+        /// <param name="filterValues">The values to filter by.</param>
         /// <returns>An <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
         IQueryBuilder Where<T>(string field, SearchModifier modifier, params T[] filterValues) where T : notnull;
 

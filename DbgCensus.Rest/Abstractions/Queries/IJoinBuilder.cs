@@ -59,10 +59,10 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// Performs a filter on the joined collection. Multiple filters can be performed.
         /// </summary>
         /// <param name="field">The collection field to filter on.</param>
-        /// <param name="filterValue">The value to filter by.</param>
         /// <param name="modifier">The comparison operator.</param>
+        /// <param name="filterValues">The values to filter by.</param>
         /// <returns>An <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
-        IJoinBuilder Where<T>(string field, T filterValue, SearchModifier modifier) where T : notnull;
+        IJoinBuilder Where<T>(string field, SearchModifier modifier, params T[] filterValues) where T : notnull;
 
         /// <summary>
         /// By default, all queries are treated as an 'outer' join. As in SQL, this means that results will be included for joins that do not match the criteria defined via terms. You can set a query to use 'inner' join behaviour, which allows filtering of a parent join via a term defined for its child if both are using 'inner' join behaviour.

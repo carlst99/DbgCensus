@@ -1,4 +1,5 @@
-﻿using DbgCensus.Rest.Abstractions.Queries;
+﻿using DbgCensus.Core.Utils;
+using DbgCensus.Rest.Abstractions.Queries;
 using System;
 
 namespace DbgCensus.Rest.Queries
@@ -27,19 +28,16 @@ namespace DbgCensus.Rest.Queries
         /// Stores the data required to perform a search on a collection in the Census REST API.
         /// </summary>
         /// <param name="field">The collection property to search on.</param>
-        /// <param name="filterValue">The value to filter by.</param>
         /// <param name="modifier">The search modifier.</param>
-        /// <exception cref="ArgumentNullException">Thrown when a null or empty string is passed in as the 'property' and/or 'filterValue' parameter/s.</exception>
-        public QueryFilter(string field, string filterValue, SearchModifier modifier)
+        /// <param name="filterValues">The value to filter by.</param>
+        /// <exception cref="ArgumentNullException">Thrown when a null or empty string is passed in as the 'property' and/or one of the 'filterValues' parameter/s.</exception>
+        public QueryFilter(string field, SearchModifier modifier, params string[] filterValues)
         {
             if (string.IsNullOrEmpty(field))
                 throw new ArgumentNullException(nameof(field));
 
-            if (string.IsNullOrEmpty(filterValue))
-                throw new ArgumentNullException(nameof(filterValue));
-
             Field = field;
-            Value = filterValue;
+            Value = StringUtils.JoinWithoutNullOrEmptyValues(',', filterValues);
             Modifier = modifier;
         }
 
@@ -49,6 +47,6 @@ namespace DbgCensus.Rest.Queries
         /// Constructs a value that can be used to perform a search within a Census query.
         /// </summary>
         /// <returns>A well-formed filter string.</returns>
-        public override string ToString() => Field + "=" + Modifier.Value + Value;
+        public override string ToString() => Field + "=" + (Modifier != SearchModifier.Equals ? (char)Modifier : string.Empty) + Value;
     }
 }

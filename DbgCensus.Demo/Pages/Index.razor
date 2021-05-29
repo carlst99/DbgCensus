@@ -31,7 +31,7 @@
     {
         _queryStringOne = QueryFactory.Get()
             .OnCollection("outfit")
-            .Where("alias_lower", SearchModifier.EQUALS, "uvoc")
+            .Where("alias_lower", SearchModifier.Equals, "uvoc")
             .AddResolve("leader", "name")
             .AddResolve("member_online_status")
             .HasFields("name_lower")
@@ -40,7 +40,7 @@
 
         _queryStringTwo = QueryFactory.Get()
             .OnCollection("outfit")
-            .Where("member_count", SearchModifier.GREATER_THAN, 100)
+            .Where("member_count", SearchModifier.GreaterThan, 100)
             .WithSortOrder("member_count", SortOrder.Ascending)
             .WithSortOrder("name_lower", SortOrder.Ascending)
             .WithLimit(10)
@@ -50,7 +50,7 @@
 
         IJoinBuilder join = QueryFactory.Get().AddJoin("outfit").IsList().InjectAt("injectedHere").HideFields("show1", "show2");
 
-        join.AddNestedJoin("character").Where("name", "Falcon", SearchModifier.EQUALS);
+        join.AddNestedJoin("character").Where("name", SearchModifier.Equals, "Falcon");
         join.AddNestedJoin("item").OnField("item_id");
 
         _joinString = join.ToString();
