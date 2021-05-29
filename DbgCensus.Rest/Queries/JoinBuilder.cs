@@ -154,7 +154,7 @@ namespace DbgCensus.Rest.Queries
             configureJoin(nested);
             _nestedJoins.Add(nested);
 
-            return nested;
+            return this;
         }
 
         /// <summary>
