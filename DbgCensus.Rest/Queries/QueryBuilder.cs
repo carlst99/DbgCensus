@@ -17,16 +17,16 @@ namespace DbgCensus.Rest.Queries
         private readonly MultiQueryCommandFormatter<QuerySortKey> _sortKeys;
         private readonly MultiQueryCommandFormatter<IJoinBuilder> _joins;
         private readonly SingleQueryCommandFormatter<ITreeBuilder> _tree;
-        private readonly SingleQueryCommandFormatter<uint> _limit;
-        private readonly SingleQueryCommandFormatter<uint> _limitPerDb;
-        private readonly SingleQueryCommandFormatter<bool> _exactMatchesFirst; // False by default
+        private readonly SingleQueryCommandFormatter<uint?> _limit;
+        private readonly SingleQueryCommandFormatter<uint?> _limitPerDb;
+        private readonly SingleQueryCommandFormatter<bool?> _exactMatchesFirst; // False by default
         private readonly SingleQueryCommandFormatter<string> _language;
-        private readonly SingleQueryCommandFormatter<bool> _isCaseSensitive; // True by default
-        private readonly SingleQueryCommandFormatter<bool> _withNullFields; // False by default
-        private readonly SingleQueryCommandFormatter<bool> _withTimings; // False by default
-        private readonly SingleQueryCommandFormatter<bool> _retry; // True by default
+        private readonly SingleQueryCommandFormatter<bool?> _isCaseSensitive; // True by default
+        private readonly SingleQueryCommandFormatter<bool?> _withNullFields; // False by default
+        private readonly SingleQueryCommandFormatter<bool?> _withTimings; // False by default
+        private readonly SingleQueryCommandFormatter<bool?> _retry; // True by default
         private readonly SingleQueryCommandFormatter<string> _distinctField;
-        private readonly SingleQueryCommandFormatter<uint> _startIndex;
+        private readonly SingleQueryCommandFormatter<uint?> _startIndex;
 
         private string _serviceId;
         private string _queryNamespace;
@@ -54,16 +54,16 @@ namespace DbgCensus.Rest.Queries
             _sortKeys = GetMultiQCF<QuerySortKey>("c:sort");
             _joins = GetMultiQCF<IJoinBuilder>("c:join");
             _tree = GetSingleQCF<ITreeBuilder>("c:tree");
-            _limit = GetSingleQCF<uint>("c:limit");
-            _limitPerDb = GetSingleQCF<uint>("c:limitPerDB");
-            _exactMatchesFirst = GetSingleQCF<bool>("c:exactMatchFirst");
+            _limit = GetSingleQCF<uint?>("c:limit");
+            _limitPerDb = GetSingleQCF<uint?>("c:limitPerDB");
+            _exactMatchesFirst = GetSingleQCF<bool?>("c:exactMatchFirst");
             _language = GetSingleQCF<string>("c:lang");
-            _isCaseSensitive = GetSingleQCF<bool>("c:case");
-            _withNullFields = GetSingleQCF<bool>("c:includeNull");
-            _withTimings = GetSingleQCF<bool>("c:timing");
-            _retry = GetSingleQCF<bool>("c:retry");
+            _isCaseSensitive = GetSingleQCF<bool?>("c:case");
+            _withNullFields = GetSingleQCF<bool?>("c:includeNull");
+            _withTimings = GetSingleQCF<bool?>("c:timing");
+            _retry = GetSingleQCF<bool?>("c:retry");
             _distinctField = GetSingleQCF<string>("c:distinct");
-            _startIndex = GetSingleQCF<uint>("c:start");
+            _startIndex = GetSingleQCF<uint?>("c:start");
 
             CollectionName = null;
             _verb = QueryType.GET;
@@ -323,7 +323,7 @@ namespace DbgCensus.Rest.Queries
         public virtual IQueryBuilder WithDistinctFieldValues(string fieldName)
         {
             if (string.IsNullOrEmpty(CollectionName))
-                throw new InvalidOperationException("This operation can only be performed on a collection.");
+                throw new InvalidOperationException("This operation can only be performed on a Census collection.");
 
             _distinctField.SetArgument(fieldName);
 

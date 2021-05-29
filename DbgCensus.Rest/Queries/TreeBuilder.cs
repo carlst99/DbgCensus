@@ -8,10 +8,10 @@ namespace DbgCensus.Rest.Queries
     /// </summary>
     public class TreeBuilder : ITreeBuilder
     {
-        private readonly QueryCommandFormatter _onField;
-        private readonly QueryCommandFormatter _isList;
-        private readonly QueryCommandFormatter _prefix;
-        private readonly QueryCommandFormatter _startOn;
+        private readonly SingleQueryCommandFormatter<string> _onField;
+        private readonly SingleQueryCommandFormatter<char?> _isList; // No value by default, defaults to '0' in Census
+        private readonly SingleQueryCommandFormatter<string> _prefix;
+        private readonly SingleQueryCommandFormatter<string> _startOn;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="TreeBuilder"/> class.
@@ -19,10 +19,10 @@ namespace DbgCensus.Rest.Queries
         /// <param name="onField">Sets the field to group data by. Will be removed from the data source.</param>
         public TreeBuilder(string onField)
         {
-            _onField = GetQueryCommandFormatter("field");
-            _isList = GetQueryCommandFormatter("list", "0");
-            _prefix = GetQueryCommandFormatter("prefix");
-            _startOn = GetQueryCommandFormatter("start");
+            _onField = GetSingleQCF<string>("field");
+            _isList = GetSingleQCF<char?>("list");
+            _prefix = GetSingleQCF<string>("prefix");
+            _startOn = GetSingleQCF<string>("start");
 
             OnField(onField);
         }
@@ -30,7 +30,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual ITreeBuilder IsList()
         {
-            _isList.AddArgument("1");
+            _isList.SetArgument('1');
 
             return this;
         }
@@ -38,7 +38,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual ITreeBuilder OnField(string fieldName)
         {
-            _onField.AddArgument(fieldName);
+            _onField.SetArgument(fieldName);
 
             return this;
         }
@@ -46,7 +46,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual ITreeBuilder StartOn(string fieldName)
         {
-            _startOn.AddArgument(fieldName);
+            _startOn.SetArgument(fieldName);
 
             return this;
         }
@@ -54,7 +54,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual ITreeBuilder WithPrefix(string prefix)
         {
-            _prefix.AddArgument(prefix);
+            _prefix.SetArgument(prefix);
 
             return this;
         }
@@ -63,6 +63,6 @@ namespace DbgCensus.Rest.Queries
 
         public static implicit operator string(TreeBuilder t) => t.ToString();
 
-        private static QueryCommandFormatter GetQueryCommandFormatter(string command, string? defaultArgument = null) => new QueryCommandFormatter(command, ':', defaultArgument);
+        private static SingleQueryCommandFormatter<T> GetSingleQCF<T>(string command) => new(command, ':');
     }
 }

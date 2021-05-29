@@ -12,15 +12,15 @@ namespace DbgCensus.Rest.Queries
     {
         private readonly List<IJoinBuilder> _nestedJoins;
 
-        private readonly QueryCommandFormatter _toCollection;
-        private readonly QueryCommandFormatter _filterTerms;
-        private readonly QueryCommandFormatter _onField;
-        private readonly QueryCommandFormatter _toField;
-        private readonly QueryCommandFormatter _isList;
-        private readonly QueryCommandFormatter _injectAt;
-        private readonly QueryCommandFormatter _isOuter;
+        private readonly SingleQueryCommandFormatter<string> _toCollection;
+        private readonly MultiQueryCommandFormatter<QueryFilter> _filterTerms;
+        private readonly SingleQueryCommandFormatter<string> _onField;
+        private readonly SingleQueryCommandFormatter<string> _toField;
+        private readonly SingleQueryCommandFormatter<string> _injectAt;
+        private readonly SingleQueryCommandFormatter<char?> _isList; // No value by default, defaults to '0' in Census
+        private readonly SingleQueryCommandFormatter<char?> _isOuter; // No value by default, defaults to '1' in Census
 
-        private QueryCommandFormatter _showHideFields;
+        private MultiQueryCommandFormatter<string> _showHideFields;
         private bool _isShowingFields; // Indicates whether, if present, fields in "_showHideFields" should be shown (or hidden).
 
         /// <summary>
@@ -31,14 +31,15 @@ namespace DbgCensus.Rest.Queries
         {
             _nestedJoins = new List<IJoinBuilder>();
 
-            _toCollection = GetQueryCommandFormatter("type", false);
-            _filterTerms = GetQueryCommandFormatter("terms", true);
-            _onField = GetQueryCommandFormatter("on", false);
-            _toField = GetQueryCommandFormatter("to", false);
-            _isList = GetQueryCommandFormatter("list", false, "0");
-            _injectAt = GetQueryCommandFormatter("inject_at", false);
-            _isOuter = GetQueryCommandFormatter("outer", false, "1");
-            _showHideFields = GetQueryCommandFormatter("show", true);
+            _toCollection = GetSingleQCF<string>("type");
+            _filterTerms = GetMultiQCF<QueryFilter>("terms");
+            _onField = GetSingleQCF<string>("on");
+            _toField = GetSingleQCF<string>("to");
+            _injectAt = GetSingleQCF<string>("inject_at");
+            _isList = GetSingleQCF<char?>("list");
+            _isOuter = GetSingleQCF<char?>("outer");
+
+            _showHideFields = GetMultiQCF<string>("show");
 
             ToCollection(toCollection);
         }
@@ -46,7 +47,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc/>
         public virtual IJoinBuilder ToCollection(string collectionName)
         {
-            _toCollection.AddArgument(collectionName);
+            _toCollection.SetArgument(collectionName);
 
             return this;
         }
@@ -56,7 +57,7 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (!_isShowingFields)
-                _showHideFields = GetQueryCommandFormatter("show", true);
+                _showHideFields = GetMultiQCF<string>("show");
 
             _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = true;
@@ -69,7 +70,7 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (_isShowingFields)
-                _showHideFields = GetQueryCommandFormatter("hide", true);
+                _showHideFields = GetMultiQCF<string>("hide");
 
             _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = false;
@@ -80,7 +81,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IJoinBuilder InjectAt(string name)
         {
-            _injectAt.AddArgument(name);
+            _injectAt.SetArgument(name);
 
             return this;
         }
@@ -88,7 +89,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IJoinBuilder IsList()
         {
-            _isList.AddArgument("1");
+            _isList.SetArgument('1');
 
             return this;
         }
@@ -96,7 +97,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IJoinBuilder IsInnerJoin()
         {
-            _isOuter.AddArgument("0");
+            _isOuter.SetArgument('0');
 
             return this;
         }
@@ -104,7 +105,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IJoinBuilder OnField(string fieldName)
         {
-            _onField.AddArgument(fieldName);
+            _onField.SetArgument(fieldName);
 
             return this;
         }
@@ -112,7 +113,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IJoinBuilder ToField(string fieldName)
         {
-            _toField.AddArgument(fieldName);
+            _toField.SetArgument(fieldName);
 
             return this;
         }
@@ -173,12 +174,8 @@ namespace DbgCensus.Rest.Queries
 
         public static implicit operator string(JoinBuilder j) => j.ToString();
 
-        private static QueryCommandFormatter GetQueryCommandFormatter(string command, bool allowsMultipleArguments, string? defaultArgument = null)
-        {
-            if (allowsMultipleArguments)
-                return new QueryCommandFormatter(command, ':', '\'', defaultArgument);
-            else
-                return new QueryCommandFormatter(command, ':', defaultArgument);
-        }
+        private static MultiQueryCommandFormatter<T> GetMultiQCF<T>(string command) => new(command, ':', '\'');
+
+        private static SingleQueryCommandFormatter<T> GetSingleQCF<T>(string command) => new(command, ':');
     }
 }

@@ -38,7 +38,7 @@ namespace DbgCensus.Rest.Queries
         /// </summary>
         public override string ToString() => Command + ComponentSeparator;
 
-        public static implicit operator string(QueryCommandFormatterBase f) => f.ToString(); // TODO: Check if this works with derived classes
+        public static implicit operator string(QueryCommandFormatterBase f) => f.ToString();
     }
 
     internal sealed class MultiQueryCommandFormatter<T> : QueryCommandFormatterBase

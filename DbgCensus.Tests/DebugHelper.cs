@@ -23,6 +23,7 @@ namespace DbgCensus.Tests
                     .IsList();
 
             string uri = builder.ConstructEndpoint().AbsoluteUri;
+
             return;
                     //.AddNestedJoin("character")
                     //    .OnField("character_id")
