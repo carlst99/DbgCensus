@@ -20,12 +20,17 @@
 
 <CopyToClipboard Text="@_joinString" />
 
+<h1>Online Outfit Members Query String</h1>
+
+<CopyToClipboard Text="@_onlineOutfitMembersString" />
+
 <SurveyPrompt Title="How is Blazor working for you?" />
 
 @code {
     private string _queryStringOne;
     private string _queryStringTwo;
     private string _joinString;
+    private string _onlineOutfitMembersString;
 
     protected override void OnInitialized()
     {
@@ -54,5 +59,63 @@
         join.AddNestedJoin("item").OnField("item_id");
 
         _joinString = join.ToString();
+
+        _onlineOutfitMembersString = QueryFactory.Get()
+            .OnCollection("outfit")
+            .Where("alias_lower", SearchModifier.Equals, "uvoc")
+            .ShowFields("name", "outfit_id", "alias")
+            .AddJoin("outfit_member", (membersJoin) =>
+            {
+                membersJoin.InjectAt("members")
+                    .ShowFields("character_id")
+                    .IsList()
+                    .AddNestedJoin("character", (charactersJoin) =>
+                    {
+                        charactersJoin.OnField("character_id")
+                            .InjectAt("character")
+                            .ShowFields("name.first")
+                            .IsInnerJoin()
+                            .AddNestedJoin("characters_online_status", (onlineJoin) =>
+                            {
+                                onlineJoin.InjectAt("online_status")
+                                    .ShowFields("online_status")
+                                    .IsInnerJoin()
+                                    .AddNestedJoin("world", (worldJoin) =>
+                                    {
+                                        worldJoin.OnField("online_status")
+                                            .ToField("world_id")
+                                            .InjectAt("ignore_this")
+                                            .ShowFields("world_id")
+                                            .IsInnerJoin();
+                                    });
+                            });
+                    });
+            })
+            .ConstructEndpoint().AbsoluteUri;
+
+        //IQueryBuilder builder = QueryFactory.Get();
+        //builder.OnCollection("outfit")
+        //    .Where("alias_lower", SearchModifier.Equals, "uvoc")
+        //    .ShowFields("name", "outfit_id", "alias")
+        //    .AddJoin("outfit_member")
+        //        .InjectAt("members")
+        //        .ShowFields("character_id")
+        //        .IsList()
+        //        .AddNestedJoin("character")
+        //            .OnField("character_id")
+        //            .InjectAt("character")
+        //            .ShowFields("name.first")
+        //            .IsInnerJoin()
+        //            .AddNestedJoin("characters_online_status")
+        //                .InjectAt("online_status")
+        //                .ShowFields("online_status")
+        //                .IsInnerJoin()
+        //                .AddNestedJoin("world")
+        //                    .OnField("online_status")
+        //                    .ToField("world_id")
+        //                    .InjectAt("ignore_this")
+        //                    .ShowFields("world_id")
+        //                    .IsInnerJoin();
+        //_onlineOutfitMembersString = builder.ConstructEndpoint().AbsoluteUri;
     }
 }
