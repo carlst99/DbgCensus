@@ -1,103 +1,133 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DbgCensus.Rest.Queries
 {
-    /// <summary>
-    /// Provides functions to build a query command.
-    /// </summary>
-    internal sealed class QueryCommandFormatter
+    internal abstract class QueryCommandFormatterBase
     {
-        private readonly List<string> _arguments;
-
         /// <summary>
-        /// Gets the command, i.e. c:join.
+        /// Gets the command.
         /// </summary>
         public string Command { get; }
 
         /// <summary>
-        /// Gets the value used to separate each argument.
+        /// Gets the character used to separate the command from its arguments.
+        /// </summary>
+        public char ComponentSeparator { get; }
+
+        protected QueryCommandFormatterBase(string command, char componentSeparator)
+        {
+            Command = command;
+            ComponentSeparator = componentSeparator;
+        }
+
+        public static string VerifyAndToString(object value)
+        {
+            string? typeName = value.GetType().FullName; // TODO: Verify this works
+            string? valueString = value.ToString();
+
+            if (string.IsNullOrEmpty(valueString) || valueString == typeName)
+                throw new ArgumentException("The type " + typeName + " must have properly implemented ToString()");
+
+            return valueString;
+        }
+
+        /// <summary>
+        /// Returns a well-formed query command string.
+        /// </summary>
+        public override string ToString() => Command + ComponentSeparator;
+
+        public static implicit operator string(QueryCommandFormatterBase f) => f.ToString(); // TODO: Check if this works with derived classes
+    }
+
+    internal sealed class MultiQueryCommandFormatter<T> : QueryCommandFormatterBase
+    {
+        private readonly List<T> _arguments;
+
+        /// <summary>
+        /// Gets the character used to separate each argument.
         /// </summary>
         public char ArgumentSeparator { get; }
 
         /// <summary>
-        /// Gets the value used to separate the command and its arguments.
+        /// Gets the arguments.
         /// </summary>
-        public char ComponentSeparator { get; }
+        public IReadOnlyList<T> Arguments => _arguments.AsReadOnly();
 
         /// <summary>
-        /// Gets a value indicating whether multiple arguments can be added.
+        /// Gets a value indicating if any arguments have been added to this <see cref="MultiQueryCommandFormatter{T}"/>.
         /// </summary>
-        public bool AllowsMultipleArguments { get; }
+        public bool AnyArguments => _arguments.Count > 0;
 
-        /// <summary>
-        /// Gets the arguments used in the command.
-        /// </summary>
-        public IReadOnlyList<string> Arguments => _arguments.AsReadOnly();
-
-        /// <summary>
-        /// Gets a value indicating whether any arguments have been added to this query command.
-        /// </summary>
-        public bool AnyValue => _arguments.Count > 0;
-
-        /// <summary>
-        /// Provides functions to build a query command with one argument.
-        /// </summary>
-        /// <param name="command">The command, i.e. c:join.</param>
-        /// <param name="componentSeparator">The value used to separate each argument.</param>
-        public QueryCommandFormatter(string command, char componentSeparator, string? defaultArgument = null)
-            : this(command, componentSeparator, char.MinValue, defaultArgument)
+        public MultiQueryCommandFormatter(string command, char componentSeparator, char argumentSeparator)
+            : base(command, componentSeparator)
         {
-            AllowsMultipleArguments = false;
-        }
-
-        /// <summary>
-        /// Provides functions to build a query command.
-        /// </summary>
-        /// <param name="command">The command, i.e. c:join.</param>
-        /// <param name="componentSeparator">The value used to separate the command and its arguments.</param>
-        /// <param name="argumentSeparator">The value used to separate each argument.</param>
-        public QueryCommandFormatter(string command, char componentSeparator, char argumentSeparator, string? defaultArgument = null)
-        {
-            _arguments = new List<string>();
-            AllowsMultipleArguments = true;
-
-            Command = command;
-            ComponentSeparator = componentSeparator;
             ArgumentSeparator = argumentSeparator;
 
-            if (defaultArgument is not null)
-                AddArgument(defaultArgument);
-        }
-
-        public void AddArgument(string argument)
-        {
-            if (AllowsMultipleArguments || _arguments.Count == 0)
-                _arguments.Add(argument);
-            else
-                _arguments[0] = argument;
+            _arguments = new List<T>();
         }
 
         /// <summary>
         /// Adds an argument to the command.
         /// </summary>
-        /// <param name="arguments">The argument/s to add.</param>
-        public void AddArgumentRange(IEnumerable<string> arguments)
+        /// <param name="argument">The argument value to add.</param>
+        public void AddArgument(T argument)
         {
-            if (!AllowsMultipleArguments)
-                throw new InvalidOperationException("Multiple arguments are not allowed.");
+            if (argument is null)
+                throw new ArgumentNullException(nameof(argument));
 
-            foreach (string argument in arguments)
-                _arguments.Add(argument);
+            _arguments.Add(argument);
         }
 
-        public static implicit operator string(QueryCommandFormatter f) => f.ToString();
+        /// <summary>
+        /// Adds a range of arguments to the command.
+        /// </summary>
+        /// <param name="arguments">The argument/s to add.</param>
+        public void AddArgumentRange(IEnumerable<T> arguments)
+        {
+            foreach (T argument in arguments)
+            {
+                if (argument is null)
+                    throw new ArgumentNullException(nameof(arguments));
+
+                _arguments.Add(argument);
+            }
+        }
+
+        /// <inheritdoc />
+        public override string ToString() => AnyArguments
+            ? base.ToString() + string.Join(ArgumentSeparator, Arguments.Select(a => VerifyAndToString(a)))
+            : string.Empty;
+    }
+
+    internal sealed class SingleQueryCommandFormatter<T> : QueryCommandFormatterBase
+    {
+        /// <summary>
+        /// Gets the argument.
+        /// </summary>
+        public T? Argument { get; private set; }
+
+        public SingleQueryCommandFormatter(string command, char componentSeparator)
+            : base(command, componentSeparator)
+        {
+        }
 
         /// <summary>
-        /// Constructs a well-formed query command string.
+        /// Sets the argument of this command.
         /// </summary>
-        public override string ToString() => _arguments.Count > 0
-            ? Command + ComponentSeparator + string.Join(ArgumentSeparator, _arguments)
+        /// <param name="argument">The argument value.</param>
+        public void SetArgument(T argument)
+        {
+            if (argument is null)
+                throw new ArgumentNullException(nameof(argument));
+
+            Argument = argument;
+        }
+
+        /// <inheritdoc />
+        public override string ToString() => Argument is not null
+            ? base.ToString() + VerifyAndToString(Argument)
             : string.Empty;
     }
 }

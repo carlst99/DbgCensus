@@ -12,11 +12,11 @@ namespace DbgCensus.Rest.Queries
     {
         private readonly string _rootEndpoint;
         private readonly List<QueryFilter> _filters;
-        private readonly QueryCommandFormatter _resolves;
-        private readonly QueryCommandFormatter _hasFields;
+        private readonly MultiQueryCommandFormatter<QueryResolve> _resolves;
+        private readonly MultiQueryCommandFormatter<string> _hasFields;
         private readonly QueryCommandFormatter _sortKeys;
         private readonly QueryCommandFormatter _joins;
-        private readonly QueryCommandFormatter _tree;
+        private readonly SingleQueryCommandFormatter<ITreeBuilder> _tree;
         private readonly QueryCommandFormatter _limit;
         private readonly QueryCommandFormatter _limitPerDb;
         private readonly QueryCommandFormatter _exactMatchesFirst;
@@ -31,7 +31,7 @@ namespace DbgCensus.Rest.Queries
         private string _serviceId;
         private string _queryNamespace;
         private QueryType _verb;
-        private QueryCommandFormatter _showHideFields;
+        private MultiQueryCommandFormatter<string> _showHideFields;
         private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
 
         public string? CollectionName { get; protected set; }
@@ -49,11 +49,11 @@ namespace DbgCensus.Rest.Queries
             _queryNamespace = censusNamespace;
 
             _filters = new List<QueryFilter>();
-            _resolves = GetQueryCommandFormatter("c:resolve", true);
-            _hasFields = GetQueryCommandFormatter("c:has", true);
+            _resolves = GetMultiQCF<QueryResolve>("c:resolve");
+            _hasFields = GetMultiQCF<string>("c:has");
             _sortKeys = GetQueryCommandFormatter("c:sort", true);
             _joins = GetQueryCommandFormatter("c:join", true);
-            _tree = GetQueryCommandFormatter("c:tree", false);
+            _tree = GetSingleQCF<ITreeBuilder>("c:tree");
             _limit = GetQueryCommandFormatter("c:limit", false, 100.ToString());
             _limitPerDb = GetQueryCommandFormatter("c:limitPerDB", false);
             _exactMatchesFirst = GetQueryCommandFormatter("c:exactMatchFirst", false);
@@ -220,7 +220,7 @@ namespace DbgCensus.Rest.Queries
         public virtual ITreeBuilder WithTree(string onField)
         {
             TreeBuilder tree = new(onField);
-            _tree.AddArgument(tree);
+            _tree.SetArgument(tree);
 
             return tree;
         }
@@ -230,7 +230,7 @@ namespace DbgCensus.Rest.Queries
         {
             TreeBuilder tree = new(onField);
             configureTree(tree);
-            _tree.AddArgument(tree);
+            _tree.SetArgument(tree);
 
             return this;
         }
@@ -248,7 +248,7 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (!_isShowingFields)
-                _showHideFields = GetQueryCommandFormatter("show", true);
+                _showHideFields = GetMultiQCF<string>("show");
 
             _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = true;
@@ -261,7 +261,7 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (_isShowingFields)
-                GetQueryCommandFormatter("hide", true);
+                _showHideFields = GetMultiQCF<string>("hide");
 
             _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = false;
@@ -346,12 +346,8 @@ namespace DbgCensus.Rest.Queries
 
         public override string ToString() => ConstructEndpoint().ToString();
 
-        private static QueryCommandFormatter GetQueryCommandFormatter(string command, bool allowsMultipleArguments, string? defaultArgument = null)
-        {
-            if (allowsMultipleArguments)
-                return new QueryCommandFormatter(command, '=', ',', defaultArgument);
-            else
-                return new QueryCommandFormatter(command, '=', defaultArgument);
-        }
+        private static MultiQueryCommandFormatter<T> GetMultiQCF<T>(string command) => new(command, '=', ',');
+
+        private static SingleQueryCommandFormatter<T> GetSingleQCF<T>(string command) => new(command, '=');
     }
 }
