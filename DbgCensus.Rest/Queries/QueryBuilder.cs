@@ -12,26 +12,26 @@ namespace DbgCensus.Rest.Queries
     {
         private readonly string _rootEndpoint;
         private readonly List<QueryFilter> _filters;
-        private readonly QueryCommandFormatter _resolves;
-        private readonly QueryCommandFormatter _hasFields;
-        private readonly QueryCommandFormatter _sortKeys;
-        private readonly QueryCommandFormatter _joins;
-        private readonly QueryCommandFormatter _tree;
-        private readonly QueryCommandFormatter _limit;
-        private readonly QueryCommandFormatter _limitPerDb;
-        private readonly QueryCommandFormatter _exactMatchesFirst;
-        private readonly QueryCommandFormatter _language;
-        private readonly QueryCommandFormatter _isCaseSensitive; // True by default
-        private readonly QueryCommandFormatter _withNullFields;
-        private readonly QueryCommandFormatter _withTimings;
-        private readonly QueryCommandFormatter _retry; // True by default
-        private readonly QueryCommandFormatter _distinctField;
-        private readonly QueryCommandFormatter _startIndex;
+        private readonly MultiQueryCommandFormatter<QueryResolve> _resolves;
+        private readonly MultiQueryCommandFormatter<string> _hasFields;
+        private readonly MultiQueryCommandFormatter<QuerySortKey> _sortKeys;
+        private readonly MultiQueryCommandFormatter<IJoinBuilder> _joins;
+        private readonly SingleQueryCommandFormatter<ITreeBuilder> _tree;
+        private readonly SingleQueryCommandFormatter<uint?> _limit;
+        private readonly SingleQueryCommandFormatter<uint?> _limitPerDb;
+        private readonly SingleQueryCommandFormatter<bool?> _exactMatchesFirst; // False by default
+        private readonly SingleQueryCommandFormatter<string> _language;
+        private readonly SingleQueryCommandFormatter<bool?> _isCaseSensitive; // True by default
+        private readonly SingleQueryCommandFormatter<bool?> _withNullFields; // False by default
+        private readonly SingleQueryCommandFormatter<bool?> _withTimings; // False by default
+        private readonly SingleQueryCommandFormatter<bool?> _retry; // True by default
+        private readonly SingleQueryCommandFormatter<string> _distinctField;
+        private readonly SingleQueryCommandFormatter<uint?> _startIndex;
 
         private string _serviceId;
         private string _queryNamespace;
         private QueryType _verb;
-        private QueryCommandFormatter _showHideFields;
+        private MultiQueryCommandFormatter<string> _showHideFields;
         private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
 
         public string? CollectionName { get; protected set; }
@@ -49,25 +49,27 @@ namespace DbgCensus.Rest.Queries
             _queryNamespace = censusNamespace;
 
             _filters = new List<QueryFilter>();
-            _resolves = GetQueryCommandFormatter("c:resolve", true);
-            _hasFields = GetQueryCommandFormatter("c:has", true);
-            _sortKeys = GetQueryCommandFormatter("c:sort", true);
-            _joins = GetQueryCommandFormatter("c:join", true);
-            _tree = GetQueryCommandFormatter("c:tree", false);
-            _limit = GetQueryCommandFormatter("c:limit", false, 100.ToString());
-            _limitPerDb = GetQueryCommandFormatter("c:limitPerDB", false);
-            _exactMatchesFirst = GetQueryCommandFormatter("c:exactMatchFirst", false);
-            _language = GetQueryCommandFormatter("c:lang", false);
-            _isCaseSensitive = GetQueryCommandFormatter("c:case", false);
-            _withNullFields = GetQueryCommandFormatter("c:includeNull", false);
-            _withTimings = GetQueryCommandFormatter("c:timing", false);
-            _retry = GetQueryCommandFormatter("c:retry", false);
-            _distinctField = GetQueryCommandFormatter("c:distinct", false);
-            _startIndex = GetQueryCommandFormatter("c:start", false);
+            _resolves = GetMultiQCF<QueryResolve>("c:resolve");
+            _hasFields = GetMultiQCF<string>("c:has");
+            _sortKeys = GetMultiQCF<QuerySortKey>("c:sort");
+            _joins = GetMultiQCF<IJoinBuilder>("c:join");
+            _tree = GetSingleQCF<ITreeBuilder>("c:tree");
+            _limit = GetSingleQCF<uint?>("c:limit");
+            _limitPerDb = GetSingleQCF<uint?>("c:limitPerDB");
+            _exactMatchesFirst = GetSingleQCF<bool?>("c:exactMatchFirst");
+            _language = GetSingleQCF<string>("c:lang");
+            _isCaseSensitive = GetSingleQCF<bool?>("c:case");
+            _withNullFields = GetSingleQCF<bool?>("c:includeNull");
+            _withTimings = GetSingleQCF<bool?>("c:timing");
+            _retry = GetSingleQCF<bool?>("c:retry");
+            _distinctField = GetSingleQCF<string>("c:distinct");
+            _startIndex = GetSingleQCF<uint?>("c:start");
 
             CollectionName = null;
             _verb = QueryType.GET;
-            _showHideFields = GetQueryCommandFormatter("c:show", true);
+            _showHideFields = GetMultiQCF<string>("c:show");
+
+            WithLimit(100);
         }
 
         /// <summary>
@@ -78,7 +80,7 @@ namespace DbgCensus.Rest.Queries
             : this(options.ServiceId, options.Namespace, options.RootEndpoint)
         {
             if (options.LanguageCode is not null)
-                WithLanguage((CensusLanguage)options.LanguageCode);
+                WithLanguage(options.LanguageCode);
 
             if (options.Limit is not null)
                 WithLimit((uint)options.Limit);
@@ -98,7 +100,7 @@ namespace DbgCensus.Rest.Queries
                 return builder.Uri;
 
             // Add distinct command
-            if (_distinctField.AnyValue)
+            if (_distinctField.HasValue)
             {
                 builder.Query = _distinctField;
                 return builder.Uri; // Querying doesn't work in tandem with the distinct command
@@ -111,7 +113,7 @@ namespace DbgCensus.Rest.Queries
             builder.Query += StringUtils.JoinWithoutNullOrEmptyValues('&', _hasFields, _showHideFields, _resolves, _joins, _sortKeys, _startIndex, _language, _exactMatchesFirst, _isCaseSensitive, _withNullFields, _withTimings, _retry);
 
             // Add relevant limit command
-            if (_limitPerDb.AnyValue)
+            if (_limitPerDb.HasValue)
                 builder.Query += '&' + _limitPerDb;
             else if (_limit is not null)
                 builder.Query += '&' + _limit;
@@ -139,7 +141,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IQueryBuilder WithLimit(uint limit)
         {
-            _limit.AddArgument(limit.ToString());
+            _limit.SetArgument(limit);
 
             return this;
         }
@@ -147,7 +149,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IQueryBuilder WithLimitPerDatabase(uint limit)
         {
-            _limitPerDb.AddArgument(limit.ToString());
+            _limitPerDb.SetArgument(limit);
 
             return this;
         }
@@ -155,7 +157,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IQueryBuilder WithStartIndex(uint index)
         {
-            _startIndex.AddArgument(index.ToString());
+            _startIndex.SetArgument(index);
 
             return this;
         }
@@ -192,7 +194,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IQueryBuilder WithExactMatchesFirst()
         {
-            _exactMatchesFirst.AddArgument(true.ToString());
+            _exactMatchesFirst.SetArgument(true);
 
             return this;
         }
@@ -220,7 +222,7 @@ namespace DbgCensus.Rest.Queries
         public virtual ITreeBuilder WithTree(string onField)
         {
             TreeBuilder tree = new(onField);
-            _tree.AddArgument(tree);
+            _tree.SetArgument(tree);
 
             return tree;
         }
@@ -230,7 +232,7 @@ namespace DbgCensus.Rest.Queries
         {
             TreeBuilder tree = new(onField);
             configureTree(tree);
-            _tree.AddArgument(tree);
+            _tree.SetArgument(tree);
 
             return this;
         }
@@ -248,7 +250,7 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (!_isShowingFields)
-                _showHideFields = GetQueryCommandFormatter("show", true);
+                _showHideFields = GetMultiQCF<string>("show");
 
             _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = true;
@@ -261,7 +263,7 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (_isShowingFields)
-                GetQueryCommandFormatter("hide", true);
+                _showHideFields = GetMultiQCF<string>("hide");
 
             _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = false;
@@ -278,9 +280,9 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public virtual IQueryBuilder WithLanguage(CensusLanguage languageCode)
+        public virtual IQueryBuilder WithLanguage(string languageCode)
         {
-            _language.AddArgument(languageCode);
+            _language.SetArgument(languageCode);
 
             return this;
         }
@@ -288,7 +290,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IQueryBuilder IsCaseInsensitive()
         {
-            _isCaseSensitive.AddArgument(false.ToString());
+            _isCaseSensitive.SetArgument(false);
 
             return this;
         }
@@ -296,7 +298,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IQueryBuilder WithNullFields()
         {
-            _withNullFields.AddArgument(true.ToString());
+            _withNullFields.SetArgument(true);
 
             return this;
         }
@@ -304,7 +306,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IQueryBuilder WithTimings()
         {
-            _withTimings.AddArgument(true.ToString());
+            _withTimings.SetArgument(true);
 
             return this;
         }
@@ -312,7 +314,7 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IQueryBuilder WithoutOneTimeRetry()
         {
-            _retry.AddArgument(false.ToString());
+            _retry.SetArgument(false);
 
             return this;
         }
@@ -321,9 +323,9 @@ namespace DbgCensus.Rest.Queries
         public virtual IQueryBuilder WithDistinctFieldValues(string fieldName)
         {
             if (string.IsNullOrEmpty(CollectionName))
-                throw new InvalidOperationException("This operation can only be performed on a collection.");
+                throw new InvalidOperationException("This operation can only be performed on a Census collection.");
 
-            _distinctField.AddArgument(fieldName);
+            _distinctField.SetArgument(fieldName);
 
             return this;
         }
@@ -346,12 +348,8 @@ namespace DbgCensus.Rest.Queries
 
         public override string ToString() => ConstructEndpoint().ToString();
 
-        private static QueryCommandFormatter GetQueryCommandFormatter(string command, bool allowsMultipleArguments, string? defaultArgument = null)
-        {
-            if (allowsMultipleArguments)
-                return new QueryCommandFormatter(command, '=', ',', defaultArgument);
-            else
-                return new QueryCommandFormatter(command, '=', defaultArgument);
-        }
+        private static MultiQueryCommandFormatter<T> GetMultiQCF<T>(string command) => new(command, '=', ',');
+
+        private static SingleQueryCommandFormatter<T> GetSingleQCF<T>(string command) => new(command, '=');
     }
 }

@@ -41,7 +41,7 @@ namespace DbgCensus.Tests.Rest.Queries
             Namespace = "testnamespace",
             RootEndpoint = "testendpoint",
             ServiceId = "testid",
-            LanguageCode = CensusLanguage.ENGLISH,
+            LanguageCode = CensusLanguage.English,
             Limit = 420
         };
     }
