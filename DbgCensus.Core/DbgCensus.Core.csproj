@@ -3,15 +3,20 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
+    
+    <!-- Package info -->
     <Version>1.0.0-beta.1</Version>
     <Authors>Carl Stephens</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
     <RepositoryUrl>https://github.com/carlst99/DbgCensus</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <Description>Contains core components for the DbgCensus.* libraries - low level wrappers for interacting with Daybreak Game Company's Census API.</Description>
     <PackageTags>planetside2 daybreak-games daybreak-census</PackageTags>
-    <Description>Contains core components for the DbgCensus.* libraries.</Description>
     <PackageIcon>Icon_128.png</PackageIcon>
+    
+    <!-- Include compiler-generated source files for SourceLink and Deterministic builds-->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Include symbol files (*.pdb) in the built .nupkg -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
@@ -24,6 +29,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

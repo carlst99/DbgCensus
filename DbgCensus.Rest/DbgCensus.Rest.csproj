@@ -3,16 +3,20 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
+    
+    <!-- Package info -->
     <Version>1.0.0-beta.1</Version>
     <Authors>Carl Stephens</Authors>
-    <Company />
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
     <RepositoryUrl>https://github.com/carlst99/DbgCensus</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Description>A low-level c# wrapper for the REST component of Daybreak Game Company's Census API.</Description>
+    <Description>A low-level c# wrapper for interacting with the query endpoints of Daybreak Game Company's Census API.</Description>
     <PackageTags>planetside2 daybreak-games daybreak-census</PackageTags>
     <PackageIcon>Icon_128.png</PackageIcon>
+
+    <!-- Include compiler-generated source files for SourceLink and Deterministic builds-->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Include symbol files (*.pdb) in the built .nupkg -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
@@ -27,6 +31,7 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="5.0.1" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
