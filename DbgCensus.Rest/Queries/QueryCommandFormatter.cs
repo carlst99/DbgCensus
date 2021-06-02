@@ -97,7 +97,9 @@ namespace DbgCensus.Rest.Queries
 
         /// <inheritdoc />
         public override string ToString() => AnyArguments
+#pragma warning disable CS8604 // Possible null reference argument. Each argument is null-checked when they are added, so it should be impossible for them to be null here.
             ? base.ToString() + string.Join(ArgumentSeparator, Arguments.Select(a => VerifyAndToString(a)))
+#pragma warning restore CS8604 // Possible null reference argument.
             : string.Empty;
     }
 

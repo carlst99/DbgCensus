@@ -20,7 +20,7 @@
         /// <summary>
         /// Optionally remove all translations from internationalized strings except the one specified.
         /// </summary>
-        public string? LanguageCode { get; set; } // TODO: Test with json serialisation
+        public string? LanguageCode { get; set; }
 
         /// <summary>
         /// Optionally set a default limit for each query.
