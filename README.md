@@ -1,5 +1,3 @@
-# DbgCensus
-
 <img title="DbgCensus Icon" alt="DbgCensus Icon" src="https://github.com/carlst99/DbgCensus/blob/main/Assets/Icon_512.png?raw=true" align="left" height="140" />
 
 # DbgCensus
