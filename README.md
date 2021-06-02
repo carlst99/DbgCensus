@@ -1,4 +1,4 @@
-<img title="DbgCensus Icon" alt="DbgCensus Icon" src="https://github.com/carlst99/DbgCensus/blob/main/assets/Icon_128.png?raw=true" align="left" />
+<img title="DbgCensus Icon" alt="DbgCensus Icon" src="https://github.com/carlst99/DbgCensus/blob/main/Assets/Icon_128.png?raw=true" align="left" />
 
 # DbgCensus
 
@@ -17,7 +17,7 @@ DbgCensus is a low-level c# wrapper for [Daybreak Game Company's Census API](htt
 - Built around the `Microsoft.Extensions` framework.
 - Compiled for .NET 5.0
 
-## Getting Started
+## Getting Started [WIP]
 
 Before you do anything, you should consider getting a *Service ID*.
 
