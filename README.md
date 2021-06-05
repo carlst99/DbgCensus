@@ -15,11 +15,11 @@ DbgCensus is a low-level c# wrapper for [Daybreak Game Company's Census API](htt
 - Fully asynchronous.
 - Highly extendable - core components can be extended, replaced and used individually.
 - Built around the `Microsoft.Extensions` framework.
-- Compiled for .NET 5.0
+- Compiled for .NET 5.0.
 
 > :warning: DbgCensus is currently in a pre-release state. This means that:
 > - Support for the Event Streaming API has not yet been implemented.
-> - The code is largely untested.
+> - The code is largely untested, but 'should work:tm:'.
 > - Documentation is light on the ground.
 
 ***
