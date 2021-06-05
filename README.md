@@ -46,7 +46,7 @@ Start off by installing the REST package. As it is currently a pre-release build
 Install-Package DbgCensus.Rest -IncludePrerelease
 ```
 
-If your project makes use of the `Microsoft.Extensions` framework, you can easily register the requisite services to the container:
+If your project makes use of the `Microsoft.Extensions` framework, you can easily register the required services to the container with the `AddCensusRestServices` extension method:
 
 ```csharp
 using DbgCensus.Rest.Extensions;
@@ -59,7 +59,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         });
 ```
 
-If you aren't using the `Microsoft.Extensions` framework, take a look at the [this file](DbgCensus.Rest/Extensions/IServiceCollectionExtensions.cs) to see how the required services are setup.
+If you aren't using the `Microsoft.Extensions` framework, take a look at [this file](DbgCensus.Rest/Extensions/IServiceCollectionExtensions.cs) to see how the required services are setup.
 
 #### Building Queries
 
@@ -71,7 +71,7 @@ Use a singleton `CensusRestClient` object.
 
 #### Customising Options
 
-Utilise the `CensusQueryOptions` object. You can register this with the options pattern (`Microsoft.Extensions.Configuration`).
+Utilise the `CensusQueryOptions` object. You can register this using the options pattern (`Microsoft.Extensions.Configuration`).
 
 ***
 
