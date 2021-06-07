@@ -18,19 +18,21 @@ DbgCensus is a low-level c# wrapper for [Daybreak Game Company's Census API](htt
 - Compiled for .NET 5.0.
 
 > :warning: DbgCensus is currently in a pre-release state. This means that:
+>
 > - Support for the Event Streaming API has not yet been implemented.
-> - The code is largely untested, but 'should work:tm:'.
-> - Documentation is light on the ground.
+> - The code is largely untested, but 'should work'.
+> - Documentation is light on the ground, although the code is fully XML documented.
 
 ***
 
 ## Getting Started
 
-Before you do anything, you should consider getting a custom *Service ID*. The process is free and it generally only takes a few hours to hear back about your registration, which you can do [here](https://census.daybreakgames.com/#devSignup).
+Before you do anything, you should consider getting a custom *Census Service ID*. The process is free and it generally only takes a few hours to hear back about your registration, which you can do [here](https://census.daybreakgames.com/#devSignup).
 
 Note that you can also use the `example` service ID, however you will be rate-limited to 10 requests per minute, per client IP address.
 
 You will also need to have a good understanding of how the Census API works. I highly recommend making your way through these excellent official/community docs:
+
 - [The official Census API documentation.](https://census.daybreakgames.com)
 - [Leonhard's Census API Primer.](https://github.com/leonhard-s/auraxium/wiki/Census-API-Primer)
 - [The community API issue tracker/info repository](https://github.com/cooltrain7/Planetside-2-API-Tracker)
