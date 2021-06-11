@@ -2,7 +2,7 @@
 
 # DbgCensus
 
-DbgCensus is a low-level c# wrapper for [Daybreak Game Company's Census API](https://census.daybreakgames.com). It was built with PlanetSide 2's endpoints in mind, but should work across all namespaces.
+DbgCensus is a low-level C# wrapper for [Daybreak Game Company's Census API](https://census.daybreakgames.com). It was built with PlanetSide 2's endpoints in mind, but should work across all namespaces.
 
 **This package is unofficial and is not affiliated with Daybreak Games Company in any way.**
 
