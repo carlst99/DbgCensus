@@ -40,6 +40,9 @@ namespace DbgCensus.Rest
 
             _jsonOptions.Converters.Add(new BooleanJsonConverter());
 
+            _jsonOptions.Converters.Add(new DateTimeJsonConverter());
+            _jsonOptions.Converters.Add(new DateTimeOffsetJsonConverter());
+
             _jsonOptions.Converters.Add(new Int16JsonConverter());
             _jsonOptions.Converters.Add(new Int32JsonConverter());
             _jsonOptions.Converters.Add(new Int64JsonConverter());
