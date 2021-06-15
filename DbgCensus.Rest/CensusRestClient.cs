@@ -5,7 +5,9 @@ using DbgCensus.Rest.Abstractions.Queries;
 using DbgCensus.Rest.Exceptions;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -13,6 +15,7 @@ using System.Threading.Tasks;
 
 namespace DbgCensus.Rest
 {
+    /// <inheritdoc cref="ICensusRestClient" />
     public class CensusRestClient : ICensusRestClient
     {
         protected readonly ILogger<CensusRestClient> _logger;
@@ -21,10 +24,21 @@ namespace DbgCensus.Rest
 
         public bool IsDisposed { get; protected set; }
 
+        /// <summary>
+        /// Initialises a new instance of the <see cref="CensusRestClient"/> class.
+        /// </summary>
+        /// <param name="logger">The logging interface to use.</param>
+        /// <param name="client">The <see cref="HttpClient"/> to send requests with.</param>
         public CensusRestClient(ILogger<CensusRestClient> logger, HttpClient client)
             : this(logger, client, new JsonSerializerOptions())
         { }
 
+        /// <summary>
+        /// Initialises a new instance of the <see cref="CensusRestClient"/> class.
+        /// </summary>
+        /// <param name="logger">The logging interface to use.</param>
+        /// <param name="client">The <see cref="HttpClient"/> to send requests with.</param>
+        /// <param name="jsonOptions">JSON options to conform to when deserialising the response.</param>
         public CensusRestClient(ILogger<CensusRestClient> logger, HttpClient client, JsonSerializerOptions jsonOptions)
         {
             _logger = logger;
@@ -72,6 +86,23 @@ namespace DbgCensus.Rest
             }
 
             return await DeserializeResponseContentAsync<T>(response.Content, collectionName, ct).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public virtual async IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>(IQueryBuilder query, uint pageSize, uint pageCount, uint start = 0, [EnumeratorCancellation] CancellationToken ct = default) where T : new()
+        {
+            for (int i = 0; i < pageCount; i++)
+            {
+                if (ct.IsCancellationRequested)
+                    throw new TaskCanceledException();
+
+                query.WithStartIndex(start);
+                query.WithLimit(pageSize);
+
+                yield return await GetAsync<List<T>>(query, ct).ConfigureAwait(false);
+
+                start += pageSize;
+            }
         }
 
         /// <summary>
@@ -158,6 +189,7 @@ namespace DbgCensus.Rest
             }
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(disposing: true);
