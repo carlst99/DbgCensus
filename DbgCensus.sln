@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbgCensus.Demo", "DbgCensus
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbgCensus.Tests", "DbgCensus.Tests\DbgCensus.Tests.csproj", "{B1EE538E-9C94-4773-BBF0-C0B5E94FA3F1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbgCensus.EventStream", "DbgCensus.EventStream\DbgCensus.EventStream.csproj", "{C8C4E92A-793F-431E-858E-0190A24E35D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{B1EE538E-9C94-4773-BBF0-C0B5E94FA3F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1EE538E-9C94-4773-BBF0-C0B5E94FA3F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1EE538E-9C94-4773-BBF0-C0B5E94FA3F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8C4E92A-793F-431E-858E-0190A24E35D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8C4E92A-793F-431E-858E-0190A24E35D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8C4E92A-793F-431E-858E-0190A24E35D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8C4E92A-793F-431E-858E-0190A24E35D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
