@@ -10,6 +10,8 @@ namespace DbgCensus.Tests.Core.Json
         {
             SnakeCaseJsonNamingPolicy policy = new();
 
+            Assert.Equal(string.Empty, policy.ConvertName(string.Empty));
+            Assert.Null(policy.ConvertName(null!));
             Assert.Equal("pascal_case", policy.ConvertName("PascalCase"));
             Assert.Equal("camel_case", policy.ConvertName("camelCase"));
             Assert.Equal("acronym_case", policy.ConvertName("ACRONYMCase"));

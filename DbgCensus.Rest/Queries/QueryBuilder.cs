@@ -100,7 +100,7 @@ namespace DbgCensus.Rest.Queries
                 return builder.Uri;
 
             // Add distinct command
-            if (_distinctField.HasValue)
+            if (_distinctField.HasArgument)
             {
                 builder.Query = _distinctField;
                 return builder.Uri; // Querying doesn't work in tandem with the distinct command
@@ -113,7 +113,7 @@ namespace DbgCensus.Rest.Queries
             builder.Query += StringUtils.JoinWithoutNullOrEmptyValues('&', _hasFields, _showHideFields, _resolves, _joins, _sortKeys, _startIndex, _language, _exactMatchesFirst, _isCaseSensitive, _withNullFields, _withTimings, _retry);
 
             // Add relevant limit command
-            if (_limitPerDb.HasValue)
+            if (_limitPerDb.HasArgument)
                 builder.Query += '&' + _limitPerDb;
             else if (_limit is not null)
                 builder.Query += '&' + _limit;

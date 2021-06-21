@@ -6,7 +6,7 @@ using Xunit;
 
 namespace DbgCensus.Tests.Rest.Queries
 {
-    public class QueryFactoryTests
+    public class QueryBuilderFactoryTests
     {
         [Fact]
         public void TestGet()

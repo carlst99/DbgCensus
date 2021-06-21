@@ -16,13 +16,24 @@ namespace DbgCensus.Rest.Queries
         /// </summary>
         public char ComponentSeparator { get; }
 
+        /// <summary>
+        /// Initialises a new instance of the <see cref="QueryCommandFormatterBase"/> class.
+        /// </summary>
+        /// <param name="command">A Census command.</param>
+        /// <param name="componentSeparator">The value used to separate the command and its argument.</param>
         protected QueryCommandFormatterBase(string command, char componentSeparator)
         {
             Command = command;
             ComponentSeparator = componentSeparator;
         }
 
-        public static string VerifyAndToString(object value)
+        /// <summary>
+        /// Converts an object to a string, and verifies that the object's ToString() method has been properly implemented.
+        /// </summary>
+        /// <param name="value">The object to convert and verify.</param>
+        /// <returns>The object's string representation.</returns>
+        /// <exception cref="ArgumentException">Thrown if the object's ToString() method has not been properly implemented.</exception>
+        public static string ToStringVerified(object value)
         {
             string? typeName = value.GetType().FullName;
             string? valueString = value.ToString();
@@ -41,6 +52,10 @@ namespace DbgCensus.Rest.Queries
         public static implicit operator string(QueryCommandFormatterBase f) => f.ToString();
     }
 
+    /// <summary>
+    /// Allows a query command string, that accepts multiple values, to be built.
+    /// </summary>
+    /// <typeparam name="T">The type of value to be used as the argument.</typeparam>
     internal sealed class MultiQueryCommandFormatter<T> : QueryCommandFormatterBase
     {
         private readonly List<T> _arguments;
@@ -60,6 +75,12 @@ namespace DbgCensus.Rest.Queries
         /// </summary>
         public bool AnyArguments => _arguments.Count > 0;
 
+        /// <summary>
+        /// Initialises a new instance of the <see cref="MultiQueryCommandFormatter{T}"/> class.
+        /// </summary>
+        /// <param name="command">A Census command.</param>
+        /// <param name="componentSeparator">The value used to separate the command and its argument.</param>
+        /// <param name="argumentSeparator">The value used to separate each argument.</param>
         public MultiQueryCommandFormatter(string command, char componentSeparator, char argumentSeparator)
             : base(command, componentSeparator)
         {
@@ -86,6 +107,9 @@ namespace DbgCensus.Rest.Queries
         /// <param name="arguments">The argument/s to add.</param>
         public void AddArgumentRange(IEnumerable<T> arguments)
         {
+            if (arguments is null)
+                throw new ArgumentNullException(nameof(arguments));
+
             foreach (T argument in arguments)
             {
                 if (argument is null)
@@ -97,12 +121,14 @@ namespace DbgCensus.Rest.Queries
 
         /// <inheritdoc />
         public override string ToString() => AnyArguments
-#pragma warning disable CS8604 // Possible null reference argument. Each argument is null-checked when they are added, so it should be impossible for them to be null here.
-            ? base.ToString() + string.Join(ArgumentSeparator, Arguments.Select(a => VerifyAndToString(a)))
-#pragma warning restore CS8604 // Possible null reference argument.
+            ? base.ToString() + string.Join(ArgumentSeparator, Arguments.Select(a => ToStringVerified(a!)))
             : string.Empty;
     }
 
+    /// <summary>
+    /// Allows a query command string, that only accepts a single value, to be built.
+    /// </summary>
+    /// <typeparam name="T">The type of value to be used as the argument.</typeparam>
     internal sealed class SingleQueryCommandFormatter<T> : QueryCommandFormatterBase
     {
         /// <summary>
@@ -110,8 +136,16 @@ namespace DbgCensus.Rest.Queries
         /// </summary>
         public T? Argument { get; private set; }
 
-        public bool HasValue { get; private set; }
+        /// <summary>
+        /// Gets a value indicating if an argument has been set on this <see cref="SingleQueryCommandFormatter{T}"/> instance.
+        /// </summary>
+        public bool HasArgument { get; private set; }
 
+        /// <summary>
+        /// Initialises a new instance of the <see cref="SingleQueryCommandFormatter{T}"/> class.
+        /// </summary>
+        /// <param name="command">A Census command.</param>
+        /// <param name="componentSeparator">The value used to separate the command and its argument.</param>
         public SingleQueryCommandFormatter(string command, char componentSeparator)
             : base(command, componentSeparator)
         {
@@ -127,12 +161,12 @@ namespace DbgCensus.Rest.Queries
                 throw new ArgumentNullException(nameof(argument));
 
             Argument = argument;
-            HasValue = true;
+            HasArgument = true;
         }
 
         /// <inheritdoc />
         public override string ToString() => Argument is not null
-            ? base.ToString() + VerifyAndToString(Argument)
+            ? base.ToString() + ToStringVerified(Argument)
             : string.Empty;
     }
 }
