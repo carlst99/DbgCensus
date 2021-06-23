@@ -5,7 +5,7 @@ namespace DbgCensus.EventStream.Commands
     /// <summary>
     /// Clear subscriptions from the event stream.
     /// </summary>
-    public record ClearSubscribeCommand : CensusCommandBase
+    public record ClearSubscribeCommand : EventStreamCommandBase
     {
         /// <summary>
         /// Gets the characters to unsubscribe from.

@@ -3,7 +3,7 @@
     /// <summary>
     /// Defines a command sent to the Census event stream.
     /// </summary>
-    public interface ICensusCommand
+    public interface IEventStreamCommand
     {
         /// <summary>
         /// The action that the command will perform.

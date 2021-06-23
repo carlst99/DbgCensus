@@ -6,5 +6,5 @@
     /// <typeparam name="T">The type of payload.</typeparam>
     /// <param name="Payload">The payload to echo.</param>
     public record EchoCommand<T>(T Payload)
-        : CensusCommandBase("echo", "event");
+        : EventStreamCommandBase("echo", "event");
 }
