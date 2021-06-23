@@ -1,4 +1,4 @@
-﻿namespace DbgCensus.EventStream.Objects
+﻿namespace DbgCensus.EventStream.Abstractions.Objects
 {
     /// <summary>
     /// Defines an object received from the Census event stream.

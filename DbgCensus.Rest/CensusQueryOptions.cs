@@ -1,6 +1,6 @@
 ﻿namespace DbgCensus.Rest
 {
-    public record CensusQueryOptions
+    public class CensusQueryOptions
     {
         /// <summary>
         /// The root endpoint of the Census API.
