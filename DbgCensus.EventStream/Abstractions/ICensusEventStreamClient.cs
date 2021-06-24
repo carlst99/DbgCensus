@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace DbgCensus.EventStream.Abstractions
 {
+    /// <summary>
+    /// Allows connecting to, and receiving data from the Census event stream.
+    /// </summary>
     public interface ICensusEventStreamClient : IDisposable
     {
         /// <summary>

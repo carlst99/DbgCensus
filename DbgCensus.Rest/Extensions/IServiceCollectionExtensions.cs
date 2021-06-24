@@ -24,11 +24,11 @@ namespace DbgCensus.Rest.Extensions
         /// Adds required services for interacting with the Census REST API.
         /// </summary>
         /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
-        /// <param name="serializerOptions"></param>
+        /// <param name="jsonOptions">JSON options to conform to when deserialising Census data.</param>
         /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
         public static IServiceCollection AddCensusRestServices(
             this IServiceCollection serviceCollection,
-            Func<IServiceProvider, JsonSerializerOptions> serializerOptions)
+            Func<IServiceProvider, JsonSerializerOptions> jsonOptions)
         {
             serviceCollection.AddHttpClient<CensusRestClient>();
 
@@ -36,7 +36,7 @@ namespace DbgCensus.Rest.Extensions
                 new CensusRestClient(
                     s.GetRequiredService<ILogger<CensusRestClient>>(),
                     s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(CensusRestClient)),
-                    serializerOptions.Invoke(s)));
+                    jsonOptions.Invoke(s)));
 
             serviceCollection.TryAddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
 

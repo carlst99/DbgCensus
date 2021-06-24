@@ -3,6 +3,7 @@ using DbgCensus.Core.Json;
 using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.Commands;
 using Microsoft.Extensions.Logging;
+using Microsoft.IO;
 using System;
 using System.IO;
 using System.Net.WebSockets;
@@ -20,10 +21,13 @@ namespace DbgCensus.EventStream
         /// Gets the size of the buffer used to send and receive data in chunks.
         /// </summary>
         private const int SOCKET_BUFFER_SIZE = 8192;
+        private static readonly RecyclableMemoryStreamManager _memoryStreamPool = new();
 
         private readonly ILogger<CensusEventStreamClient> _logger;
         private readonly ClientWebSocket _webSocket;
         private readonly JsonSerializerOptions _jsonOptions;
+
+        private CancellationTokenSource _listenerCancellationToken;
 
         /// <inheritdoc />
         public bool IsDisposed { get; protected set; }
@@ -40,6 +44,7 @@ namespace DbgCensus.EventStream
             _logger = logger;
             _webSocket = new ClientWebSocket();
             _webSocket.Options.KeepAliveInterval = TimeSpan.FromSeconds(20);
+            _listenerCancellationToken = new CancellationTokenSource();
 
             _jsonOptions = new JsonSerializerOptions(jsonOptions)
             {
@@ -66,17 +71,26 @@ namespace DbgCensus.EventStream
         /// <inheritdoc />
         public virtual async Task StartAsync(CensusEventStreamOptions options, CancellationToken ct = default)
         {
+            if (_webSocket.State is WebSocketState.Open or WebSocketState.Connecting)
+                throw new InvalidOperationException("Client has already been started.");
+
             UriBuilder builder = new(options.RootEndpoint);
             builder.Path = $"streaming?environment={ options.Environment }&service-id=s:{ options.ServiceId }";
 
             await _webSocket.ConnectAsync(builder.Uri, ct).ConfigureAwait(false);
 
-            // Start listener
+            _listenerCancellationToken = new CancellationTokenSource();
+            ct.Register(() => _listenerCancellationToken.Cancel());
+            await StartListening(_listenerCancellationToken.Token).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
         public virtual async Task StopAsync()
         {
+            if (_listenerCancellationToken.IsCancellationRequested)
+                return;
+
+            _listenerCancellationToken.Cancel();
             await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -84,7 +98,7 @@ namespace DbgCensus.EventStream
         public virtual async Task SendCommandAsync<T>(T command, CancellationToken ct = default) where T : IEventStreamCommand
         {
             if (_webSocket.State != WebSocketState.Open)
-                throw new CensusException("Websocket connection is not open.");
+                throw new InvalidOperationException("Websocket connection is not open.");
 
             using MemoryStream stream = new();
             await JsonSerializer.SerializeAsync(stream, command, _jsonOptions, ct).ConfigureAwait(false);
@@ -112,6 +126,35 @@ namespace DbgCensus.EventStream
             GC.SuppressFinalize(this);
         }
 
+        protected virtual async Task StartListening(CancellationToken ct = default)
+        {
+            byte[] buffer = new byte[SOCKET_BUFFER_SIZE];
+
+            while (_webSocket.State == WebSocketState.Open)
+            {
+                using MemoryStream stream = _memoryStreamPool.GetStream();
+                WebSocketReceiveResult result;
+
+                do
+                {
+                    result = await _webSocket.ReceiveAsync(buffer, ct).ConfigureAwait(false);
+
+                    if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        await StopAsync().ConfigureAwait(false);
+                        // TODO: Notify of the closure
+                        return;
+                    }
+
+                    stream.Write(buffer, 0, result.Count);
+                } while (!result.EndOfMessage);
+
+                JsonDocument jsonResponse = await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false);
+
+                // TODO: Discover type, build responder system
+            }
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!IsDisposed)
@@ -119,10 +162,9 @@ namespace DbgCensus.EventStream
                 if (disposing)
                 {
                     _webSocket.Dispose();
+                    _listenerCancellationToken.Dispose();
                 }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
                 IsDisposed = true;
             }
         }
