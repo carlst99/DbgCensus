@@ -1,6 +1,5 @@
 ﻿using DbgCensus.EventStream.Abstractions.Commands;
 using System;
-using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,9 +16,9 @@ namespace DbgCensus.EventStream.Abstractions
         bool IsDisposed { get; }
 
         /// <summary>
-        /// Gets the state of the websocket.
+        /// Gets a value indicating if the client is running.
         /// </summary>
-        WebSocketState State { get; }
+        bool IsRunning { get; }
 
         Task StartAsync(CensusEventStreamOptions options, CancellationToken ct = default);
         Task StopAsync();

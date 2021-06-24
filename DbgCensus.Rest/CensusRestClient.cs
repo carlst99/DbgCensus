@@ -115,7 +115,7 @@ namespace DbgCensus.Rest
         /// <returns></returns>
         protected virtual async Task<T?> DeserializeResponseContentAsync<T>(HttpContent content, string? collectionName, CancellationToken ct = default)
         {
-            JsonDocument data = await JsonDocument.ParseAsync(await content.ReadAsStreamAsync(ct).ConfigureAwait(false), cancellationToken: ct).ConfigureAwait(false);
+            using JsonDocument data = await JsonDocument.ParseAsync(await content.ReadAsStreamAsync(ct).ConfigureAwait(false), cancellationToken: ct).ConfigureAwait(false);
 
             CheckForResponseError(data);
 

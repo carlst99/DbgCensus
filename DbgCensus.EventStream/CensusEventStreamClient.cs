@@ -21,19 +21,30 @@ namespace DbgCensus.EventStream
         /// Gets the size of the buffer used to send and receive data in chunks.
         /// </summary>
         private const int SOCKET_BUFFER_SIZE = 8192;
+
+        /// <summary>
+        /// The delay to use in between reconnection attempts.
+        /// </summary>
+        private const int RECONNECT_DELAY = 5000;
+
+        /// <summary>
+        /// The keep-alive interval for the websocket.
+        /// </summary>
+        private const int KEEPALIVE_INTERVAL_SEC = 20;
+
         private static readonly RecyclableMemoryStreamManager _memoryStreamPool = new();
 
         private readonly ILogger<CensusEventStreamClient> _logger;
         private readonly ClientWebSocket _webSocket;
         private readonly JsonSerializerOptions _jsonOptions;
 
-        private CancellationTokenSource _listenerCancellationToken;
+        private Uri _endpoint;
 
         /// <inheritdoc />
         public bool IsDisposed { get; protected set; }
 
         /// <inheritdoc />
-        public WebSocketState State => _webSocket.State;
+        public bool IsRunning { get; protected set; }
 
         public CensusEventStreamClient(ILogger<CensusEventStreamClient> logger)
             : this(logger, new JsonSerializerOptions())
@@ -43,8 +54,7 @@ namespace DbgCensus.EventStream
         {
             _logger = logger;
             _webSocket = new ClientWebSocket();
-            _webSocket.Options.KeepAliveInterval = TimeSpan.FromSeconds(20);
-            _listenerCancellationToken = new CancellationTokenSource();
+            _webSocket.Options.KeepAliveInterval = TimeSpan.FromSeconds(KEEPALIVE_INTERVAL_SEC);
 
             _jsonOptions = new JsonSerializerOptions(jsonOptions)
             {
@@ -71,26 +81,27 @@ namespace DbgCensus.EventStream
         /// <inheritdoc />
         public virtual async Task StartAsync(CensusEventStreamOptions options, CancellationToken ct = default)
         {
-            if (_webSocket.State is WebSocketState.Open or WebSocketState.Connecting)
+            if (IsRunning || _webSocket.State is WebSocketState.Open or WebSocketState.Connecting)
                 throw new InvalidOperationException("Client has already been started.");
+
+            IsRunning = true;
 
             UriBuilder builder = new(options.RootEndpoint);
             builder.Path = $"streaming?environment={ options.Environment }&service-id=s:{ options.ServiceId }";
+            _endpoint = builder.Uri;
 
-            await _webSocket.ConnectAsync(builder.Uri, ct).ConfigureAwait(false);
-
-            _listenerCancellationToken = new CancellationTokenSource();
-            ct.Register(() => _listenerCancellationToken.Cancel());
-            await StartListening(_listenerCancellationToken.Token).ConfigureAwait(false);
+            await _webSocket.ConnectAsync(_endpoint, ct).ConfigureAwait(false);
+            await StartListeningAsync(ct).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
         public virtual async Task StopAsync()
         {
-            if (_listenerCancellationToken.IsCancellationRequested)
+            if (!IsRunning)
                 return;
 
-            _listenerCancellationToken.Cancel();
+            IsRunning = false;
+
             await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -126,12 +137,21 @@ namespace DbgCensus.EventStream
             GC.SuppressFinalize(this);
         }
 
-        protected virtual async Task StartListening(CancellationToken ct = default)
+        protected virtual async Task StartListeningAsync(CancellationToken ct = default)
         {
             byte[] buffer = new byte[SOCKET_BUFFER_SIZE];
 
-            while (_webSocket.State == WebSocketState.Open)
+            while (IsRunning)
             {
+                if (ct.IsCancellationRequested)
+                    throw new TaskCanceledException();
+
+                if (_webSocket.State != WebSocketState.Open)
+                {
+                    await ReconnectAsync(ct).ConfigureAwait(false);
+                    continue;
+                }
+
                 using MemoryStream stream = _memoryStreamPool.GetStream();
                 WebSocketReceiveResult result;
 
@@ -141,18 +161,28 @@ namespace DbgCensus.EventStream
 
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        await StopAsync().ConfigureAwait(false);
-                        // TODO: Notify of the closure
-                        return;
+                        await ReconnectAsync(ct).ConfigureAwait(false);
+                        continue;
                     }
 
                     stream.Write(buffer, 0, result.Count);
                 } while (!result.EndOfMessage);
 
-                JsonDocument jsonResponse = await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false);
+                using JsonDocument jsonResponse = await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false);
 
                 // TODO: Discover type, build responder system
             }
+        }
+
+        protected virtual async Task ReconnectAsync(CancellationToken ct = default)
+        {
+            await StopAsync().ConfigureAwait(false);
+            _logger.LogError("Websocket was closed with status {code} and description {description}.", _webSocket.CloseStatus, _webSocket.CloseStatusDescription);
+
+            await Task.Delay(RECONNECT_DELAY, ct).ConfigureAwait(false);
+
+            _logger.LogInformation("Attempting to reconnect websocket.");
+            await _webSocket.ConnectAsync(_endpoint, ct).ConfigureAwait(false);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -162,7 +192,6 @@ namespace DbgCensus.EventStream
                 if (disposing)
                 {
                     _webSocket.Dispose();
-                    _listenerCancellationToken.Dispose();
                 }
 
                 IsDisposed = true;
