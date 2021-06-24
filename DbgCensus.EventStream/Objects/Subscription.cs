@@ -1,15 +1,12 @@
-﻿using System;
+﻿using DbgCensus.EventStream.Abstractions.Objects;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DbgCensus.EventStream.Objects
 {
     /// <summary>
     /// An object sent by the event stream to provide details of the current subscription.
     /// </summary>
-    public record Subscription
+    public record Subscription : IEventStreamObject
     {
         /// <summary>
         /// Gets the number of characters that have been subscribed to.

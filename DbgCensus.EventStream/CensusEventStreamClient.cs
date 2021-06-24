@@ -38,7 +38,7 @@ namespace DbgCensus.EventStream
         private readonly ClientWebSocket _webSocket;
         private readonly JsonSerializerOptions _jsonOptions;
 
-        private Uri _endpoint;
+        private Uri? _endpoint;
 
         /// <inheritdoc />
         public bool IsDisposed { get; protected set; }
@@ -182,7 +182,7 @@ namespace DbgCensus.EventStream
             await Task.Delay(RECONNECT_DELAY, ct).ConfigureAwait(false);
 
             _logger.LogInformation("Attempting to reconnect websocket.");
-            await _webSocket.ConnectAsync(_endpoint, ct).ConfigureAwait(false);
+            await _webSocket.ConnectAsync(_endpoint!, ct).ConfigureAwait(false);
         }
 
         protected virtual void Dispose(bool disposing)

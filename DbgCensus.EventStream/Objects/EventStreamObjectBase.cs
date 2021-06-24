@@ -3,7 +3,24 @@
 namespace DbgCensus.EventStream.Objects
 {
     /// <summary>
-    /// Provides a default implementation of <see cref="DbgCensus.EventStream.Objects.IEventStreamObject"/>
+    /// The base object of a majority of Census event stream objects.
     /// </summary>
-    public record EventStreamObjectBase(string Service, string Type) : IEventStreamObject;
+    public abstract record EventStreamObjectBase : IEventStreamObject
+    {
+        /// <summary>
+        /// The websocket service that this object has been received from.
+        /// </summary>
+        public string Service { get; init; }
+
+        /// <summary>
+        /// The type of object.
+        /// </summary>
+        public string Type { get; init; }
+
+        protected EventStreamObjectBase(string service, string type)
+        {
+            Service = service;
+            Type = type;
+        }
+    }
 }
