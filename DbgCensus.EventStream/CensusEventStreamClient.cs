@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace DbgCensus.EventStream
 {
     /// <inheritdoc cref="ICensusEventStreamClient"/>
-    public class CensusEventStreamClient : ICensusEventStreamClient
+    public abstract class CensusEventStreamClient : ICensusEventStreamClient
     {
         /// <summary>
         /// Gets the size of the buffer used to send and receive data in chunks.
@@ -46,14 +46,14 @@ namespace DbgCensus.EventStream
         /// <inheritdoc />
         public bool IsRunning { get; protected set; }
 
-        public CensusEventStreamClient(ILogger<CensusEventStreamClient> logger)
-            : this(logger, new JsonSerializerOptions())
+        protected CensusEventStreamClient(ILogger<CensusEventStreamClient> logger, ClientWebSocket webSocket)
+            : this(logger, webSocket, new JsonSerializerOptions())
         { }
 
-        public CensusEventStreamClient(ILogger<CensusEventStreamClient> logger, JsonSerializerOptions jsonOptions)
+        protected CensusEventStreamClient(ILogger<CensusEventStreamClient> logger, ClientWebSocket webSocket, JsonSerializerOptions jsonOptions)
         {
             _logger = logger;
-            _webSocket = new ClientWebSocket();
+            _webSocket = webSocket;
             _webSocket.Options.KeepAliveInterval = TimeSpan.FromSeconds(KEEPALIVE_INTERVAL_SEC);
 
             _jsonOptions = new JsonSerializerOptions(jsonOptions)
@@ -168,9 +168,7 @@ namespace DbgCensus.EventStream
                     stream.Write(buffer, 0, result.Count);
                 } while (!result.EndOfMessage);
 
-                using JsonDocument jsonResponse = await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false);
-
-                // TODO: Discover type, build responder system
+                await HandleEvent(stream, ct).ConfigureAwait(false);
             }
         }
 
@@ -184,6 +182,8 @@ namespace DbgCensus.EventStream
             _logger.LogInformation("Attempting to reconnect websocket.");
             await _webSocket.ConnectAsync(_endpoint!, ct).ConfigureAwait(false);
         }
+
+        protected abstract Task HandleEvent(MemoryStream eventStream, CancellationToken ct = default);
 
         protected virtual void Dispose(bool disposing)
         {

@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Net.WebSockets;
 using System.Text.Json;
 
 namespace DbgCensus.EventStream.Extensions
@@ -27,9 +28,12 @@ namespace DbgCensus.EventStream.Extensions
             this IServiceCollection serviceCollection,
             Func<IServiceProvider, JsonSerializerOptions> jsonOptions)
         {
+            serviceCollection.TryAddTransient<ClientWebSocket>();
+
             serviceCollection.TryAddTransient<ICensusEventStreamClient>((s) =>
-                new CensusEventStreamClient(
-                    s.GetRequiredService<ILogger<CensusEventStreamClient>>(),
+                new EventHandlingEventStreamClient(
+                    s.GetRequiredService<ILogger<EventHandlingEventStreamClient>>(),
+                    s.GetRequiredService<ClientWebSocket>(),
                     jsonOptions.Invoke(s)));
 
             return serviceCollection;
