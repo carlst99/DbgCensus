@@ -1,5 +1,4 @@
-﻿using DbgCensus.Core.Exceptions;
-using DbgCensus.Core.Json;
+﻿using DbgCensus.Core.Json;
 using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.Commands;
 using Microsoft.Extensions.Logging;
@@ -20,35 +19,31 @@ namespace DbgCensus.EventStream
         /// <summary>
         /// Gets the size of the buffer used to send and receive data in chunks.
         /// </summary>
-        private const int SOCKET_BUFFER_SIZE = 8192;
+        protected const int SOCKET_BUFFER_SIZE = 8192;
 
         /// <summary>
         /// The delay to use in between reconnection attempts.
         /// </summary>
-        private const int RECONNECT_DELAY = 5000;
+        protected const int RECONNECT_DELAY = 5000;
 
         /// <summary>
         /// The keep-alive interval for the websocket.
         /// </summary>
-        private const int KEEPALIVE_INTERVAL_SEC = 20;
+        protected const int KEEPALIVE_INTERVAL_SEC = 20;
 
-        private static readonly RecyclableMemoryStreamManager _memoryStreamPool = new();
+        protected static readonly RecyclableMemoryStreamManager _memoryStreamPool = new();
 
-        private readonly ILogger<CensusEventStreamClient> _logger;
-        private readonly ClientWebSocket _webSocket;
-        private readonly JsonSerializerOptions _jsonOptions;
+        protected readonly ILogger<CensusEventStreamClient> _logger;
+        protected readonly ClientWebSocket _webSocket;
+        protected readonly JsonSerializerOptions _jsonOptions;
 
-        private Uri? _endpoint;
+        protected Uri? _endpoint;
 
         /// <inheritdoc />
         public bool IsDisposed { get; protected set; }
 
         /// <inheritdoc />
         public bool IsRunning { get; protected set; }
-
-        protected CensusEventStreamClient(ILogger<CensusEventStreamClient> logger, ClientWebSocket webSocket)
-            : this(logger, webSocket, new JsonSerializerOptions())
-        { }
 
         protected CensusEventStreamClient(ILogger<CensusEventStreamClient> logger, ClientWebSocket webSocket, JsonSerializerOptions jsonOptions)
         {

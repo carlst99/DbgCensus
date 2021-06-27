@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DbgCensus.EventStream.EventHandling
+namespace DbgCensus.EventStream.Abstractions.EventHandling
 {
     public interface ICensusEventHandler
     {
