@@ -1,6 +1,8 @@
 ﻿using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.EventHandling;
+using DbgCensus.EventStream.Abstractions.Objects;
 using DbgCensus.EventStream.EventHandling;
+using DbgCensus.EventStream.Objects.Event;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -36,13 +38,17 @@ namespace DbgCensus.EventStream.Extensions
             serviceCollection.TryAddTransient<ClientWebSocket>();
 
             serviceCollection.TryAddSingleton<IEventHandlerRepository>(s => s.GetRequiredService<IOptions<EventHandlerRepository>>().Value);
+            serviceCollection.TryAddSingleton<IEventStreamObjectTypeRepository>(s => s.GetRequiredService<IOptions<EventStreamObjectTypeRepository>>().Value);
+
+            serviceCollection.AddEventStreamObject<Heartbeat>("event", "heartbeat");
 
             serviceCollection.TryAddTransient<ICensusEventStreamClient>((s) =>
                 new EventHandlingEventStreamClient(
                     s.GetRequiredService<ILogger<EventHandlingEventStreamClient>>(),
                     s.GetRequiredService<ClientWebSocket>(),
                     jsonOptions.Invoke(s),
-                    s.GetRequiredService<IEventHandlerRepository>()));
+                    s.GetRequiredService<IEventHandlerRepository>(),
+                    s.GetRequiredService<IEventStreamObjectTypeRepository>()));
 
             return serviceCollection;
         }
@@ -53,7 +59,7 @@ namespace DbgCensus.EventStream.Extensions
         /// <param name="serviceCollection">The service collection.</param>
         /// <typeparam name="THandler">The responder type.</typeparam>
         /// <returns>The <see cref="IServiceCollection"/> instance, so that calls may be chained.</returns>
-        public static IServiceCollection AddResponder<THandler>(this IServiceCollection serviceCollection) where THandler : ICensusEventHandler
+        public static IServiceCollection AddEventHandler<THandler>(this IServiceCollection serviceCollection) where THandler : ICensusEventHandler
         {
             Type handlerType = typeof(THandler);
 
@@ -67,6 +73,21 @@ namespace DbgCensus.EventStream.Extensions
             serviceCollection.AddScoped(handlerType);
 
             serviceCollection.Configure<EventHandlerRepository>(e => e.RegisterHandler<THandler>());
+
+            return serviceCollection;
+        }
+
+        /// <summary>
+        /// Registers an <see cref="IEventStreamObject"/>.
+        /// </summary>
+        /// <param name="serviceCollection">The service collection.</param>
+        /// <param name="censusService">The service that the object is received from.</param>
+        /// <param name="censusType">The type that the object represents.</param>
+        /// <typeparam name="TEvent">The responder type.</typeparam>
+        /// <returns>The <see cref="IServiceCollection"/> instance, so that calls may be chained.</returns>
+        public static IServiceCollection AddEventStreamObject<TEvent>(this IServiceCollection serviceCollection, string censusService, string censusType) where TEvent : IEventStreamObject
+        {
+            serviceCollection.Configure<EventStreamObjectTypeRepository>(e => e.TryRegister<TEvent>(censusService, censusType));
 
             return serviceCollection;
         }

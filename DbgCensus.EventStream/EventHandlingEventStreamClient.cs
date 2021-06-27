@@ -18,6 +18,7 @@ namespace DbgCensus.EventStream
     public sealed class EventHandlingEventStreamClient : CensusEventStreamClient
     {
         private readonly IEventHandlerRepository _eventHandlerRepository;
+        private readonly IEventStreamObjectTypeRepository _eventStreamObjectTypeRepository;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="EventHandlingEventStreamClient"/> class.
@@ -29,10 +30,12 @@ namespace DbgCensus.EventStream
             ILogger<EventHandlingEventStreamClient> logger,
             ClientWebSocket webSocket,
             JsonSerializerOptions jsonOptions,
-            IEventHandlerRepository eventHandlerRepository)
+            IEventHandlerRepository eventHandlerRepository,
+            IEventStreamObjectTypeRepository eventStreamObjectTypeRepository)
             : base(logger, webSocket, jsonOptions)
         {
             _eventHandlerRepository = eventHandlerRepository;
+            _eventStreamObjectTypeRepository = eventStreamObjectTypeRepository;
             // TODO: Investigate period subscription refresh
             // TODO: Investigate CensusEventStreamClientFactory, similar to HttpClientFactory. So specific instances can be retrieved.
         }
@@ -40,18 +43,6 @@ namespace DbgCensus.EventStream
         public override async Task StartAsync(CensusEventStreamOptions options, CancellationToken ct = default)
         {
             await base.StartAsync(options, ct).ConfigureAwait(false);
-
-            Attribute[] attrs = Attribute.GetCustomAttributes(Assembly.GetExecutingAssembly(), typeof(EventStreamObjectAttribute));
-
-            foreach (Attribute attr in attrs)
-            {
-                attr.
-            }
-            IEnumerable<EventStreamObjectAttribute> attributes = Assembly.GetExecutingAssembly().GetCustomAttributes<EventStreamObjectAttribute>();
-
-            foreach (EventStreamObjectAttribute attr in attributes)
-            {
-            }
         }
 
         protected override async Task HandleEvent(MemoryStream eventStream, CancellationToken ct = default)
@@ -59,18 +50,6 @@ namespace DbgCensus.EventStream
             using JsonDocument jsonResponse = await JsonDocument.ParseAsync(eventStream, cancellationToken: ct).ConfigureAwait(false);
 
             // TODO: Discover type, build responder system
-        }
-
-        private IEnumerable<Tuple<EventStreamObjectAttribute, Type>> GetEventStreamObjectTypes()
-        {
-            string? assemblyOfAttribute = typeof(EventStreamObjectAttribute).Assembly.GetName().Name;
-            if (string.IsNullOrEmpty(assemblyOfAttribute))
-                return Array.Empty<Tuple<EventStreamObjectAttribute, Type>>();
-
-            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                if (assembly.GetName().Name != assemblyOfAttribute || !assembly.GetR)
-            }
         }
 
         private async Task DispatchEventAsync<T>(T eventObject, CancellationToken ct = default) where T : IEventStreamObject
