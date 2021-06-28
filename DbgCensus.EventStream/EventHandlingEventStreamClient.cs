@@ -1,6 +1,5 @@
 ﻿using DbgCensus.EventStream.Abstractions.EventHandling;
 using DbgCensus.EventStream.Abstractions.Objects;
-using DbgCensus.EventStream.EventHandling;
 using DbgCensus.EventStream.Objects;
 using DbgCensus.EventStream.Objects.Event;
 using Microsoft.Extensions.DependencyInjection;
@@ -109,6 +108,8 @@ namespace DbgCensus.EventStream
                     BeginEventDispatch(heartbeat, ct);
                 }
             }
+
+            eventStream.Dispose();
 
             // BIG DUM DUM
             // RECEIVED: {"payload":{"character_id":"5428011263437685377","event_name":"PlayerLogout","timestamp":"1624788175","world_id":"1"},"service":"event","type":"serviceMessage"}

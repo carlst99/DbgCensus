@@ -82,10 +82,13 @@ namespace DbgCensus.EventStream
             IsRunning = true;
 
             UriBuilder builder = new(options.RootEndpoint);
-            builder.Path = $"streaming?environment={ options.Environment }&service-id=s:{ options.ServiceId }";
+            builder.Path = "streaming";
+            builder.Query = $"environment={ options.Environment }&service-id=s:{ options.ServiceId }";
             _endpoint = builder.Uri;
 
             await _webSocket.ConnectAsync(_endpoint, ct).ConfigureAwait(false);
+
+            _logger.LogInformation("Connected to event stream websocket. Listening for events...");
             await StartListeningAsync(ct).ConfigureAwait(false);
         }
 
@@ -147,7 +150,7 @@ namespace DbgCensus.EventStream
                     continue;
                 }
 
-                using MemoryStream stream = _memoryStreamPool.GetStream();
+                MemoryStream stream = _memoryStreamPool.GetStream();
                 WebSocketReceiveResult result;
 
                 do
@@ -163,6 +166,7 @@ namespace DbgCensus.EventStream
                     stream.Write(buffer, 0, result.Count);
                 } while (!result.EndOfMessage);
 
+                stream.Seek(0, SeekOrigin.Begin);
                 await HandleEvent(stream, ct).ConfigureAwait(false);
             }
         }
@@ -170,7 +174,7 @@ namespace DbgCensus.EventStream
         protected virtual async Task ReconnectAsync(CancellationToken ct = default)
         {
             await StopAsync().ConfigureAwait(false);
-            _logger.LogError("Websocket was closed with status {code} and description {description}.", _webSocket.CloseStatus, _webSocket.CloseStatusDescription);
+            _logger.LogWarning("Websocket was closed with status {code} and description {description}.", _webSocket.CloseStatus, _webSocket.CloseStatusDescription);
 
             await Task.Delay(RECONNECT_DELAY, ct).ConfigureAwait(false);
 

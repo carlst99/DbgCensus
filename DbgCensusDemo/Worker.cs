@@ -3,6 +3,7 @@ using DbgCensus.EventStream.Abstractions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,7 +25,14 @@ namespace DbgCensusDemo
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Starting event stream client");
-            await _eventStreamClient.StartAsync(_eventStreamOptions, stoppingToken).ConfigureAwait(false);
+            try
+            {
+                await _eventStreamClient.StartAsync(_eventStreamOptions, stoppingToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occured in the event stream client");
+            }
         }
     }
 }

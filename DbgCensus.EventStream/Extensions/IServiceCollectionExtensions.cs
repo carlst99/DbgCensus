@@ -1,6 +1,5 @@
 ﻿using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.EventHandling;
-using DbgCensus.EventStream.Abstractions.Objects;
 using DbgCensus.EventStream.EventHandling;
 using DbgCensus.EventStream.Objects.Event;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,15 +85,14 @@ namespace DbgCensus.EventStream.Extensions
         /// <typeparam name="THandler">The handler type.</typeparam>
         /// <typeparam name="TPayload">The type of payload that the <see cref="ServiceMessage{T}"/> carries.</typeparam>
         /// <param name="serviceCollection">The service collection.</param>
-        /// <param name="censusService">The service that the object is received from.</param>
-        /// <param name="censusType">The type that the object represents.</param>
+        /// <param name="eventName">The name of the event that this payload is for.</param>
         /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
-        public static IServiceCollection AddEventHandler<THandler, TPayload>(this IServiceCollection serviceCollection, string censusService, string censusType)
+        public static IServiceCollection AddEventHandler<THandler, TPayload>(this IServiceCollection serviceCollection, string eventName)
             where THandler : ICensusEventHandler<ServiceMessage<TPayload>>
         {
             return serviceCollection
                 .AddEventHandler<THandler>()
-                .Configure<ServiceMessageTypeRepository>(s => s.TryRegister<ServiceMessage<TPayload>, TPayload>(censusService, censusType));
+                .Configure<ServiceMessageTypeRepository>(s => s.TryRegister<ServiceMessage<TPayload>, TPayload>(eventName));
         }
 
         /// <summary>
@@ -102,12 +100,11 @@ namespace DbgCensus.EventStream.Extensions
         /// </summary>
         /// <typeparam name="TPayload">The type of the payload.</typeparam>
         /// <param name="serviceCollection">The service collection.</param>
-        /// <param name="censusService">The service that the object is received from.</param>
-        /// <param name="censusType">The type that the object represents.</param>
+        /// <param name="eventName">The name of the event that this payload is for.</param>
         /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
         [Obsolete("Use an overload " + nameof(AddEventHandler) + " instead.")]
-        public static IServiceCollection AddServiceMessagePayload<TPayload>(this IServiceCollection serviceCollection, string censusService, string censusType)
-            => serviceCollection.Configure<ServiceMessageTypeRepository>(s => s.TryRegister<ServiceMessage<TPayload>, TPayload>(censusService, censusType));
+        public static IServiceCollection AddServiceMessagePayload<TPayload>(this IServiceCollection serviceCollection, string eventName)
+            => serviceCollection.Configure<ServiceMessageTypeRepository>(s => s.TryRegister<ServiceMessage<TPayload>, TPayload>(eventName));
 
         /// <summary>
         /// Adds a <see cref="ICensusEventHandler"/> for a <see cref="ServiceMessage{T}"/> to the service collection.

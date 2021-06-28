@@ -1,5 +1,4 @@
-﻿using DbgCensus.EventStream.Abstractions.Objects;
-using DbgCensus.EventStream.Objects.Event;
+﻿using DbgCensus.EventStream.Objects.Event;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
@@ -13,19 +12,17 @@ namespace DbgCensus.EventStream.Abstractions.EventHandling
         /// <summary>
         /// Attempts to get an <see cref="ServiceMessage{T}"/> type.
         /// </summary>
-        /// <param name="censusService">The service that the object is received from.</param>
-        /// <param name="censusType">The type that the object represents.</param>
+        /// <param name="eventName">The name of the event that this service message contains a payload for.</param>
         /// <param name="type">The retrieved object type.</param>
         /// <returns>A value indicating if the object type was found in the repository.</returns>
-        bool TryGet(string censusService, string censusType, [NotNullWhen(true)] out Type? type);
+        bool TryGet(string eventName, [NotNullWhen(true)] out Type? type);
 
         /// <summary>
-        /// Registers an <see cref="IEventStreamObject"/> to the census type that it represents.
+        /// Registers a <see cref="ServiceMessage{T}"/> to the census event type that it carries a payload for.
         /// </summary>
         /// <typeparam name="TPayload">The type of the payload.</typeparam>
-        /// <param name="censusService">The service that the object is received from.</param>
-        /// <param name="censusType">The type that the object represents.</param>
+        /// <param name="eventName">The name of the event that this payload is for.</param>
         /// <returns>A value indicating if the service message type was added to the repository. If false, the type has already been registered.</returns>
-        bool TryRegister<TObject, TPayload>(string censusService, string censusType) where TObject : ServiceMessage<TPayload>;
+        bool TryRegister<TObject, TPayload>(string eventName) where TObject : ServiceMessage<TPayload>;
     }
 }

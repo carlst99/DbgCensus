@@ -9,35 +9,32 @@ namespace DbgCensus.EventStream.EventHandling
     /// <inheritdoc cref="IServiceMessageTypeRepository"/>
     public class ServiceMessageTypeRepository : IServiceMessageTypeRepository
     {
-        private readonly Dictionary<Tuple<string, string>, Type> _repository;
+        private readonly Dictionary<string, Type> _repository;
 
         public ServiceMessageTypeRepository()
         {
-            _repository = new Dictionary<Tuple<string, string>, Type>();
+            _repository = new Dictionary<string, Type>();
         }
 
         /// <inheritdoc />
-        public bool TryGet(string censusService, string censusType, [NotNullWhen(true)] out Type? type)
+        public bool TryGet(string eventName, [NotNullWhen(true)] out Type? type)
         {
             type = null;
-            Tuple<string, string> censusTypeData = new(censusService, censusType);
 
-            if (!_repository.ContainsKey(censusTypeData))
+            if (!_repository.ContainsKey(eventName))
                 return false;
 
-            type = _repository[censusTypeData];
+            type = _repository[eventName];
             return true;
         }
 
         /// <inheritdoc />
-        public bool TryRegister<TObject, TPayload>(string censusService, string censusType) where TObject : ServiceMessage<TPayload>
+        public bool TryRegister<TObject, TPayload>(string eventName) where TObject : ServiceMessage<TPayload>
         {
-            Tuple<string, string> censusTypeData = new(censusService, censusType);
-
-            if (_repository.ContainsKey(censusTypeData))
+            if (_repository.ContainsKey(eventName))
                 return false;
 
-            _repository.Add(censusTypeData, typeof(TObject));
+            _repository.Add(eventName, typeof(TObject));
             return true;
         }
     }
