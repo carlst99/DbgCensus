@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DbgCensusDemo.Objects.EventStream
+namespace EventStreamSample.Objects.EventStream
 {
     public record PlayerLogin(ulong CharacterId, DateTimeOffset Timestamp, World WorldId);
 }

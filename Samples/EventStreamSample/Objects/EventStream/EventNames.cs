@@ -1,4 +1,4 @@
-﻿namespace DbgCensusDemo.Objects.EventStream
+﻿namespace EventStreamSample.Objects.EventStream
 {
     public static class EventNames
     {

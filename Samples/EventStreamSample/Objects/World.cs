@@ -1,4 +1,4 @@
-﻿namespace DbgCensusDemo.Objects
+﻿namespace EventStreamSample.Objects
 {
     public enum World
     {

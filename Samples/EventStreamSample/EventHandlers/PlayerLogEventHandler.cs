@@ -1,11 +1,11 @@
 ﻿using DbgCensus.EventStream.Abstractions.EventHandling;
 using DbgCensus.EventStream.Objects.Event;
-using DbgCensusDemo.Objects.EventStream;
+using EventStreamSample.Objects.EventStream;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DbgCensusDemo.EventHandlers
+namespace EventStreamSample.EventHandlers
 {
     public class PlayerLogEventHandler : ICensusEventHandler<ServiceMessage<PlayerLogin>>, ICensusEventHandler<ServiceMessage<PlayerLogout>>
     {

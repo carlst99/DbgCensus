@@ -1,13 +1,13 @@
 using DbgCensus.EventStream;
 using DbgCensus.EventStream.Extensions;
-using DbgCensusDemo.EventHandlers;
-using DbgCensusDemo.Objects.EventStream;
+using EventStreamSample.EventHandlers;
+using EventStreamSample.Objects.EventStream;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 
-namespace DbgCensusDemo
+namespace EventStreamSample
 {
     public static class Program
     {

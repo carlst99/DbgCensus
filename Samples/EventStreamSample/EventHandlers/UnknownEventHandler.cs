@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DbgCensusDemo.EventHandlers
+namespace EventStreamSample.EventHandlers
 {
     public class UnknownEventHandler : ICensusEventHandler<UnknownEvent>
     {

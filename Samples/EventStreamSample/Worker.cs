@@ -7,7 +7,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DbgCensusDemo
+namespace EventStreamSample
 {
     public class Worker : BackgroundService
     {
