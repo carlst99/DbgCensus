@@ -1,11 +1,13 @@
 ﻿using DbgCensus.Core.Json;
 using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.Commands;
+using DbgCensus.EventStream.Commands;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using System;
 using System.IO;
 using System.Net.WebSockets;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -35,7 +37,8 @@ namespace DbgCensus.EventStream
 
         protected readonly ILogger<CensusEventStreamClient> _logger;
         protected readonly ClientWebSocket _webSocket;
-        protected readonly JsonSerializerOptions _jsonOptions;
+        protected readonly JsonSerializerOptions _jsonDeserializerOptions;
+        protected readonly JsonSerializerOptions _jsonSerializerOptions;
 
         protected Uri? _endpoint;
 
@@ -45,32 +48,40 @@ namespace DbgCensus.EventStream
         /// <inheritdoc />
         public bool IsRunning { get; protected set; }
 
-        protected CensusEventStreamClient(ILogger<CensusEventStreamClient> logger, ClientWebSocket webSocket, JsonSerializerOptions jsonOptions)
+        protected CensusEventStreamClient(
+            ILogger<CensusEventStreamClient> logger,
+            ClientWebSocket webSocket,
+            JsonSerializerOptions deserializerOptions,
+            JsonSerializerOptions serializerOptions)
         {
             _logger = logger;
             _webSocket = webSocket;
             _webSocket.Options.KeepAliveInterval = TimeSpan.FromSeconds(KEEPALIVE_INTERVAL_SEC);
 
-            _jsonOptions = new JsonSerializerOptions(jsonOptions)
+            _jsonDeserializerOptions = new JsonSerializerOptions(deserializerOptions)
             {
                 NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals
             };
 
-            if (_jsonOptions.PropertyNamingPolicy is null)
-                _jsonOptions.PropertyNamingPolicy = new SnakeCaseJsonNamingPolicy();
+            if (_jsonDeserializerOptions.PropertyNamingPolicy is null)
+                _jsonDeserializerOptions.PropertyNamingPolicy = new SnakeCaseJsonNamingPolicy();
 
-            _jsonOptions.Converters.Add(new BooleanJsonConverter());
+            _jsonDeserializerOptions.Converters.Add(new BooleanJsonConverter());
+            _jsonDeserializerOptions.Converters.Add(new JsonStringEnumConverter());
 
-            _jsonOptions.Converters.Add(new DateTimeJsonConverter());
-            _jsonOptions.Converters.Add(new DateTimeOffsetJsonConverter());
+            _jsonDeserializerOptions.Converters.Add(new DateTimeJsonConverter());
+            _jsonDeserializerOptions.Converters.Add(new DateTimeOffsetJsonConverter());
 
-            _jsonOptions.Converters.Add(new Int16JsonConverter());
-            _jsonOptions.Converters.Add(new Int32JsonConverter());
-            _jsonOptions.Converters.Add(new Int64JsonConverter());
+            _jsonDeserializerOptions.Converters.Add(new Int16JsonConverter());
+            _jsonDeserializerOptions.Converters.Add(new Int32JsonConverter());
+            _jsonDeserializerOptions.Converters.Add(new Int64JsonConverter());
+            _jsonDeserializerOptions.Converters.Add(new UInt16JsonConverter());
+            _jsonDeserializerOptions.Converters.Add(new UInt32JsonConverter());
+            _jsonDeserializerOptions.Converters.Add(new UInt64JsonConverter());
 
-            _jsonOptions.Converters.Add(new UInt16JsonConverter());
-            _jsonOptions.Converters.Add(new UInt32JsonConverter());
-            _jsonOptions.Converters.Add(new UInt64JsonConverter());
+            _jsonSerializerOptions = new JsonSerializerOptions(serializerOptions);
+            if (_jsonSerializerOptions.PropertyNamingPolicy is null)
+                _jsonSerializerOptions.PropertyNamingPolicy = new CamelCaseJsonNamingPolicy();
         }
 
         /// <inheritdoc />
@@ -110,10 +121,12 @@ namespace DbgCensus.EventStream
                 throw new InvalidOperationException("Websocket connection is not open.");
 
             using MemoryStream stream = new();
-            await JsonSerializer.SerializeAsync(stream, command, _jsonOptions, ct).ConfigureAwait(false);
+            await JsonSerializer.SerializeAsync(stream, command, _jsonSerializerOptions, ct).ConfigureAwait(false);
 
             if (!stream.TryGetBuffer(out ArraySegment<byte> serialisedBuffer))
                 throw new JsonException("Could not serialise command.");
+
+            _logger.LogInformation("Sending census command: {command}", Encoding.UTF8.GetString(serialisedBuffer));
 
             int pageCount = (int)Math.Ceiling((double)serialisedBuffer.Count / SOCKET_BUFFER_SIZE);
 

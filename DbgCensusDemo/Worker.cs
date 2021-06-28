@@ -34,5 +34,11 @@ namespace DbgCensusDemo
                 _logger.LogError(ex, "An error occured in the event stream client");
             }
         }
+
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            await _eventStreamClient.StopAsync().ConfigureAwait(false);
+            await base.StopAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
 }

@@ -30,15 +30,16 @@ namespace DbgCensus.EventStream
         /// </summary>
         /// <param name="logger">The logging interface to use.</param>
         /// <param name="webSocket">The websocket to use.</param>
-        /// <param name="jsonOptions">The JSON serialization options to use.</param>
+        /// <param name="deserializerOptions">The JSON serialization options to use.</param>
         public EventHandlingEventStreamClient(
             ILogger<EventHandlingEventStreamClient> logger,
             ClientWebSocket webSocket,
-            JsonSerializerOptions jsonOptions,
+            JsonSerializerOptions deserializerOptions,
+            JsonSerializerOptions serializerOptions,
             IEventHandlerRepository eventHandlerRepository,
             IServiceMessageTypeRepository eventStreamObjectTypeRepository,
             IServiceProvider services)
-            : base(logger, webSocket, jsonOptions)
+            : base(logger, webSocket, deserializerOptions, serializerOptions)
         {
             _eventHandlerRepository = eventHandlerRepository;
             _serviceMessageObjectRepository = eventStreamObjectTypeRepository;
@@ -47,6 +48,9 @@ namespace DbgCensus.EventStream
             _dispatchedEventQueue = new ConcurrentQueue<Task>();
         }
 
+        /// <summary>
+        /// <inheritdoc />Furthermore, finalises any event handlers that have not yet finished processing.
+        /// </summary>
         /// <inheritdoc />
         public override async Task StopAsync()
         {
@@ -75,7 +79,7 @@ namespace DbgCensus.EventStream
 
                 if (censusService is null || censusType is null)
                 {
-                    _logger.LogWarning("An unknown event has been received from service {service} of type {type}.", censusService, censusType);
+                    _logger.LogWarning("An event with an unspecified service and/or type has been received. An UnknownEvent object will be dispatched.");
                     BeginEventDispatch(new UnknownEvent(jsonResponse.RootElement.GetRawText()), ct);
                     return;
                 }
@@ -99,6 +103,11 @@ namespace DbgCensus.EventStream
                     // Get 
                 }
             }
+            else
+            {
+                _logger.LogWarning("An unknown event was received from the Census event stream. An UnknownEvent object will be dispatched.");
+                BeginEventDispatch(new UnknownEvent(jsonResponse.RootElement.GetRawText()), ct);
+            }
 
             eventStream.Dispose();
         }
@@ -113,7 +122,7 @@ namespace DbgCensus.EventStream
             // Attempt to get the payload element
             if (!rootElement.TryGetProperty("payload", out JsonElement payloadElement))
             {
-                _logger.LogWarning("A service message was received that did not contain a payload. An unknown event has been dispatched.");
+                _logger.LogWarning("A service message was received that did not contain a payload. An unknown event will be dispatched.");
                 BeginEventDispatch(new UnknownEvent(rootElement.GetRawText()), ct);
                 return;
             }
@@ -121,7 +130,7 @@ namespace DbgCensus.EventStream
             // Attempt to get the event name element
             if (!payloadElement.TryGetProperty("event_name", out JsonElement eventNameElement))
             {
-                _logger.LogWarning("A service message was received that did not contain a valid payload. An unknown event has been dispatched.");
+                _logger.LogWarning("A service message was received that did not contain a valid payload. An unknown event will be dispatched.");
                 BeginEventDispatch(new UnknownEvent(rootElement.GetRawText()), ct);
                 return;
             }
@@ -130,7 +139,7 @@ namespace DbgCensus.EventStream
             string? eventName = eventNameElement.GetString();
             if (eventName is null)
             {
-                _logger.LogWarning("An event with no name was received. An unknown event has been dispatched.");
+                _logger.LogWarning("An event with no name was received. An unknown event will be dispatched.");
                 BeginEventDispatch(new UnknownEvent(rootElement.GetRawText()), ct);
                 return;
             }
@@ -142,14 +151,21 @@ namespace DbgCensus.EventStream
                 return;
             }
 
-            // Deserialise to the service message object
-            object? serviceMessageObject = JsonSerializer.Deserialize(rootElement.GetRawText(), serviceMessageType, _jsonOptions);
-            if (serviceMessageObject is null)
+            // Deserialise to the service message object and dispatch an event
+            try
             {
-                _logger.LogError("Could not deserialise websocket event to the type {type}. Raw response: {raw}", serviceMessageType, rootElement.GetRawText());
-                return;
+                object? serviceMessageObject = JsonSerializer.Deserialize(rootElement.GetRawText(), serviceMessageType, _jsonDeserializerOptions);
+                if (serviceMessageObject is null)
+                {
+                    _logger.LogError("Could not deserialise websocket event to the type {type}. Raw response: {raw}", serviceMessageType, rootElement.GetRawText());
+                    return;
+                }
+                BeginEventDispatch(serviceMessageType, serviceMessageObject, ct);
             }
-            BeginEventDispatch(serviceMessageType, serviceMessageObject, ct);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to dispatch event");
+            }
         }
 
         /// <summary>

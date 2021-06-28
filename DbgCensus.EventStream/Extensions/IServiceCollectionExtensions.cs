@@ -22,17 +22,18 @@ namespace DbgCensus.EventStream.Extensions
         /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
         /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
         public static IServiceCollection AddCensusEventStreamServices(this IServiceCollection serviceCollection)
-            => AddCensusEventStreamServices(serviceCollection, (_) => new JsonSerializerOptions());
+            => AddCensusEventStreamServices(serviceCollection, (_) => new JsonSerializerOptions(), (_) => new JsonSerializerOptions());
 
         /// <summary>
         /// Adds required services for interacting with the Census REST API.
         /// </summary>
         /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
-        /// <param name="jsonOptions">JSON options to conform to.</param>
+        /// <param name="deserializerOptions">JSON options to conform to.</param>
         /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
         public static IServiceCollection AddCensusEventStreamServices(
             this IServiceCollection serviceCollection,
-            Func<IServiceProvider, JsonSerializerOptions> jsonOptions)
+            Func<IServiceProvider, JsonSerializerOptions> deserializerOptions,
+            Func<IServiceProvider, JsonSerializerOptions> serializerOptions)
         {
             serviceCollection.TryAddTransient<ClientWebSocket>();
 
@@ -43,7 +44,8 @@ namespace DbgCensus.EventStream.Extensions
                 new EventHandlingEventStreamClient(
                     s.GetRequiredService<ILogger<EventHandlingEventStreamClient>>(),
                     s.GetRequiredService<ClientWebSocket>(),
-                    jsonOptions.Invoke(s),
+                    deserializerOptions.Invoke(s),
+                    serializerOptions.Invoke(s),
                     s.GetRequiredService<IEventHandlerRepository>(),
                     s.GetRequiredService<IServiceMessageTypeRepository>(),
                     s.GetRequiredService<IServiceProvider>()));
@@ -64,10 +66,6 @@ namespace DbgCensus.EventStream.Extensions
             Type[] handlerTypeInterfaces = handlerType.GetInterfaces();
             IEnumerable<Type> handlerInterfaces = handlerTypeInterfaces.Where(
                 r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(ICensusEventHandler<>));
-
-            //IEnumerable<Type> serviceMessageHandlerInterfaces = handlerTypeInterfaces
-            //    .SelectMany(r => r.GetGenericArguments())
-            //    .Where(r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(ServiceMessage<>));
 
             foreach (Type handlerInterface in handlerInterfaces)
                 serviceCollection.AddScoped(handlerInterface, handlerType);
@@ -94,40 +92,5 @@ namespace DbgCensus.EventStream.Extensions
                 .AddEventHandler<THandler>()
                 .Configure<ServiceMessageTypeRepository>(s => s.TryRegister<ServiceMessage<TPayload>, TPayload>(eventName));
         }
-
-        /// <summary>
-        /// Registers a payload type for a census <see cref="ServiceMessage{T}"/>.
-        /// </summary>
-        /// <typeparam name="TPayload">The type of the payload.</typeparam>
-        /// <param name="serviceCollection">The service collection.</param>
-        /// <param name="eventName">The name of the event that this payload is for.</param>
-        /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
-        [Obsolete("Use an overload " + nameof(AddEventHandler) + " instead.")]
-        public static IServiceCollection AddServiceMessagePayload<TPayload>(this IServiceCollection serviceCollection, string eventName)
-            => serviceCollection.Configure<ServiceMessageTypeRepository>(s => s.TryRegister<ServiceMessage<TPayload>, TPayload>(eventName));
-
-        /// <summary>
-        /// Adds a <see cref="ICensusEventHandler"/> for a <see cref="ServiceMessage{T}"/> to the service collection.
-        /// </summary>
-        /// <param name="serviceCollection">The service collection.</param>
-        /// <typeparam name="THandler">The responder type.</typeparam>
-        /// <returns>The <see cref="IServiceCollection"/> instance, so that calls may be chained.</returns>
-        //public static IServiceCollection AddServiceMessageEventHandler<THandler, TPayload>(this IServiceCollection serviceCollection) where THandler : ICensusEventHandler
-        //{
-        //    Type handlerType = typeof(THandler);
-
-        //    Type[] handlerTypeInterfaces = handlerType.GetInterfaces();
-        //    IEnumerable<Type> handlerInterfaces = handlerTypeInterfaces.Where(
-        //        r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(ICensusEventHandler<ServiceMessage<TPayload>>));
-
-        //    foreach (Type handlerInterface in handlerInterfaces)
-        //        serviceCollection.AddScoped(handlerInterface, handlerType);
-
-        //    serviceCollection.AddScoped(handlerType);
-
-        //    serviceCollection.Configure<EventHandlerRepository>(e => e.RegisterHandler<THandler>());
-
-        //    return serviceCollection;
-        //}
     }
 }

@@ -1,8 +1,11 @@
 using DbgCensus.EventStream;
 using DbgCensus.EventStream.Extensions;
 using DbgCensusDemo.EventHandlers;
+using DbgCensusDemo.Objects.EventStream;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
+using Serilog.Events;
 
 namespace DbgCensusDemo
 {
@@ -15,14 +18,25 @@ namespace DbgCensusDemo
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseSerilog(GetLogger())
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.Configure<CensusEventStreamOptions>(hostContext.Configuration.GetSection(nameof(CensusEventStreamOptions)));
 
                     services.AddCensusEventStreamServices()
-                            .AddEventHandler<HeartbeatEventHandler>();
+                            .AddEventHandler<HeartbeatEventHandler>()
+                            .AddEventHandler<PlayerLogEventHandler, PlayerLogin>(EventNames.PLAYER_LOGIN)
+                            .AddEventHandler<PlayerLogEventHandler, PlayerLogout>(EventNames.PLAYER_LOGOUT)
+                            .AddEventHandler<UnknownEventHandler>();
 
                     services.AddHostedService<Worker>();
                 });
+
+        private static ILogger GetLogger()
+            => new LoggerConfiguration()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
     }
 }
