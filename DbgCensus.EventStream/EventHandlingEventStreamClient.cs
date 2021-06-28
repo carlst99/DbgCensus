@@ -18,7 +18,7 @@ namespace DbgCensus.EventStream
     public sealed class EventHandlingEventStreamClient : CensusEventStreamClient
     {
         private readonly IEventHandlerRepository _eventHandlerRepository;
-        private readonly IEventStreamObjectTypeRepository _eventStreamObjectTypeRepository;
+        private readonly IServiceMessageTypeRepository _eventStreamObjectTypeRepository;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="EventHandlingEventStreamClient"/> class.
@@ -31,7 +31,7 @@ namespace DbgCensus.EventStream
             ClientWebSocket webSocket,
             JsonSerializerOptions jsonOptions,
             IEventHandlerRepository eventHandlerRepository,
-            IEventStreamObjectTypeRepository eventStreamObjectTypeRepository)
+            IServiceMessageTypeRepository eventStreamObjectTypeRepository)
             : base(logger, webSocket, jsonOptions)
         {
             _eventHandlerRepository = eventHandlerRepository;
@@ -50,6 +50,9 @@ namespace DbgCensus.EventStream
             using JsonDocument jsonResponse = await JsonDocument.ParseAsync(eventStream, cancellationToken: ct).ConfigureAwait(false);
 
             // TODO: Discover type, build responder system
+
+            // BIG DUM DUM
+            // RECEIVED: {"payload":{"character_id":"5428011263437685377","event_name":"PlayerLogout","timestamp":"1624788175","world_id":"1"},"service":"event","type":"serviceMessage"}
         }
 
         private async Task DispatchEventAsync<T>(T eventObject, CancellationToken ct = default) where T : IEventStreamObject

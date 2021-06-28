@@ -1,15 +1,16 @@
 ﻿using DbgCensus.EventStream.Abstractions.Objects;
+using DbgCensus.EventStream.Objects.Event;
 using System;
 
 namespace DbgCensus.EventStream.Abstractions.EventHandling
 {
     /// <summary>
-    /// Stores and maps <see cref="IEventStreamObject"/> types to the census types they represent.
+    /// Stores and maps <see cref="ServiceMessage"/> types to the census types they represent.
     /// </summary>
-    public interface IEventStreamObjectTypeRepository
+    public interface IServiceMessageTypeRepository
     {
         /// <summary>
-        /// Attempts to get an <see cref="IEventStreamObject"/> type.
+        /// Attempts to get an <see cref="ServiceMessage{T}"/> type.
         /// </summary>
         /// <param name="censusService">The service that the object is received from.</param>
         /// <param name="censusType">The type that the object represents.</param>
@@ -20,10 +21,10 @@ namespace DbgCensus.EventStream.Abstractions.EventHandling
         /// <summary>
         /// Registers an <see cref="IEventStreamObject"/> to the census type that it represents.
         /// </summary>
-        /// <typeparam name="T">The type of the <see cref="IEventStreamObject"/></typeparam>
+        /// <typeparam name="TPayload">The type of the payload.</typeparam>
         /// <param name="censusService">The service that the object is received from.</param>
         /// <param name="censusType">The type that the object represents.</param>
-        /// <returns>A value indicating if the object type was added to the repository. If false, the object has already been registered.</returns>
-        bool TryRegister<T>(string censusService, string censusType) where T : IEventStreamObject;
+        /// <returns>A value indicating if the service message type was added to the repository. If false, the type has already been registered.</returns>
+        bool TryRegister<TObject, TPayload>(string censusService, string censusType) where TObject : ServiceMessage<TPayload>;
     }
 }

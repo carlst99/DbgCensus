@@ -1,5 +1,6 @@
 ﻿using DbgCensus.EventStream.Abstractions.EventHandling;
 using DbgCensus.EventStream.Abstractions.Objects;
+using DbgCensus.EventStream.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -39,10 +40,15 @@ namespace DbgCensus.EventStream.EventHandling
 
         /// <inheritdoc />
         public IReadOnlyList<Type> GetHandlerTypes<TEvent>() where TEvent : IEventStreamObject
+            => GetHandlerTypes(typeof(TEvent));
+
+        public IReadOnlyList<Type> GetHandlerTypes(Type handlerType)
         {
-            Type key = typeof(ICensusEventHandler<TEvent>);
-            if (_repository.ContainsKey(key))
-                return _repository[key];
+            if (!handlerType.IsCensusEventHandler())
+                throw new ArgumentException("The type must derive from " + nameof(ICensusEventHandler), nameof(handlerType));
+
+            if (_repository.ContainsKey(handlerType))
+                return _repository[handlerType];
             else
                 return Array.Empty<Type>();
         }

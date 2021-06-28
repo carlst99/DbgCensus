@@ -1,17 +1,17 @@
 ﻿using DbgCensus.EventStream.Abstractions.EventHandling;
-using DbgCensus.EventStream.Abstractions.Objects;
+using DbgCensus.EventStream.Objects.Event;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace DbgCensus.EventStream.EventHandling
 {
-    /// <inheritdoc cref="IEventStreamObjectTypeRepository"/>
-    public class EventStreamObjectTypeRepository : IEventStreamObjectTypeRepository
+    /// <inheritdoc cref="IServiceMessageTypeRepository"/>
+    public class ServiceMessageTypeRepository : IServiceMessageTypeRepository
     {
         private readonly Dictionary<Tuple<string, string>, Type> _repository;
 
-        public EventStreamObjectTypeRepository()
+        public ServiceMessageTypeRepository()
         {
             _repository = new Dictionary<Tuple<string, string>, Type>();
         }
@@ -30,14 +30,14 @@ namespace DbgCensus.EventStream.EventHandling
         }
 
         /// <inheritdoc />
-        public bool TryRegister<T>(string censusService, string censusType) where T : IEventStreamObject
+        public bool TryRegister<TObject, TPayload>(string censusService, string censusType) where TObject : ServiceMessage<TPayload>
         {
             Tuple<string, string> censusTypeData = new(censusService, censusType);
 
             if (_repository.ContainsKey(censusTypeData))
                 return false;
 
-            _repository.Add(censusTypeData, typeof(T));
+            _repository.Add(censusTypeData, typeof(TObject));
             return true;
         }
     }

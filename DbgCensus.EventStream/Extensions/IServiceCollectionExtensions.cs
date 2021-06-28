@@ -38,7 +38,7 @@ namespace DbgCensus.EventStream.Extensions
             serviceCollection.TryAddTransient<ClientWebSocket>();
 
             serviceCollection.TryAddSingleton<IEventHandlerRepository>(s => s.GetRequiredService<IOptions<EventHandlerRepository>>().Value);
-            serviceCollection.TryAddSingleton<IEventStreamObjectTypeRepository>(s => s.GetRequiredService<IOptions<EventStreamObjectTypeRepository>>().Value);
+            serviceCollection.TryAddSingleton<IServiceMessageTypeRepository>(s => s.GetRequiredService<IOptions<ServiceMessageTypeRepository>>().Value);
 
             serviceCollection.AddEventStreamObject<Heartbeat>("event", "heartbeat");
 
@@ -48,7 +48,7 @@ namespace DbgCensus.EventStream.Extensions
                     s.GetRequiredService<ClientWebSocket>(),
                     jsonOptions.Invoke(s),
                     s.GetRequiredService<IEventHandlerRepository>(),
-                    s.GetRequiredService<IEventStreamObjectTypeRepository>()));
+                    s.GetRequiredService<IServiceMessageTypeRepository>()));
 
             return serviceCollection;
         }
@@ -67,6 +67,10 @@ namespace DbgCensus.EventStream.Extensions
             IEnumerable<Type> handlerInterfaces = handlerTypeInterfaces.Where(
                 r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(ICensusEventHandler<>));
 
+            IEnumerable<Type> serviceMessageHandlerInterfaces = handlerTypeInterfaces
+                .SelectMany(r => r.GetGenericArguments())
+                .Where(r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(ServiceMessage<>));
+
             foreach (Type handlerInterface in handlerInterfaces)
                 serviceCollection.AddScoped(handlerInterface, handlerType);
 
@@ -74,20 +78,31 @@ namespace DbgCensus.EventStream.Extensions
 
             serviceCollection.Configure<EventHandlerRepository>(e => e.RegisterHandler<THandler>());
 
+            foreach (Type serviceMessageHandlerInterface in serviceMessageHandlerInterfaces)
+
             return serviceCollection;
         }
 
         /// <summary>
-        /// Registers an <see cref="IEventStreamObject"/>.
+        /// Adds a <see cref="ICensusEventHandler"/> for a <see cref="ServiceMessage{T}"/> to the service collection.
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
-        /// <param name="censusService">The service that the object is received from.</param>
-        /// <param name="censusType">The type that the object represents.</param>
-        /// <typeparam name="TEvent">The responder type.</typeparam>
+        /// <typeparam name="THandler">The responder type.</typeparam>
         /// <returns>The <see cref="IServiceCollection"/> instance, so that calls may be chained.</returns>
-        public static IServiceCollection AddEventStreamObject<TEvent>(this IServiceCollection serviceCollection, string censusService, string censusType) where TEvent : IEventStreamObject
+        public static IServiceCollection AddServiceMessageEventHandler<THandler, TPayload>(this IServiceCollection serviceCollection) where THandler : ICensusEventHandler
         {
-            serviceCollection.Configure<EventStreamObjectTypeRepository>(e => e.TryRegister<TEvent>(censusService, censusType));
+            Type handlerType = typeof(THandler);
+
+            Type[] handlerTypeInterfaces = handlerType.GetInterfaces();
+            IEnumerable<Type> handlerInterfaces = handlerTypeInterfaces.Where(
+                r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(ICensusEventHandler<ServiceMessage<TPayload>>));
+
+            foreach (Type handlerInterface in handlerInterfaces)
+                serviceCollection.AddScoped(handlerInterface, handlerType);
+
+            serviceCollection.AddScoped(handlerType);
+
+            serviceCollection.Configure<EventHandlerRepository>(e => e.RegisterHandler<THandler>());
 
             return serviceCollection;
         }

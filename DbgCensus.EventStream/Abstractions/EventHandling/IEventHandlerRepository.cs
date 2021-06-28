@@ -19,6 +19,13 @@ namespace DbgCensus.EventStream.Abstractions.EventHandling
         /// <summary>
         /// Gets types implementing <see cref="ICensusEventHandler{TEvent}"/> for the given event type.
         /// </summary>
+        /// <param name="handlerType">The type of the <see cref="IEventStreamObject"/> to retrieve handler types for.</param>
+        /// <returns>A list of types.</returns>
+        IReadOnlyList<Type> GetHandlerTypes(Type handlerType);
+
+        /// <summary>
+        /// Gets types implementing <see cref="ICensusEventHandler{TEvent}"/> for the given event type.
+        /// </summary>
         /// <typeparam name="TEvent">The <see cref="IEventStreamObject"/> to retrieve handler types for.</typeparam>
         /// <returns>A list of types.</returns>
         IReadOnlyList<Type> GetHandlerTypes<TEvent>() where TEvent : IEventStreamObject;
