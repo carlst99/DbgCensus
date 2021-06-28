@@ -11,47 +11,31 @@ namespace DbgCensus.EventStream.EventHandling
     /// <inheritdoc cref="IEventHandlerRepository"/>
     public class EventHandlerRepository : IEventHandlerRepository
     {
-        private readonly IServiceProvider _services;
         private readonly Dictionary<Type, List<Type>> _repository;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="EventHandlerRepository"/> class.
         /// </summary>
-        public EventHandlerRepository(IServiceProvider services)
+        public EventHandlerRepository()
         {
-            _services = services;
             _repository = new Dictionary<Type, List<Type>>();
         }
 
         /// <inheritdoc />
-        public IReadOnlyList<ICensusEventHandler<TEvent>> GetHandlers<TEvent>() where TEvent : IEventStreamObject
+        public IReadOnlyList<Type> GetHandlerTypes(Type eventObjectType)
         {
-            Type key = typeof(ICensusEventHandler<TEvent>);
-            if (!_repository.ContainsKey(key))
-                return Array.Empty<ICensusEventHandler<TEvent>>();
+            if (!eventObjectType.IsCensusEventHandler())
+                throw new ArgumentException("The type must derive from " + nameof(ICensusEventHandler), nameof(eventObjectType));
 
-            List<ICensusEventHandler<TEvent>> handlers = new();
-            using IServiceScope scope = _services.CreateScope();
-            foreach (Type handler in _repository[key])
-                handlers.Add((ICensusEventHandler<TEvent>)scope.ServiceProvider.GetRequiredService(handler));
-
-            return handlers;
+            if (_repository.ContainsKey(eventObjectType))
+                return _repository[eventObjectType];
+            else
+                return Array.Empty<Type>();
         }
 
         /// <inheritdoc />
         public IReadOnlyList<Type> GetHandlerTypes<TEvent>() where TEvent : IEventStreamObject
             => GetHandlerTypes(typeof(TEvent));
-
-        public IReadOnlyList<Type> GetHandlerTypes(Type handlerType)
-        {
-            if (!handlerType.IsCensusEventHandler())
-                throw new ArgumentException("The type must derive from " + nameof(ICensusEventHandler), nameof(handlerType));
-
-            if (_repository.ContainsKey(handlerType))
-                return _repository[handlerType];
-            else
-                return Array.Empty<Type>();
-        }
 
         /// <inheritdoc/>
         public void RegisterHandler<THandler>() where THandler : ICensusEventHandler

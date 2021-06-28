@@ -1,6 +1,7 @@
 ﻿using DbgCensus.EventStream.Abstractions.Objects;
 using DbgCensus.EventStream.Objects.Event;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace DbgCensus.EventStream.Abstractions.EventHandling
 {
@@ -16,7 +17,7 @@ namespace DbgCensus.EventStream.Abstractions.EventHandling
         /// <param name="censusType">The type that the object represents.</param>
         /// <param name="type">The retrieved object type.</param>
         /// <returns>A value indicating if the object type was found in the repository.</returns>
-        bool TryGet(string censusService, string censusType, out Type? type);
+        bool TryGet(string censusService, string censusType, [NotNullWhen(true)] out Type? type);
 
         /// <summary>
         /// Registers an <see cref="IEventStreamObject"/> to the census type that it represents.
