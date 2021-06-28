@@ -75,27 +75,14 @@ namespace DbgCensus.EventStream
 
                 if (censusService is null || censusType is null)
                 {
-                    _logger.LogWarning("Received unknown event from service {service} of type {type}", censusService, censusType);
+                    _logger.LogWarning("An unknown event has been received from service {service} of type {type}.", censusService, censusType);
                     BeginEventDispatch(new UnknownEvent(jsonResponse.RootElement.GetRawText()), ct);
                     return;
                 }
 
                 if (censusService == "event" && censusType == "serviceMessage")
                 {
-                    if (!_serviceMessageObjectRepository.TryGet(censusService, censusType, out Type? serviceMessageType))
-                    {
-                        _logger.LogWarning("Received unknown event from service {service} of type {type}", censusService, censusType);
-                        BeginEventDispatch(new UnknownEvent(jsonResponse.RootElement.GetRawText()), ct);
-                        return;
-                    }
-
-                    object? serviceMessageObject = JsonSerializer.Deserialize(jsonResponse.RootElement.GetRawText(), serviceMessageType, _jsonOptions);
-                    if (serviceMessageObject is null)
-                    {
-                        _logger.LogError("Could not deserialise websocket event. Raw response: {raw}", jsonResponse.RootElement.GetRawText());
-                        return;
-                    }
-                    BeginEventDispatch(serviceMessageType, serviceMessageObject, ct);
+                    DispatchServiceMessage(jsonResponse.RootElement, ct);
                 }
                 else if (censusService == "event" && censusType == "heartbeat")
                 {
@@ -107,17 +94,79 @@ namespace DbgCensus.EventStream
                     }
                     BeginEventDispatch(heartbeat, ct);
                 }
+                else
+                {
+                    // Get 
+                }
             }
 
             eventStream.Dispose();
-
-            // BIG DUM DUM
-            // RECEIVED: {"payload":{"character_id":"5428011263437685377","event_name":"PlayerLogout","timestamp":"1624788175","world_id":"1"},"service":"event","type":"serviceMessage"}
         }
 
-        private void BeginEventDispatch<TEvent>(TEvent eventObject, CancellationToken ct = default) where TEvent : notnull
+        /// <summary>
+        /// Attempts to dispatch a service message event.
+        /// </summary>
+        /// <param name="rootElement"></param>
+        /// <param name="ct"></param>
+        private void DispatchServiceMessage(JsonElement rootElement, CancellationToken ct = default)
+        {
+            // Attempt to get the payload element
+            if (!rootElement.TryGetProperty("payload", out JsonElement payloadElement))
+            {
+                _logger.LogWarning("A service message was received that did not contain a payload. An unknown event has been dispatched.");
+                BeginEventDispatch(new UnknownEvent(rootElement.GetRawText()), ct);
+                return;
+            }
+
+            // Attempt to get the event name element
+            if (!payloadElement.TryGetProperty("event_name", out JsonElement eventNameElement))
+            {
+                _logger.LogWarning("A service message was received that did not contain a valid payload. An unknown event has been dispatched.");
+                BeginEventDispatch(new UnknownEvent(rootElement.GetRawText()), ct);
+                return;
+            }
+
+            // Attempt to get the event name
+            string? eventName = eventNameElement.GetString();
+            if (eventName is null)
+            {
+                _logger.LogWarning("An event with no name was received. An unknown event has been dispatched.");
+                BeginEventDispatch(new UnknownEvent(rootElement.GetRawText()), ct);
+                return;
+            }
+
+            // Attempt to get the type of service message that represents this event
+            if (!_serviceMessageObjectRepository.TryGet(eventName, out Type? serviceMessageType))
+            {
+                _logger.LogWarning("A ServiceMessage object has not been registered for the census event {event}", eventName);
+                return;
+            }
+
+            // Deserialise to the service message object
+            object? serviceMessageObject = JsonSerializer.Deserialize(rootElement.GetRawText(), serviceMessageType, _jsonOptions);
+            if (serviceMessageObject is null)
+            {
+                _logger.LogError("Could not deserialise websocket event to the type {type}. Raw response: {raw}", serviceMessageType, rootElement.GetRawText());
+                return;
+            }
+            BeginEventDispatch(serviceMessageType, serviceMessageObject, ct);
+        }
+
+        /// <summary>
+        /// Creates an instance of <see cref="DispatchEventAsync{T}(T, CancellationToken)"/> and dispatches an event.
+        /// </summary>
+        /// <typeparam name="TEvent">The type of <see cref="IEventStreamObject"/> to dispatch.</typeparam>
+        /// <param name="eventObject">The event object to dispatch.</param>
+        /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the entire event chain.</param>
+        private void BeginEventDispatch<TEvent>(TEvent eventObject, CancellationToken ct = default) where TEvent : IEventStreamObject
             => BeginEventDispatch(typeof(TEvent), eventObject, ct);
 
+        /// <summary>
+        /// Creates an instance of <see cref="DispatchEventAsync{T}(T, CancellationToken)"/> and dispatches an event.
+        /// </summary>
+        /// <param name="eventType">The type of <see cref="IEventStreamObject"/> to dispatch.</param>
+        /// <param name="eventObject">The evnet object to dispatch.</param>
+        /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the entire event chain.</param>
         private void BeginEventDispatch(Type eventType, object eventObject, CancellationToken ct = default)
         {
             MethodInfo dispatchMethod = CreateDispatchMethod(eventType!);
@@ -130,6 +179,13 @@ namespace DbgCensus.EventStream
             _dispatchedEventQueue.Enqueue(dispatchTask);
         }
 
+        /// <summary>
+        /// Dispatches an event to all appropriate event handlers.
+        /// </summary>
+        /// <typeparam name="T">The type of <see cref="IEventStreamObject"/> to dispatch.</typeparam>
+        /// <param name="eventObject">The event object to dispatch.</param>
+        /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the entire event chain.</param>
+        /// <returns></returns>
         private async Task DispatchEventAsync<T>(T eventObject, CancellationToken ct = default) where T : IEventStreamObject
         {
             IReadOnlyList<Type> handlerTypes = _eventHandlerRepository.GetHandlerTypes<T>();
@@ -167,6 +223,11 @@ namespace DbgCensus.EventStream
             ).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Constructs a <see cref="MethodInfo"/> instance of the <see cref="DispatchEventAsync{T}(T, CancellationToken)"/> method.
+        /// </summary>
+        /// <param name="eventType">The type of event that will be dispatched through the method.</param>
+        /// <returns></returns>
         private MethodInfo CreateDispatchMethod(Type eventType)
         {
             MethodInfo? dispatchMethod = GetType().GetMethod(nameof(DispatchEventAsync), BindingFlags.NonPublic | BindingFlags.Instance);
@@ -179,6 +240,11 @@ namespace DbgCensus.EventStream
             return dispatchMethod.MakeGenericMethod(new Type[] { eventType });
         }
 
+        /// <summary>
+        /// Logs any errors that occured while executing the event handler.
+        /// </summary>
+        /// <param name="eventTask">The task representing the event handling operation.</param>
+        /// <returns></returns>
         private async Task FinaliseDispatchedEvent(Task eventTask)
         {
             try

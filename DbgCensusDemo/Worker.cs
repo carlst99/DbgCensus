@@ -29,7 +29,7 @@ namespace DbgCensusDemo
             {
                 await _eventStreamClient.StartAsync(_eventStreamOptions, stoppingToken).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not TaskCanceledException)
             {
                 _logger.LogError(ex, "An error occured in the event stream client");
             }
