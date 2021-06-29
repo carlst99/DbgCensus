@@ -1,7 +1,6 @@
 ﻿using DbgCensus.Core.Json;
 using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.Commands;
-using DbgCensus.EventStream.Commands;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using System;
@@ -15,7 +14,9 @@ using System.Threading.Tasks;
 
 namespace DbgCensus.EventStream
 {
-    /// <inheritdoc cref="ICensusEventStreamClient"/>
+    /// <summary>
+    /// <inheritdoc cref="ICensusEventStreamClient"/>Reconnection is handled automatically.
+    /// </summary>
     public abstract class CensusEventStreamClient : ICensusEventStreamClient
     {
         /// <summary>
@@ -48,6 +49,13 @@ namespace DbgCensus.EventStream
         /// <inheritdoc />
         public bool IsRunning { get; protected set; }
 
+        /// <summary>
+        /// Initialises a new instance of the <see cref="CensusEventStreamClient"/> class.
+        /// </summary>
+        /// <param name="logger">The logging interface to use.</param>
+        /// <param name="webSocket">The websocket to use.</param>
+        /// <param name="deserializerOptions">The JSON options to use when deserializing events.</param>
+        /// <param name="serializerOptions">The JSON options to use when serializing commands.</param>
         protected CensusEventStreamClient(
             ILogger<CensusEventStreamClient> logger,
             ClientWebSocket webSocket,
@@ -195,6 +203,12 @@ namespace DbgCensus.EventStream
             await _webSocket.ConnectAsync(_endpoint!, ct).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Called when an event is received.
+        /// </summary>
+        /// <param name="eventStream">The event data. You must dispose of this stream when you are finished with it.</param>
+        /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected abstract Task HandleEvent(MemoryStream eventStream, CancellationToken ct = default);
 
         protected virtual void Dispose(bool disposing)

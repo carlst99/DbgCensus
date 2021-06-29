@@ -17,10 +17,12 @@ using System.Threading.Tasks;
 
 namespace DbgCensus.EventStream
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// <inheritdoc />Events are dispatched to registered instances of <see cref="ICensusEventHandler{TEvent}"/>.
+    /// </summary>
     public sealed class EventHandlingEventStreamClient : CensusEventStreamClient
     {
-        private readonly IEventHandlerRepository _eventHandlerRepository;
+        private readonly IEventHandlerTypeRepository _eventHandlerRepository;
         private readonly IServiceMessageTypeRepository _serviceMessageObjectRepository;
         private readonly IServiceProvider _services;
         private readonly ConcurrentQueue<Task> _dispatchedEventQueue;
@@ -28,20 +30,21 @@ namespace DbgCensus.EventStream
         /// <summary>
         /// Initialises a new instance of the <see cref="EventHandlingEventStreamClient"/> class.
         /// </summary>
-        /// <param name="logger">The logging interface to use.</param>
-        /// <param name="webSocket">The websocket to use.</param>
-        /// <param name="deserializerOptions">The JSON serialization options to use.</param>
+        /// <inheritdoc cref="CensusEventStreamClient(ILogger{CensusEventStreamClient}, ClientWebSocket, JsonSerializerOptions, JsonSerializerOptions)"/>
+        /// <param name="eventHandlerTypeRepository">The repository of <see cref="ICensusEventHandler{TEvent}"/> types.</param>
+        /// <param name="eventStreamObjectTypeRepository">The repository of <see cref="IEventStreamObject"/> types.</param>
+        /// <param name="services">The <see cref="IServiceProvider"/>.</param>
         public EventHandlingEventStreamClient(
             ILogger<EventHandlingEventStreamClient> logger,
             ClientWebSocket webSocket,
             JsonSerializerOptions deserializerOptions,
             JsonSerializerOptions serializerOptions,
-            IEventHandlerRepository eventHandlerRepository,
+            IEventHandlerTypeRepository eventHandlerTypeRepository,
             IServiceMessageTypeRepository eventStreamObjectTypeRepository,
             IServiceProvider services)
             : base(logger, webSocket, deserializerOptions, serializerOptions)
         {
-            _eventHandlerRepository = eventHandlerRepository;
+            _eventHandlerRepository = eventHandlerTypeRepository;
             _serviceMessageObjectRepository = eventStreamObjectTypeRepository;
             _services = services;
 
@@ -60,6 +63,7 @@ namespace DbgCensus.EventStream
             await base.StopAsync().ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         protected override async Task HandleEvent(MemoryStream eventStream, CancellationToken ct = default)
         {
             if (_dispatchedEventQueue.TryDequeue(out Task? eventTask))

@@ -1,21 +1,20 @@
 ﻿using DbgCensus.EventStream.Abstractions.EventHandling;
 using DbgCensus.EventStream.Abstractions.Objects;
-using DbgCensus.EventStream.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DbgCensus.EventStream.EventHandling
 {
-    /// <inheritdoc cref="IEventHandlerRepository"/>
-    public class EventHandlerRepository : IEventHandlerRepository
+    /// <inheritdoc cref="IEventHandlerTypeRepository"/>
+    public class EventHandlerTypeRepository : IEventHandlerTypeRepository
     {
         private readonly Dictionary<Type, List<Type>> _repository;
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="EventHandlerRepository"/> class.
+        /// Initialises a new instance of the <see cref="EventHandlerTypeRepository"/> class.
         /// </summary>
-        public EventHandlerRepository()
+        public EventHandlerTypeRepository()
         {
             _repository = new Dictionary<Type, List<Type>>();
         }

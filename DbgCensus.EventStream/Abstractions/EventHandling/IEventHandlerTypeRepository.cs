@@ -7,7 +7,7 @@ namespace DbgCensus.EventStream.Abstractions.EventHandling
     /// <summary>
     /// Stores and maps types that implement <see cref="ICensusEventHandler{T}"/>.
     /// </summary>
-    public interface IEventHandlerRepository
+    public interface IEventHandlerTypeRepository
     {
         /// <summary>
         /// Gets types implementing <see cref="ICensusEventHandler{TEvent}"/> for the given event type.
