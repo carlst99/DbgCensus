@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RestSample.Objects;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,13 +26,16 @@ namespace RestSample
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await GetCharacter(stoppingToken).ConfigureAwait(false);
+            await GetOnlineOutfitMembers(stoppingToken).ConfigureAwait(false);
         }
 
         private async Task GetCharacter(CancellationToken ct)
         {
+            _logger.LogInformation("Getting character information for FalconEye36");
+
             IQueryBuilder query = _queryFactory.Get()
                 .OnCollection("character")
-                .Where("character_id", SearchModifier.Equals, 5428703501287322737);
+                .Where("name.first_lower", SearchModifier.Equals, "falconeye36");
 
             try
             {
@@ -60,10 +64,12 @@ namespace RestSample
 
         private async Task GetOnlineOutfitMembers(CancellationToken ct)
         {
+            _logger.LogInformation("Getting online outfit members for TWC2");
+
             IQueryBuilder query = _queryFactory.Get();
 
             query.OnCollection("outfit")
-                .Where("alias_lower", SearchModifier.Equals, "uvoc")
+                .Where("alias_lower", SearchModifier.Equals, "twc2")
                 .ShowFields("name", "outfit_id", "alias")
                 .AddJoin("outfit_member") // Returns new join object
                     .InjectAt("members")
@@ -91,21 +97,19 @@ namespace RestSample
 
             try
             {
-                Character? character = await _client.GetAsync<Character>(query, ct).ConfigureAwait(false);
-                if (character is null)
+                OutfitOnlineMembers? outfit = await _client.GetAsync<OutfitOnlineMembers>(query, ct).ConfigureAwait(false);
+                if (outfit is null)
                 {
                     _logger.LogInformation("That character does not exist.");
                 }
                 else
                 {
                     _logger.LogInformation(
-                        "The character {name} of the {faction} is battle rank {rank}~{asp} with {certs} certs available. They last logged in on {lastLogin}",
-                        character.Name.First,
-                        character.FactionId,
-                        character.BattleRank.Value,
-                        character.PrestigeLevel,
-                        character.Certs.AvailablePoints,
-                        character.Times.LastLoginDate);
+                        "The outfit [{alias}] {name} has {onlineCount} members online: {onlineMembers}",
+                        outfit.OutfitAlias,
+                        outfit.OutfitName,
+                        outfit.OnlineMembers.Count,
+                        string.Join(", ", outfit.OnlineMembers.Select(m => m.Character.Name.First)));
                 }
             }
             catch (Exception ex)
