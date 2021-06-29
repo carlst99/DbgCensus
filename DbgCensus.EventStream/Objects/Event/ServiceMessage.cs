@@ -16,7 +16,6 @@
         /// </summary>
         /// <param name="payload">The event object.</param>
         public ServiceMessage(T payload)
-            : base("event", "serviceMessage")
         {
             Payload = payload;
         }

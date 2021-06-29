@@ -2,6 +2,7 @@
 using DbgCensus.EventStream.Abstractions.Objects;
 using DbgCensus.EventStream.Objects;
 using DbgCensus.EventStream.Objects.Event;
+using DbgCensus.EventStream.Objects.Push;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -82,27 +83,31 @@ namespace DbgCensus.EventStream
                 {
                     _logger.LogWarning("An event with an unspecified service and/or type has been received. An UnknownEvent object will be dispatched.");
                     BeginEventDispatch(new UnknownEvent(jsonResponse.RootElement.GetRawText()), ct);
-                    return;
                 }
-
-                if (censusService == "event" && censusType == "serviceMessage")
+                else if (censusService == "event" && censusType == "serviceMessage")
                 {
                     DispatchServiceMessage(jsonResponse.RootElement, ct);
                 }
                 else if (censusService == "event" && censusType == "heartbeat")
                 {
-                    Heartbeat? heartbeat = JsonSerializer.Deserialize<Heartbeat>(jsonResponse.RootElement.GetRawText());
-                    if (heartbeat is null)
-                    {
-                        _logger.LogError("Could not deserialise websocket event. Raw response: {raw}", jsonResponse.RootElement.GetRawText());
-                        return;
-                    }
-                    BeginEventDispatch(heartbeat, ct);
+                    DeserializeAndBeginEventDispatch<Heartbeat>(jsonResponse.RootElement, ct);
                 }
-                else
+                else if (censusService == "event" && censusType == "serviceStateChanged")
                 {
-                    // Get 
+                    DeserializeAndBeginEventDispatch<ServiceStateChanged>(jsonResponse.RootElement, ct);
                 }
+                else if (censusService == "push" && censusType == "connectionStateChanged")
+                {
+                    DeserializeAndBeginEventDispatch<ConnectionStateChanged>(jsonResponse.RootElement, ct);
+                }
+            }
+            else if (jsonResponse.RootElement.TryGetProperty("subscription", out JsonElement subscriptionElement))
+            {
+                DeserializeAndBeginEventDispatch<Subscription>(jsonResponse.RootElement, ct);
+            }
+            else if (jsonResponse.RootElement.TryGetProperty("send this for help", out _))
+            {
+                // No need to process this
             }
             else
             {
@@ -116,15 +121,15 @@ namespace DbgCensus.EventStream
         /// <summary>
         /// Attempts to dispatch a service message event.
         /// </summary>
-        /// <param name="rootElement"></param>
+        /// <param name="element"></param>
         /// <param name="ct"></param>
-        private void DispatchServiceMessage(JsonElement rootElement, CancellationToken ct = default)
+        private void DispatchServiceMessage(JsonElement element, CancellationToken ct = default)
         {
             // Attempt to get the payload element
-            if (!rootElement.TryGetProperty("payload", out JsonElement payloadElement))
+            if (!element.TryGetProperty("payload", out JsonElement payloadElement))
             {
                 _logger.LogWarning("A service message was received that did not contain a payload. An unknown event will be dispatched.");
-                BeginEventDispatch(new UnknownEvent(rootElement.GetRawText()), ct);
+                BeginEventDispatch(new UnknownEvent(element.GetRawText()), ct);
                 return;
             }
 
@@ -132,7 +137,7 @@ namespace DbgCensus.EventStream
             if (!payloadElement.TryGetProperty("event_name", out JsonElement eventNameElement))
             {
                 _logger.LogWarning("A service message was received that did not contain a valid payload. An unknown event will be dispatched.");
-                BeginEventDispatch(new UnknownEvent(rootElement.GetRawText()), ct);
+                BeginEventDispatch(new UnknownEvent(element.GetRawText()), ct);
                 return;
             }
 
@@ -141,31 +146,54 @@ namespace DbgCensus.EventStream
             if (eventName is null)
             {
                 _logger.LogWarning("An event with no name was received. An unknown event will be dispatched.");
-                BeginEventDispatch(new UnknownEvent(rootElement.GetRawText()), ct);
+                BeginEventDispatch(new UnknownEvent(element.GetRawText()), ct);
                 return;
             }
 
             // Attempt to get the type of service message that represents this event
             if (!_serviceMessageObjectRepository.TryGet(eventName, out Type? serviceMessageType))
             {
-                _logger.LogWarning("A ServiceMessage object has not been registered for the census event {event}", eventName);
+                _logger.LogWarning("A ServiceMessage object has not been registered for the received census event {event}", eventName);
                 return;
             }
 
             // Deserialise to the service message object and dispatch an event
+            DeserializeAndBeginEventDispatch(serviceMessageType, element, ct);
+        }
+
+        private void DeserializeAndBeginEventDispatch<T>(JsonElement element, CancellationToken ct = default) where T : IEventStreamObject
+        {
             try
             {
-                object? serviceMessageObject = JsonSerializer.Deserialize(rootElement.GetRawText(), serviceMessageType, _jsonDeserializerOptions);
-                if (serviceMessageObject is null)
+                T? deserialized = JsonSerializer.Deserialize<T>(element.GetRawText(), _jsonDeserializerOptions);
+                if (deserialized is null)
                 {
-                    _logger.LogError("Could not deserialise websocket event to the type {type}. Raw response: {raw}", serviceMessageType, rootElement.GetRawText());
+                    _logger.LogError("Could not deserialise websocket event. Raw response: {raw}", element.GetRawText());
                     return;
                 }
-                BeginEventDispatch(serviceMessageType, serviceMessageObject, ct);
+                BeginEventDispatch(deserialized, ct);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to dispatch event");
+                _logger.LogError(ex, "Failed to deserialize and dispatch event");
+            }
+        }
+
+        private void DeserializeAndBeginEventDispatch(Type eventType, JsonElement element, CancellationToken ct = default)
+        {
+            try
+            {
+                object? deserialized = JsonSerializer.Deserialize(element.GetRawText(), eventType, _jsonDeserializerOptions);
+                if (deserialized is null)
+                {
+                    _logger.LogError("Could not deserialise websocket event. Raw response: {raw}", element.GetRawText());
+                    return;
+                }
+                BeginEventDispatch(eventType, deserialized, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to deserialize and dispatch event");
             }
         }
 
@@ -261,7 +289,7 @@ namespace DbgCensus.EventStream
         /// Logs any errors that occured while executing the event handler.
         /// </summary>
         /// <param name="eventTask">The task representing the event handling operation.</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         private async Task FinaliseDispatchedEvent(Task eventTask)
         {
             try

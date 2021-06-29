@@ -17,10 +17,10 @@ namespace DbgCensus.EventStream.Objects
         /// </summary>
         public string Type { get; init; }
 
-        protected EventStreamObjectBase(string service, string type)
+        protected EventStreamObjectBase()
         {
-            Service = service;
-            Type = type;
+            Service = string.Empty;
+            Type = string.Empty;
         }
     }
 }

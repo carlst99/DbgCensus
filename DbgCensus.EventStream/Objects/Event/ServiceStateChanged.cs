@@ -1,4 +1,6 @@
-﻿namespace DbgCensus.EventStream.Objects.Event
+﻿using System.Text.Json.Serialization;
+
+namespace DbgCensus.EventStream.Objects.Event
 {
     /// <summary>
     /// An object sent by the event stream when the state of a service changes.
@@ -6,25 +8,24 @@
     public record ServiceStateChanged : EventStreamObjectBase
     {
         /// <summary>
-        /// Gets the identifier of the particular component within the service that has changed state.
+        /// Gets the identifier of the world for which the event streaming endpoint has changed state.
         /// </summary>
-        public string Detail { get; init; }
+        [JsonPropertyName("detail")]
+        public string EndpointIdentifier { get; init; }
 
         /// <summary>
-        /// Gets a value indicating if this component of the service is online.
+        /// Gets a value indicating if the endpoint is online.
         /// </summary>
-        public bool Online { get; init; }
+        [JsonPropertyName("online")]
+        public bool IsOnline { get; init; }
 
         /// <summary>
         /// Initialises a new instance of the <see cref="ServiceStateChanged"/> record.
         /// </summary>
-        /// <param name="detail">The identifier of the particular component within the service that has changed state.</param>
-        /// <param name="online">A value indicating if this component is online.</param>
-        public ServiceStateChanged(string detail, bool online)
-            : base("event", "serviceStateChanged")
+        public ServiceStateChanged()
         {
-            Detail = detail;
-            Online = online;
+            EndpointIdentifier = string.Empty;
+            IsOnline = false;
         }
     }
 }

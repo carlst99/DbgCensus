@@ -13,11 +13,9 @@
         /// <summary>
         /// Initialises a new instance of the <see cref="ConnectionStateChanged"/> record.
         /// </summary>
-        /// <param name="connected">A value indicating if the event stream websocket is still open.</param>
-        public ConnectionStateChanged(bool connected)
-            : base("push", "connectionStateChanged")
+        public ConnectionStateChanged()
         {
-            Connected = connected;
+            Connected = false;
         }
     }
 }

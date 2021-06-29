@@ -17,7 +17,7 @@ namespace EventStreamSample.EventHandlers
 
         public Task HandleAsync(Heartbeat censusEvent, CancellationToken ct = default)
         {
-            _logger.LogInformation("Received heartbeat: " + censusEvent.Online);
+            _logger.LogInformation($"Received heartbeat. { censusEvent }");
             return Task.CompletedTask;
         }
     }
