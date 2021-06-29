@@ -1,6 +1,6 @@
 ﻿{
   "profiles": {
-    "EventStreamSample": {
+    "RestSample": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "environmentVariables": {

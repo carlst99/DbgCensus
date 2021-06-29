@@ -80,13 +80,6 @@ namespace DbgCensus.EventStream
             _jsonDeserializerOptions.Converters.Add(new DateTimeJsonConverter());
             _jsonDeserializerOptions.Converters.Add(new DateTimeOffsetJsonConverter());
 
-            _jsonDeserializerOptions.Converters.Add(new Int16JsonConverter());
-            _jsonDeserializerOptions.Converters.Add(new Int32JsonConverter());
-            _jsonDeserializerOptions.Converters.Add(new Int64JsonConverter());
-            _jsonDeserializerOptions.Converters.Add(new UInt16JsonConverter());
-            _jsonDeserializerOptions.Converters.Add(new UInt32JsonConverter());
-            _jsonDeserializerOptions.Converters.Add(new UInt64JsonConverter());
-
             _jsonSerializerOptions = new JsonSerializerOptions(serializerOptions);
             if (_jsonSerializerOptions.PropertyNamingPolicy is null)
                 _jsonSerializerOptions.PropertyNamingPolicy = new CamelCaseJsonNamingPolicy();

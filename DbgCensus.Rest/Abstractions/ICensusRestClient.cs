@@ -18,7 +18,7 @@ namespace DbgCensus.Rest.Abstractions
         /// <param name="query">The query to perform.</param>
         /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
         /// <returns>The deserialised response, or null if no value was returned.</returns>
-        Task<T?> GetAsync<T>(IQueryBuilder query, CancellationToken ct = default) where T : new();
+        Task<T?> GetAsync<T>(IQueryBuilder query, CancellationToken ct = default);
 
         /// <summary>
         /// Performs a query on the Census REST API.
@@ -28,7 +28,7 @@ namespace DbgCensus.Rest.Abstractions
         /// <param name="collectionName">The collection that the query will be performed on.</param>
         /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
         /// <returns>The deserialised response, or null if no value was returned.</returns>
-        Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default) where T : new();
+        Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default);
 
         /// <summary>
         /// Performs a query on the Census REST API, returning the results in pages.
@@ -40,6 +40,6 @@ namespace DbgCensus.Rest.Abstractions
         /// <param name="start">The index at which to start getting objects from.</param>
         /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
         /// <returns>An <see cref="IAsyncEnumerable{T}"/> that yields enumerables for each page.</returns>
-        IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>(IQueryBuilder query, uint pageSize, uint pageCount, uint start = 0, CancellationToken ct = default) where T : new();
+        IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>(IQueryBuilder query, uint pageSize, uint pageCount, uint start = 0, CancellationToken ct = default);
     }
 }

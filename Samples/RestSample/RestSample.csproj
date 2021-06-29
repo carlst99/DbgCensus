@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <UserSecretsId>52a1148a-77ac-401e-82ad-9931888f9d13</UserSecretsId>
+    <UserSecretsId>dotnet-DbgCensusDemo-68A3505B-E415-4103-B44D-2D314D46B925</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DbgCensus.EventStream\DbgCensus.EventStream.csproj" />
+    <ProjectReference Include="..\..\DbgCensus.Rest\DbgCensus.Rest.csproj" />
   </ItemGroup>
 </Project>

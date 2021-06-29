@@ -1,13 +1,11 @@
-using DbgCensus.EventStream;
-using DbgCensus.EventStream.Extensions;
-using EventStreamSample.EventHandlers;
-using EventStreamSample.Objects;
+using DbgCensus.Rest;
+using DbgCensus.Rest.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 
-namespace EventStreamSample
+namespace RestSample
 {
     public static class Program
     {
@@ -21,13 +19,9 @@ namespace EventStreamSample
                 .UseSerilog(GetLogger())
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.Configure<CensusEventStreamOptions>(hostContext.Configuration.GetSection(nameof(CensusEventStreamOptions)));
+                    services.Configure<CensusQueryOptions>(hostContext.Configuration.GetSection(nameof(CensusQueryOptions)));
 
-                    services.AddCensusEventStreamServices()
-                            .AddEventHandler<HeartbeatEventHandler>()
-                            .AddEventHandler<PlayerLogEventHandler, PlayerLogin>(EventNames.PLAYER_LOGIN)
-                            .AddEventHandler<PlayerLogEventHandler, PlayerLogout>(EventNames.PLAYER_LOGOUT)
-                            .AddEventHandler<UnknownEventHandler>();
+                    services.AddCensusRestServices();
 
                     services.AddHostedService<Worker>();
                 });

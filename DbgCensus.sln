@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventStreamSample", "Sample
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{192E67B9-9A22-4A5F-BBFD-608F4A6C2807}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestSample", "Samples\RestSample\RestSample.csproj", "{4C123014-3A3B-40AA-92CD-1488FD0A28D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{5D4E1B12-E20D-4918-A4DC-FFF4EC0EEDE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D4E1B12-E20D-4918-A4DC-FFF4EC0EEDE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D4E1B12-E20D-4918-A4DC-FFF4EC0EEDE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C123014-3A3B-40AA-92CD-1488FD0A28D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C123014-3A3B-40AA-92CD-1488FD0A28D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C123014-3A3B-40AA-92CD-1488FD0A28D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C123014-3A3B-40AA-92CD-1488FD0A28D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -54,6 +60,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{3DEECA4F-CE0F-4D2E-B777-3D76DBACF3D7} = {192E67B9-9A22-4A5F-BBFD-608F4A6C2807}
 		{5D4E1B12-E20D-4918-A4DC-FFF4EC0EEDE1} = {192E67B9-9A22-4A5F-BBFD-608F4A6C2807}
+		{4C123014-3A3B-40AA-92CD-1488FD0A28D3} = {192E67B9-9A22-4A5F-BBFD-608F4A6C2807}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {451779D3-6D5D-4290-A6AB-7EBAD1F2C8C5}

@@ -12,9 +12,9 @@ namespace DbgCensus.Tests.Core.Json
 
             Assert.Equal(string.Empty, policy.ConvertName(string.Empty));
             Assert.Null(policy.ConvertName(null!));
-            Assert.Equal("pascal_case", policy.ConvertName("PascalCase"));
-            Assert.Equal("camel_case", policy.ConvertName("camelCase"));
-            Assert.Equal("acronym_case", policy.ConvertName("ACRONYMCase"));
+            Assert.Equal("pascal_case_for_properties", policy.ConvertName("PascalCaseForProperties"));
+            Assert.Equal("camel_case_for_fields", policy.ConvertName("camelCaseForFields"));
+            Assert.Equal("acronym_case_for_whynot", policy.ConvertName("ACRONYMCaseForWHYNOT"));
             Assert.Equal("word", policy.ConvertName("Word"));
         }
     }

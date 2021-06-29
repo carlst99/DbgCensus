@@ -1,6 +1,6 @@
 ﻿using DbgCensus.EventStream.Abstractions.EventHandling;
 using DbgCensus.EventStream.Objects.Event;
-using EventStreamSample.Objects.EventStream;
+using EventStreamSample.Objects;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;

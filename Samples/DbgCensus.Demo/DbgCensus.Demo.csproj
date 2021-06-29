@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DbgCensus.Rest\DbgCensus.Rest.csproj" />
+    <ProjectReference Include="..\..\DbgCensus.Rest\DbgCensus.Rest.csproj" />
   </ItemGroup>
 
 </Project>

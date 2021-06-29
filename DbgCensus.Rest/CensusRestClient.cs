@@ -53,27 +53,20 @@ namespace DbgCensus.Rest
                 _jsonOptions.PropertyNamingPolicy = new SnakeCaseJsonNamingPolicy();
 
             _jsonOptions.Converters.Add(new BooleanJsonConverter());
+            _jsonOptions.Converters.Add(new JsonStringEnumConverter());
 
             _jsonOptions.Converters.Add(new DateTimeJsonConverter());
             _jsonOptions.Converters.Add(new DateTimeOffsetJsonConverter());
-
-            _jsonOptions.Converters.Add(new Int16JsonConverter());
-            _jsonOptions.Converters.Add(new Int32JsonConverter());
-            _jsonOptions.Converters.Add(new Int64JsonConverter());
-
-            _jsonOptions.Converters.Add(new UInt16JsonConverter());
-            _jsonOptions.Converters.Add(new UInt32JsonConverter());
-            _jsonOptions.Converters.Add(new UInt64JsonConverter());
         }
 
         /// <inheritdoc />
-        public virtual async Task<T?> GetAsync<T>(IQueryBuilder query, CancellationToken ct = default) where T : new()
+        public virtual async Task<T?> GetAsync<T>(IQueryBuilder query, CancellationToken ct = default)
         {
             return await GetAsync<T>(query.ConstructEndpoint().AbsoluteUri, query.CollectionName, ct).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public virtual async Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default) where T : new()
+        public virtual async Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default)
         {
             _logger.LogTrace("Performing Census GET request with query: {query}", query);
 
@@ -89,7 +82,7 @@ namespace DbgCensus.Rest
         }
 
         /// <inheritdoc />
-        public virtual async IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>(IQueryBuilder query, uint pageSize, uint pageCount, uint start = 0, [EnumeratorCancellation] CancellationToken ct = default) where T : new()
+        public virtual async IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>(IQueryBuilder query, uint pageSize, uint pageCount, uint start = 0, [EnumeratorCancellation] CancellationToken ct = default)
         {
             for (int i = 0; i < pageCount; i++)
             {

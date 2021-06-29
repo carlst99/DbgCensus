@@ -15,15 +15,22 @@ namespace DbgCensus.Core.Json
             Queue<int> wordBoundaries = new();
 
             char? previousLetter = null;
+            int lastAddedBoundary = 0;
             for (var i = 0; i < name.Length; i++)
             {
                 char letter = name[i];
 
-                if (previousLetter is not null && char.IsUpper(previousLetter.Value) && char.IsLower(letter))
-                    wordBoundaries.Enqueue(i - 1);
+                if (previousLetter is not null && char.IsUpper(previousLetter.Value) && char.IsLower(letter) && i - 1 != lastAddedBoundary)
+                {
+                    lastAddedBoundary = i - 1;
+                    wordBoundaries.Enqueue(lastAddedBoundary);
+                }
 
-                if (previousLetter is not null && char.IsLower(previousLetter.Value) && char.IsUpper(letter))
-                    wordBoundaries.Enqueue(i);
+                if (previousLetter is not null && char.IsLower(previousLetter.Value) && char.IsUpper(letter) && i != lastAddedBoundary)
+                {
+                    lastAddedBoundary = i;
+                    wordBoundaries.Enqueue(lastAddedBoundary);
+                }
 
                 previousLetter = letter;
             }
