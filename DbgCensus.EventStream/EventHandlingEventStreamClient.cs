@@ -24,7 +24,6 @@ namespace DbgCensus.EventStream
     {
         private readonly IEventHandlerTypeRepository _eventHandlerRepository;
         private readonly IServiceMessageTypeRepository _serviceMessageObjectRepository;
-        private readonly IServiceProvider _services;
         private readonly ConcurrentQueue<Task> _dispatchedEventQueue;
 
         /// <summary>
@@ -36,17 +35,15 @@ namespace DbgCensus.EventStream
         /// <param name="services">The <see cref="IServiceProvider"/>.</param>
         public EventHandlingEventStreamClient(
             ILogger<EventHandlingEventStreamClient> logger,
-            ClientWebSocket webSocket,
+            IServiceProvider services,
             JsonSerializerOptions deserializerOptions,
             JsonSerializerOptions serializerOptions,
             IEventHandlerTypeRepository eventHandlerTypeRepository,
-            IServiceMessageTypeRepository eventStreamObjectTypeRepository,
-            IServiceProvider services)
-            : base(logger, webSocket, deserializerOptions, serializerOptions)
+            IServiceMessageTypeRepository eventStreamObjectTypeRepository)
+            : base(logger, services, deserializerOptions, serializerOptions)
         {
             _eventHandlerRepository = eventHandlerTypeRepository;
             _serviceMessageObjectRepository = eventStreamObjectTypeRepository;
-            _services = services;
 
             _dispatchedEventQueue = new ConcurrentQueue<Task>();
         }

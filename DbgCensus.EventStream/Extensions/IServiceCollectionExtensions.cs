@@ -43,12 +43,11 @@ namespace DbgCensus.EventStream.Extensions
             serviceCollection.TryAddTransient<ICensusEventStreamClient>((s) =>
                 new EventHandlingEventStreamClient(
                     s.GetRequiredService<ILogger<EventHandlingEventStreamClient>>(),
-                    s.GetRequiredService<ClientWebSocket>(),
+                    s.GetRequiredService<IServiceProvider>(),
                     deserializerOptions.Invoke(s),
                     serializerOptions.Invoke(s),
                     s.GetRequiredService<IEventHandlerTypeRepository>(),
-                    s.GetRequiredService<IServiceMessageTypeRepository>(),
-                    s.GetRequiredService<IServiceProvider>()));
+                    s.GetRequiredService<IServiceMessageTypeRepository>()));
 
             return serviceCollection;
         }

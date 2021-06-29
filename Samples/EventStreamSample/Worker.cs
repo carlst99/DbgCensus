@@ -12,22 +12,23 @@ namespace EventStreamSample
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly CensusEventStreamOptions _eventStreamOptions;
-        private readonly ICensusEventStreamClient _eventStreamClient;
+        private readonly CensusEventStreamOptions _options;
+        private readonly ICensusEventStreamClient _client;
 
         public Worker(ILogger<Worker> logger, IOptions<CensusEventStreamOptions> eventStreamOptions, ICensusEventStreamClient eventStreamClient)
         {
             _logger = logger;
-            _eventStreamOptions = eventStreamOptions.Value;
-            _eventStreamClient = eventStreamClient;
+            _options = eventStreamOptions.Value;
+            _client = eventStreamClient;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Starting event stream client");
+
             try
             {
-                await _eventStreamClient.StartAsync(_eventStreamOptions, stoppingToken).ConfigureAwait(false);
+                await _client.StartAsync(_options, stoppingToken).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not TaskCanceledException)
             {
@@ -37,7 +38,7 @@ namespace EventStreamSample
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            await _eventStreamClient.StopAsync().ConfigureAwait(false);
+            await _client.StopAsync().ConfigureAwait(false);
             await base.StopAsync(cancellationToken).ConfigureAwait(false);
         }
     }

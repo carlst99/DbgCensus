@@ -1,6 +1,7 @@
 ﻿using DbgCensus.Core.Json;
 using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.Commands;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using System;
@@ -37,11 +38,12 @@ namespace DbgCensus.EventStream
         protected static readonly RecyclableMemoryStreamManager _memoryStreamPool = new();
 
         protected readonly ILogger<CensusEventStreamClient> _logger;
-        protected readonly ClientWebSocket _webSocket;
+        protected readonly IServiceProvider _services;
         protected readonly JsonSerializerOptions _jsonDeserializerOptions;
         protected readonly JsonSerializerOptions _jsonSerializerOptions;
 
         protected Uri? _endpoint;
+        protected ClientWebSocket _webSocket;
 
         /// <inheritdoc />
         public bool IsDisposed { get; protected set; }
@@ -58,13 +60,13 @@ namespace DbgCensus.EventStream
         /// <param name="serializerOptions">The JSON options to use when serializing commands.</param>
         protected CensusEventStreamClient(
             ILogger<CensusEventStreamClient> logger,
-            ClientWebSocket webSocket,
+            IServiceProvider services,
             JsonSerializerOptions deserializerOptions,
             JsonSerializerOptions serializerOptions)
         {
             _logger = logger;
-            _webSocket = webSocket;
-            _webSocket.Options.KeepAliveInterval = TimeSpan.FromSeconds(KEEPALIVE_INTERVAL_SEC);
+            _services = services;
+            _webSocket = services.GetRequiredService<ClientWebSocket>();
 
             _jsonDeserializerOptions = new JsonSerializerOptions(deserializerOptions)
             {
@@ -91,15 +93,14 @@ namespace DbgCensus.EventStream
             if (IsRunning || _webSocket.State is WebSocketState.Open or WebSocketState.Connecting)
                 throw new InvalidOperationException("Client has already been started.");
 
-            IsRunning = true;
-
             UriBuilder builder = new(options.RootEndpoint);
             builder.Path = "streaming";
             builder.Query = $"environment={ options.Environment }&service-id=s:{ options.ServiceId }";
             _endpoint = builder.Uri;
 
-            await _webSocket.ConnectAsync(_endpoint, ct).ConfigureAwait(false);
+            await ConnectWebsocket(ct).ConfigureAwait(false);
 
+            IsRunning = true;
             _logger.LogInformation("Connected to event stream websocket. Listening for events...");
             await StartListeningAsync(ct).ConfigureAwait(false);
         }
@@ -113,6 +114,8 @@ namespace DbgCensus.EventStream
             IsRunning = false;
 
             await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None).ConfigureAwait(false);
+            _webSocket.Dispose();
+            _logger.LogInformation("Disconnected from the event stream websocket.");
         }
 
         /// <inheritdoc />
@@ -173,8 +176,15 @@ namespace DbgCensus.EventStream
 
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        await ReconnectAsync(ct).ConfigureAwait(false);
-                        continue;
+                        if (IsRunning)
+                        {
+                            await ReconnectAsync(ct).ConfigureAwait(false);
+                            continue;
+                        }
+                        else
+                        {
+                            return;
+                        }
                     }
 
                     stream.Write(buffer, 0, result.Count);
@@ -185,6 +195,17 @@ namespace DbgCensus.EventStream
             }
         }
 
+        /// <summary>
+        /// Gets a new <see cref="ClientWebSocket"/> instance and connects it to the <see cref="_endpoint"/>.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        protected virtual async Task ConnectWebsocket(CancellationToken ct = default)
+        {
+            _webSocket = _services.GetRequiredService<ClientWebSocket>();
+            _webSocket.Options.KeepAliveInterval = TimeSpan.FromSeconds(KEEPALIVE_INTERVAL_SEC);
+            await _webSocket.ConnectAsync(_endpoint!, ct).ConfigureAwait(false);
+        }
+
         protected virtual async Task ReconnectAsync(CancellationToken ct = default)
         {
             await StopAsync().ConfigureAwait(false);
@@ -193,7 +214,7 @@ namespace DbgCensus.EventStream
             await Task.Delay(RECONNECT_DELAY, ct).ConfigureAwait(false);
 
             _logger.LogInformation("Attempting to reconnect websocket.");
-            await _webSocket.ConnectAsync(_endpoint!, ct).ConfigureAwait(false);
+            await ConnectWebsocket(ct).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -210,7 +231,14 @@ namespace DbgCensus.EventStream
             {
                 if (disposing)
                 {
-                    _webSocket.Dispose();
+                    try
+                    {
+                        _webSocket.Dispose();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // This is fine, we dispose websockets when reconnecting or stopping
+                    }
                 }
 
                 IsDisposed = true;
