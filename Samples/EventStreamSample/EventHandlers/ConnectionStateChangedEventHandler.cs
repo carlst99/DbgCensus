@@ -1,6 +1,4 @@
-﻿using DbgCensus.EventStream.Abstractions;
-using DbgCensus.EventStream.Abstractions.EventHandling;
-using DbgCensus.EventStream.Commands;
+﻿using DbgCensus.EventStream.Abstractions.EventHandling;
 using DbgCensus.EventStream.Objects.Push;
 using Microsoft.Extensions.Logging;
 using System.Threading;
@@ -11,33 +9,33 @@ namespace EventStreamSample.EventHandlers
     public class ConnectionStateChangedEventHandler : ICensusEventHandler<ConnectionStateChanged>
     {
         private readonly ILogger<ConnectionStateChangedEventHandler> _logger;
-        private readonly ICensusEventStreamClient _client;
 
-        public ConnectionStateChangedEventHandler(ILogger<ConnectionStateChangedEventHandler> logger, ICensusEventStreamClient client)
+        public ConnectionStateChangedEventHandler(ILogger<ConnectionStateChangedEventHandler> logger)
         {
             _logger = logger;
-            _client = client;
         }
 
         public async Task HandleAsync(ConnectionStateChanged censusEvent, CancellationToken ct = default)
         {
-            if (!censusEvent.Connected)
-            {
-                _logger.LogWarning("Event stream connection state changed: we are now disconnected!");
-                return;
-            }
+            _logger.LogWarning("Event stream connection state changed: we are now {state}!", censusEvent.Connected ? "connected" : "disconnected");
 
-            await _client.SendCommandAsync
-            (
-                new SubscribeCommand
-                (
-                    new string[] { "all" },
-                    new string[] { "PlayerLogin", "PlayerLogout" },
-                    true,
-                    new string[] { "all" }
-                ),
-                ct
-            ).ConfigureAwait(false);
+            if (!censusEvent.Connected)
+                return;
+
+            //if (censusEvent.EventStreamClient is null)
+            //    return;
+
+            //await censusEvent.EventStreamClient.SendCommandAsync
+            //(
+            //    new SubscribeCommand
+            //    (
+            //        new string[] { "all" },
+            //        new string[] { "PlayerLogin", "PlayerLogout" },
+            //        true,
+            //        new string[] { "all" }
+            //    ),
+            //    ct
+            //).ConfigureAwait(false);
         }
     }
 }

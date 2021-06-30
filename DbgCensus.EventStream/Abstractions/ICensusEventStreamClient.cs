@@ -11,6 +11,11 @@ namespace DbgCensus.EventStream.Abstractions
     public interface ICensusEventStreamClient : IDisposable
     {
         /// <summary>
+        /// The unique name of the client.
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
         /// Gets a value indicating if this <see cref="CensusEventStreamClient"/> instance has been disposed.
         /// </summary>
         bool IsDisposed { get; }

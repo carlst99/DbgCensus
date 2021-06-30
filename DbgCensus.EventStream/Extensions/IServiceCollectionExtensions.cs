@@ -36,18 +36,23 @@ namespace DbgCensus.EventStream.Extensions
             Func<IServiceProvider, JsonSerializerOptions> serializerOptions)
         {
             serviceCollection.TryAddTransient<ClientWebSocket>();
-
-            serviceCollection.TryAddSingleton<IEventHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
-            serviceCollection.TryAddSingleton<IServiceMessageTypeRepository>(s => s.GetRequiredService<IOptions<ServiceMessageTypeRepository>>().Value);
-
-            serviceCollection.TryAddTransient<ICensusEventStreamClient>((s) =>
-                new EventHandlingEventStreamClient(
+            serviceCollection.TryAddTransient
+            (
+                s => new EventHandlingEventStreamClient
+                (
+                    string.Empty,
                     s.GetRequiredService<ILogger<EventHandlingEventStreamClient>>(),
                     s.GetRequiredService<IServiceProvider>(),
                     deserializerOptions.Invoke(s),
                     serializerOptions.Invoke(s),
                     s.GetRequiredService<IEventHandlerTypeRepository>(),
-                    s.GetRequiredService<IServiceMessageTypeRepository>()));
+                    s.GetRequiredService<IServiceMessageTypeRepository>()
+                )
+            );
+            serviceCollection.TryAddTransient<ICensusEventStreamClient>(s => s.GetRequiredService<EventHandlingEventStreamClient>());
+
+            serviceCollection.TryAddSingleton<IEventHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
+            serviceCollection.TryAddSingleton<IServiceMessageTypeRepository>(s => s.GetRequiredService<IOptions<ServiceMessageTypeRepository>>().Value);
 
             return serviceCollection;
         }

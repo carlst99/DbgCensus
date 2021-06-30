@@ -46,6 +46,9 @@ namespace DbgCensus.EventStream
         protected ClientWebSocket _webSocket;
 
         /// <inheritdoc />
+        public string Name { get; protected set; }
+
+        /// <inheritdoc />
         public bool IsDisposed { get; protected set; }
 
         /// <inheritdoc />
@@ -59,11 +62,13 @@ namespace DbgCensus.EventStream
         /// <param name="deserializerOptions">The JSON options to use when deserializing events.</param>
         /// <param name="serializerOptions">The JSON options to use when serializing commands.</param>
         protected CensusEventStreamClient(
+            string name,
             ILogger<CensusEventStreamClient> logger,
             IServiceProvider services,
             JsonSerializerOptions deserializerOptions,
             JsonSerializerOptions serializerOptions)
         {
+            Name = name;
             _logger = logger;
             _services = services;
             _webSocket = services.GetRequiredService<ClientWebSocket>();

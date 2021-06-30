@@ -28,19 +28,28 @@ namespace DbgCensus.EventStream.Objects
         /// </summary>
         public IEnumerable<string> Worlds { get; init; }
 
+        ///// <summary>
+        ///// Initialises a new instance of the <see cref="Subscription"/> record.
+        ///// </summary>
+        ///// <param name="characterCount">The number of characters that have been subscribed to.</param>
+        ///// <param name="eventNames">The events that have been subscribed to.</param>
+        ///// <param name="logicalAndCharactersWithWorlds">A value indicating if events will only be sent when they both a character AND a world that has been subscribed to. Useful when subscribing to 'all' values of a category.</param>
+        ///// <param name="worlds">The worlds that have been subscribed to.</param>
+        //public Subscription(int characterCount, IEnumerable<string> eventNames, bool logicalAndCharactersWithWorlds, IEnumerable<string> worlds)
+        //{
+        //    CharacterCount = characterCount;
+        //    EventNames = eventNames ?? new List<string>();
+        //    LogicalAndCharactersWithWorlds = logicalAndCharactersWithWorlds;
+        //    Worlds = worlds ?? new List<string>();
+        //}
+    
         /// <summary>
         /// Initialises a new instance of the <see cref="Subscription"/> record.
         /// </summary>
-        /// <param name="characterCount">The number of characters that have been subscribed to.</param>
-        /// <param name="eventNames">The events that have been subscribed to.</param>
-        /// <param name="logicalAndCharactersWithWorlds">A value indicating if events will only be sent when they both a character AND a world that has been subscribed to. Useful when subscribing to 'all' values of a category.</param>
-        /// <param name="worlds">The worlds that have been subscribed to.</param>
-        public Subscription(int characterCount, IEnumerable<string> eventNames, bool logicalAndCharactersWithWorlds, IEnumerable<string> worlds)
+        public Subscription()
         {
-            CharacterCount = characterCount;
-            EventNames = eventNames;
-            LogicalAndCharactersWithWorlds = logicalAndCharactersWithWorlds;
-            Worlds = worlds;
+            EventNames = new List<string>();
+            Worlds = new List<string>();
         }
     }
 }

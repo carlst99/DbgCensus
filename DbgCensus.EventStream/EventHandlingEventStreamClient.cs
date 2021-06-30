@@ -35,13 +35,14 @@ namespace DbgCensus.EventStream
         /// <param name="eventStreamObjectTypeRepository">The repository of <see cref="IEventStreamObject"/> types.</param>
         /// <param name="services">The <see cref="IServiceProvider"/>.</param>
         public EventHandlingEventStreamClient(
+            string name,
             ILogger<EventHandlingEventStreamClient> logger,
             IServiceProvider services,
             JsonSerializerOptions deserializerOptions,
             JsonSerializerOptions serializerOptions,
             IEventHandlerTypeRepository eventHandlerTypeRepository,
             IServiceMessageTypeRepository eventStreamObjectTypeRepository)
-            : base(logger, services, deserializerOptions, serializerOptions)
+            : base(name, logger, services, deserializerOptions, serializerOptions)
         {
             _eventHandlerRepository = eventHandlerTypeRepository;
             _serviceMessageObjectRepository = eventStreamObjectTypeRepository;
@@ -103,7 +104,7 @@ namespace DbgCensus.EventStream
             }
             else if (jsonResponse.RootElement.TryGetProperty("subscription", out JsonElement subscriptionElement))
             {
-                DeserializeAndBeginEventDispatch<Subscription>(jsonResponse.RootElement, ct);
+                DeserializeAndBeginEventDispatch<Subscription>(subscriptionElement, ct);
             }
             else if (jsonResponse.RootElement.TryGetProperty("send this for help", out _))
             {

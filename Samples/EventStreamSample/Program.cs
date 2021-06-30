@@ -24,7 +24,10 @@ namespace EventStreamSample
                     services.Configure<CensusEventStreamOptions>(hostContext.Configuration.GetSection(nameof(CensusEventStreamOptions)));
 
                     services.AddCensusEventStreamServices()
+                            .AddEventHandler<ConnectionStateChangedEventHandler>()
                             .AddEventHandler<HeartbeatEventHandler>()
+                            .AddEventHandler<ServiceStateChangedEventHandler>()
+                            .AddEventHandler<SubscriptionEventHandler>()
                             .AddEventHandler<PlayerLogEventHandler, PlayerLogin>(EventNames.PLAYER_LOGIN)
                             .AddEventHandler<PlayerLogEventHandler, PlayerLogout>(EventNames.PLAYER_LOGOUT)
                             .AddEventHandler<UnknownEventHandler>();
