@@ -1,4 +1,6 @@
-﻿using DbgCensus.EventStream.Abstractions.EventHandling;
+﻿using DbgCensus.EventStream.Abstractions;
+using DbgCensus.EventStream.Abstractions.EventHandling;
+using DbgCensus.EventStream.Commands;
 using DbgCensus.EventStream.Objects.Push;
 using Microsoft.Extensions.Logging;
 using System.Threading;
@@ -9,10 +11,12 @@ namespace EventStreamSample.EventHandlers
     public class ConnectionStateChangedEventHandler : ICensusEventHandler<ConnectionStateChanged>
     {
         private readonly ILogger<ConnectionStateChangedEventHandler> _logger;
+        private readonly ICensusEventStreamClientFactory _clientFactory;
 
-        public ConnectionStateChangedEventHandler(ILogger<ConnectionStateChangedEventHandler> logger)
+        public ConnectionStateChangedEventHandler(ILogger<ConnectionStateChangedEventHandler> logger, ICensusEventStreamClientFactory clientFactory)
         {
             _logger = logger;
+            _clientFactory = clientFactory;
         }
 
         public async Task HandleAsync(ConnectionStateChanged censusEvent, CancellationToken ct = default)
@@ -22,20 +26,18 @@ namespace EventStreamSample.EventHandlers
             if (!censusEvent.Connected)
                 return;
 
-            //if (censusEvent.EventStreamClient is null)
-            //    return;
-
-            //await censusEvent.EventStreamClient.SendCommandAsync
-            //(
-            //    new SubscribeCommand
-            //    (
-            //        new string[] { "all" },
-            //        new string[] { "PlayerLogin", "PlayerLogout" },
-            //        true,
-            //        new string[] { "all" }
-            //    ),
-            //    ct
-            //).ConfigureAwait(false);
+            ICensusEventStreamClient client = _clientFactory.GetClient(censusEvent.DispatchingClientName);
+            await client.SendCommandAsync
+            (
+                new SubscribeCommand
+                (
+                    new string[] { "all" },
+                    new string[] { "PlayerLogin", "PlayerLogout" },
+                    true,
+                    new string[] { "all" }
+                ),
+                ct
+            ).ConfigureAwait(false);
         }
     }
 }

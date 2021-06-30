@@ -7,6 +7,9 @@ namespace DbgCensus.EventStream.Objects
     /// </summary>
     public abstract record EventStreamObjectBase : IEventStreamObject
     {
+        /// <inheritdoc />
+        public string DispatchingClientName { get; set; }
+
         /// <summary>
         /// The websocket service that this object has been received from.
         /// </summary>
@@ -19,6 +22,7 @@ namespace DbgCensus.EventStream.Objects
 
         protected EventStreamObjectBase()
         {
+            DispatchingClientName = string.Empty;
             Service = string.Empty;
             Type = string.Empty;
         }

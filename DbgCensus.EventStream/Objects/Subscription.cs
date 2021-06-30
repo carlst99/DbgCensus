@@ -8,6 +8,9 @@ namespace DbgCensus.EventStream.Objects
     /// </summary>
     public record Subscription : IEventStreamObject
     {
+        /// <inheritdoc />
+        public string DispatchingClientName { get; set; }
+
         /// <summary>
         /// Gets the number of characters that have been subscribed to.
         /// </summary>

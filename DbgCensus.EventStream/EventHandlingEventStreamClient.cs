@@ -10,7 +10,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.WebSockets;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
@@ -30,7 +29,7 @@ namespace DbgCensus.EventStream
         /// <summary>
         /// Initialises a new instance of the <see cref="EventHandlingEventStreamClient"/> class.
         /// </summary>
-        /// <inheritdoc cref="CensusEventStreamClient(ILogger{CensusEventStreamClient}, ClientWebSocket, JsonSerializerOptions, JsonSerializerOptions)"/>
+        /// <inheritdoc cref="CensusEventStreamClient(string, ILogger{CensusEventStreamClient}, IServiceProvider, JsonSerializerOptions, JsonSerializerOptions)"/>
         /// <param name="eventHandlerTypeRepository">The repository of <see cref="ICensusEventHandler{TEvent}"/> types.</param>
         /// <param name="eventStreamObjectTypeRepository">The repository of <see cref="IEventStreamObject"/> types.</param>
         /// <param name="services">The <see cref="IServiceProvider"/>.</param>
@@ -83,7 +82,7 @@ namespace DbgCensus.EventStream
                 if (censusService is null || censusType is null)
                 {
                     _logger.LogWarning("An event with an unspecified service and/or type has been received. An UnknownEvent object will be dispatched.");
-                    BeginEventDispatch(new UnknownEvent(jsonResponse.RootElement.GetRawText()), ct);
+                    BeginEventDispatch(new UnknownEvent(Name, jsonResponse.RootElement.GetRawText()), ct);
                 }
                 else if (censusService == "event" && censusType == "serviceMessage")
                 {
@@ -113,7 +112,7 @@ namespace DbgCensus.EventStream
             else
             {
                 _logger.LogWarning("An unknown event was received from the Census event stream. An UnknownEvent object will be dispatched.");
-                BeginEventDispatch(new UnknownEvent(jsonResponse.RootElement.GetRawText()), ct);
+                BeginEventDispatch(new UnknownEvent(Name, jsonResponse.RootElement.GetRawText()), ct);
             }
 
             eventStream.Dispose();
@@ -130,7 +129,7 @@ namespace DbgCensus.EventStream
             if (!element.TryGetProperty("payload", out JsonElement payloadElement))
             {
                 _logger.LogWarning("A service message was received that did not contain a payload. An unknown event will be dispatched.");
-                BeginEventDispatch(new UnknownEvent(element.GetRawText()), ct);
+                BeginEventDispatch(new UnknownEvent(Name, element.GetRawText()), ct);
                 return;
             }
 
@@ -138,7 +137,7 @@ namespace DbgCensus.EventStream
             if (!payloadElement.TryGetProperty("event_name", out JsonElement eventNameElement))
             {
                 _logger.LogWarning("A service message was received that did not contain a valid payload. An unknown event will be dispatched.");
-                BeginEventDispatch(new UnknownEvent(element.GetRawText()), ct);
+                BeginEventDispatch(new UnknownEvent(Name, element.GetRawText()), ct);
                 return;
             }
 
@@ -147,7 +146,7 @@ namespace DbgCensus.EventStream
             if (eventName is null)
             {
                 _logger.LogWarning("An event with no name was received. An unknown event will be dispatched.");
-                BeginEventDispatch(new UnknownEvent(element.GetRawText()), ct);
+                BeginEventDispatch(new UnknownEvent(Name, element.GetRawText()), ct);
                 return;
             }
 
@@ -172,6 +171,8 @@ namespace DbgCensus.EventStream
                     _logger.LogError("Could not deserialise websocket event. Raw response: {raw}", element.GetRawText());
                     return;
                 }
+
+                deserialized.DispatchingClientName = Name;
                 BeginEventDispatch(deserialized, ct);
             }
             catch (Exception ex)
@@ -190,6 +191,8 @@ namespace DbgCensus.EventStream
                     _logger.LogError("Could not deserialise websocket event. Raw response: {raw}", element.GetRawText());
                     return;
                 }
+
+                ((IEventStreamObject)deserialized).DispatchingClientName = Name;
                 BeginEventDispatch(eventType, deserialized, ct);
             }
             catch (Exception ex)
