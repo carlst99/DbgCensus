@@ -59,8 +59,6 @@ namespace DbgCensus.EventStream.Extensions
             );
             serviceCollection.TryAddTransient<ICensusEventStreamClient>(s => s.GetRequiredService<ICensusEventStreamClientFactory>().GetClient());
 
-            serviceCollection.TryAddTransient<ICensusEventStreamClient>(s => s.GetRequiredService<EventHandlingEventStreamClient>());
-
             serviceCollection.TryAddSingleton<IEventHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
             serviceCollection.TryAddSingleton<IServiceMessageTypeRepository>(s => s.GetRequiredService<IOptions<ServiceMessageTypeRepository>>().Value);
 

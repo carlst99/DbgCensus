@@ -1,5 +1,6 @@
 ﻿using DbgCensus.EventStream.Abstractions.Objects;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace DbgCensus.EventStream.Objects
 {
@@ -12,18 +13,26 @@ namespace DbgCensus.EventStream.Objects
         public string DispatchingClientName { get; set; }
 
         /// <summary>
+        /// Gets the characters that have been subscribed to.
+        /// </summary>
+        public IEnumerable<string> Characters { get; init; }
+
+        /// <summary>
         /// Gets the number of characters that have been subscribed to.
         /// </summary>
+        [JsonPropertyName("characterCount")]
         public int CharacterCount { get; init; }
 
         /// <summary>
         /// Gets the events that have been subscribed to.
         /// </summary>
+        [JsonPropertyName("eventNames")]
         public IEnumerable<string> EventNames { get; init; }
 
         /// <summary>
         /// Gets a value indicating if events will only be sent when they both a character AND a world that has been subscribed to. Useful when subscribing to 'all' values of a category.
         /// </summary>
+        [JsonPropertyName("logicalAndCharactersWithWorlds")]
         public bool LogicalAndCharactersWithWorlds { get; init; }
 
         /// <summary>
@@ -51,6 +60,8 @@ namespace DbgCensus.EventStream.Objects
         /// </summary>
         public Subscription()
         {
+            DispatchingClientName = string.Empty;
+            Characters = new List<string>();
             EventNames = new List<string>();
             Worlds = new List<string>();
         }

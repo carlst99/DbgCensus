@@ -20,11 +20,12 @@ namespace EventStreamSample.EventHandlers
             _logger.LogInformation
             (
                 "Current subscription changed! Subscribed to:" +
-                "\n- {charCount} characters" +
-                "\n- On worlds {worlds}" +
-                "\n- To events {events}" +
-                "\n- Logical AND characters with worlds: {logicalAnd}",
+                "\n- {charCount} characters: {characters}" +
+                "\n- on worlds {worlds}" +
+                "\n- for events {events}" +
+                "\n- logical AND characters with worlds: {logicalAnd}",
                 censusEvent.CharacterCount,
+                string.Join(", ", censusEvent.Characters),
                 string.Join(", ", censusEvent.Worlds),
                 string.Join(", ", censusEvent.EventNames),
                 censusEvent.LogicalAndCharactersWithWorlds
