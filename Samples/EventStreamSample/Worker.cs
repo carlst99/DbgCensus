@@ -13,32 +13,47 @@ namespace EventStreamSample
     {
         private readonly ILogger<Worker> _logger;
         private readonly CensusEventStreamOptions _options;
-        private readonly ICensusEventStreamClient _client;
+        private readonly ICensusEventStreamClientFactory _clientFactory;
 
-        public Worker(ILogger<Worker> logger, IOptions<CensusEventStreamOptions> eventStreamOptions, ICensusEventStreamClient eventStreamClient)
+        private ICensusEventStreamClient? _client;
+
+        public Worker(ILogger<Worker> logger, IOptions<CensusEventStreamOptions> eventStreamOptions, ICensusEventStreamClientFactory clientFactory)
         {
             _logger = logger;
             _options = eventStreamOptions.Value;
-            _client = eventStreamClient;
+            _clientFactory = clientFactory;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Starting event stream client");
 
-            try
+            while (!stoppingToken.IsCancellationRequested)
             {
-                await _client.StartAsync(_options, stoppingToken).ConfigureAwait(false);
-            }
-            catch (Exception ex) when (ex is not TaskCanceledException)
-            {
-                _logger.LogError(ex, "An error occured in the event stream client");
+                _client = _clientFactory.GetClient();
+
+                try
+                {
+                    await _client.StartAsync(_options, stoppingToken).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (ex is not TaskCanceledException)
+                {
+                    _logger.LogError(ex, "An error occured in the event stream client");
+                }
+                finally
+                {
+                    _client.Dispose();
+                }
+
+                await Task.Delay(15000, stoppingToken).ConfigureAwait(false);
             }
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            await _client.StopAsync().ConfigureAwait(false);
+            if (_client?.IsRunning == true)
+                await _client.StopAsync().ConfigureAwait(false);
+
             await base.StopAsync(cancellationToken).ConfigureAwait(false);
         }
     }

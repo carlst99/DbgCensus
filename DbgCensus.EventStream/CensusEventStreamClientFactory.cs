@@ -55,8 +55,8 @@ namespace DbgCensus.EventStream
             if (options is null)
                 options = _options;
 
-            if (!_repository.ContainsKey(name))
-                _repository.Add(name, _clientFactory.Invoke(_services, name));
+            if (!_repository.ContainsKey(name) || _repository[name].IsDisposed)
+                _repository[name] = _clientFactory.Invoke(_services, name);
 
             return _repository[name];
         }

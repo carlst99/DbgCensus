@@ -31,10 +31,8 @@ namespace EventStreamSample.EventHandlers
             (
                 new SubscribeCommand
                 (
-                    new string[] { "all" },
-                    new string[] { "PlayerLogin", "PlayerLogout" },
-                    true,
-                    new string[] { "all" }
+                    eventNames: new string[] { "PlayerLogin", "PlayerLogout" },
+                    worlds: new string[] { "all" }
                 ),
                 ct
             ).ConfigureAwait(false);
