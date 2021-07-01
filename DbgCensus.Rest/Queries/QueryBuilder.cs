@@ -165,6 +165,9 @@ namespace DbgCensus.Rest.Queries
         /// <inheritdoc />
         public virtual IQueryBuilder Where<T>(string field, SearchModifier modifier, params T[] filterValues) where T : notnull
         {
+            if (filterValues.Length == 0)
+                throw new ArgumentException("At least one value must be provided", nameof(filterValues));
+
             string[] stringValues = new string[filterValues.Length];
             string? typeName = typeof(T).FullName;
 
@@ -250,7 +253,7 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (!_isShowingFields)
-                _showHideFields = GetMultiQCF<string>("show");
+                _showHideFields = GetMultiQCF<string>("c:show");
 
             _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = true;
@@ -263,7 +266,7 @@ namespace DbgCensus.Rest.Queries
         {
             // Show and hide are incompatible
             if (_isShowingFields)
-                _showHideFields = GetMultiQCF<string>("hide");
+                _showHideFields = GetMultiQCF<string>("c:hide");
 
             _showHideFields.AddArgumentRange(fieldNames);
             _isShowingFields = false;
