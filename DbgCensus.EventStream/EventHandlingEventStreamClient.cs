@@ -29,10 +29,13 @@ namespace DbgCensus.EventStream
         /// <summary>
         /// Initialises a new instance of the <see cref="EventHandlingEventStreamClient"/> class.
         /// </summary>
-        /// <inheritdoc cref="CensusEventStreamClient(string, ILogger{CensusEventStreamClient}, IServiceProvider, JsonSerializerOptions, JsonSerializerOptions)"/>
+        /// <param name="name">The identifying name of this client.</param>
+        /// <param name="logger">The logging interface to use.</param>
+        /// <param name="services">The service provider.</param>
+        /// <param name="deserializerOptions">The JSON options to use when deserializing events.</param>
+        /// <param name="serializerOptions">The JSON options to use when serializing commands.</param>
         /// <param name="eventHandlerTypeRepository">The repository of <see cref="ICensusEventHandler{TEvent}"/> types.</param>
         /// <param name="eventStreamObjectTypeRepository">The repository of <see cref="IEventStreamObject"/> types.</param>
-        /// <param name="services">The <see cref="IServiceProvider"/>.</param>
         public EventHandlingEventStreamClient(
             string name,
             ILogger<EventHandlingEventStreamClient> logger,

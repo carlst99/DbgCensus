@@ -18,7 +18,7 @@
         public string Namespace { get; set; }
 
         /// <summary>
-        /// Optionally remove all translations from internationalized strings except the one specified.
+        /// Optionally remove all translations by default from internationalized strings except the one specified.
         /// </summary>
         public string? LanguageCode { get; set; }
 

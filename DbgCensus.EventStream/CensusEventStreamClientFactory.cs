@@ -30,7 +30,12 @@ namespace DbgCensus.EventStream
         {
         }
 
-        /// <inheritdoc cref="CensusEventStreamClientFactory{TClient}.CensusEventStreamClientFactory(IOptions{CensusEventStreamOptions}, IServiceProvider, Func{IServiceProvider, string, TClient})"/>
+        /// <summary>
+        /// Initialises a new instance of the <see cref="CensusEventStreamClientFactory{TClient}"/> class.
+        /// </summary>
+        /// <param name="options">This parameter is currently unused.</param>
+        /// <param name="services">The service provider.</param>
+        /// <param name="clientFactory">The factory to use when creating new instances of an <see cref="ICensusEventStreamClient"/>.</param>
         /// <param name="deserializationOptions">The JSON options for each client to use when deserializing event stream objects.</param>
         /// <param name="serializationOptions">The JSON options for each client to use when serializing commands.</param>
         public CensusEventStreamClientFactory(

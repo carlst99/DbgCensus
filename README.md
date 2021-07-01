@@ -8,6 +8,7 @@ DbgCensus is a low-level C# wrapper for [Daybreak Game Company's Census API](htt
 
 [![Nuget | DbgCensus.Core](https://img.shields.io/nuget/v/DbgCensus.Core?label=DbgCensus.Core)](https://www.nuget.org/packages/DbgCensus.Core)
 [![Nuget | DbgCensus.Rest](https://img.shields.io/nuget/v/DbgCensus.Rest?label=DbgCensus.Rest)](https://www.nuget.org/packages/DbgCensus.Rest)
+[![Nuget | DbgCensus.EventStream](https://img.shields.io/nuget/v/DbgCensus.EventStream?label=DbgCensus.EventStream)](https://www.nuget.org/packages/DbgCensus.EventStream)
 
 ***
 
@@ -19,9 +20,9 @@ DbgCensus is a low-level C# wrapper for [Daybreak Game Company's Census API](htt
 
 > :warning: DbgCensus is currently in a pre-release state. This means that:
 >
-> - Support for the Event Streaming API has not yet been implemented.
 > - The code is largely untested, but 'should work'.
 > - Documentation is light on the ground, although the code is fully XML documented.
+> - The event stream wrapper is completely undocumented and in an extremely 'alpha' state.
 
 ***
 
@@ -49,7 +50,7 @@ Start off by installing the REST package. As it is currently a pre-release build
 Install-Package DbgCensus.Rest -IncludePrerelease
 ```
 
-If your project makes use of the `Microsoft.Extensions` framework, you can easily register the required services to the container with the `AddCensusRestServices` extension method:
+If your project integrates with the `Microsoft.Extensions` framework, you can easily register the required services to the container with the `AddCensusRestServices` extension method:
 
 ```csharp
 using DbgCensus.Rest.Extensions;
@@ -80,7 +81,6 @@ Utilise the `CensusQueryOptions` object. You can register this using the options
 
 ## Roadmap
 
-- Support for the event stream.
 - Proper documentation.
-- Polly implementation for the REST interface.
-- Complete unit testing coverage.
+- Polly support for the REST interface.
+- Much improved unit testing coverage.

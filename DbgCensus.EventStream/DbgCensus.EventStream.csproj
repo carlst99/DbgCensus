@@ -1,17 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
 
     <!-- Package info -->
-    <Version>1.0.0-beta.1</Version>
+    <Version>1.0.0-alpha.1</Version>
     <Authors>Carl Stephens</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
     <RepositoryUrl>https://github.com/carlst99/DbgCensus</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Description>A library for receiving data from the websocket event stream of Daybreak Game Company's Census API.</Description>
+    <Description>A library for receiving data from the websocket event stream of Daybreak Game Company's Census API. EXTREMELY ALPHA release.</Description>
     <PackageTags>planetside2 daybreak-games daybreak-census</PackageTags>
     <PackageIcon>Icon_128.png</PackageIcon>
 

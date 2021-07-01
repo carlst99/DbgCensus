@@ -57,6 +57,7 @@ namespace DbgCensus.EventStream
         /// <summary>
         /// Initialises a new instance of the <see cref="CensusEventStreamClient"/> class.
         /// </summary>
+        /// <param name="name">The identifying name of this client.</param>
         /// <param name="logger">The logging interface to use.</param>
         /// <param name="services">The service provider.</param>
         /// <param name="deserializerOptions">The JSON options to use when deserializing events.</param>
