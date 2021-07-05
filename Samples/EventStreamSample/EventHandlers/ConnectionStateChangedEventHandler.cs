@@ -31,7 +31,8 @@ namespace EventStreamSample.EventHandlers
             (
                 new SubscribeCommand
                 (
-                    eventNames: new string[] { "PlayerLogin", "PlayerLogout" },
+                    new string[] { "all" },
+                    new string[] { "PlayerLogin", "PlayerLogout" },
                     worlds: new string[] { "all" }
                 ),
                 ct
