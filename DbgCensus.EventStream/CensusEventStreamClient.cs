@@ -60,21 +60,21 @@ namespace DbgCensus.EventStream
         /// <param name="name">The identifying name of this client.</param>
         /// <param name="logger">The logging interface to use.</param>
         /// <param name="services">The service provider.</param>
-        /// <param name="deserializerOptions">The JSON options to use when deserializing events.</param>
-        /// <param name="serializerOptions">The JSON options to use when serializing commands.</param>
+        /// <param name="deserializationOptions">The JSON options to use when deserializing events.</param>
+        /// <param name="serializationOptions">The JSON options to use when serializing commands.</param>
         protected CensusEventStreamClient(
             string name,
             ILogger<CensusEventStreamClient> logger,
             IServiceProvider services,
-            JsonSerializerOptions deserializerOptions,
-            JsonSerializerOptions serializerOptions)
+            JsonSerializerOptions deserializationOptions,
+            JsonSerializerOptions serializationOptions)
         {
             Name = name;
             _logger = logger;
             _services = services;
             _webSocket = services.GetRequiredService<ClientWebSocket>();
 
-            _jsonDeserializerOptions = new JsonSerializerOptions(deserializerOptions)
+            _jsonDeserializerOptions = new JsonSerializerOptions(deserializationOptions)
             {
                 NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals
             };
@@ -88,7 +88,7 @@ namespace DbgCensus.EventStream
             _jsonDeserializerOptions.Converters.Add(new DateTimeJsonConverter());
             _jsonDeserializerOptions.Converters.Add(new DateTimeOffsetJsonConverter());
 
-            _jsonSerializerOptions = new JsonSerializerOptions(serializerOptions);
+            _jsonSerializerOptions = new JsonSerializerOptions(serializationOptions);
             if (_jsonSerializerOptions.PropertyNamingPolicy is null)
                 _jsonSerializerOptions.PropertyNamingPolicy = new CamelCaseJsonNamingPolicy();
         }

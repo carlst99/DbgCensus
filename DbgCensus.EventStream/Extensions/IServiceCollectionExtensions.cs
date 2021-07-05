@@ -28,7 +28,8 @@ namespace DbgCensus.EventStream.Extensions
         /// Adds required services for interacting with the Census REST API.
         /// </summary>
         /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
-        /// <param name="deserializationOptions">JSON options to conform to.</param>
+        /// <param name="deserializationOptions">The JSON options to use when deserializing events.</param>
+        /// <param name="serializationOptions">The JSON options to use when serializing commands.</param>
         /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
         public static IServiceCollection AddCensusEventStreamServices(
             this IServiceCollection serviceCollection,
