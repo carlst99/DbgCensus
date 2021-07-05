@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace DbgCensus.EventStream.Abstractions.EventHandling
 {
     /// <summary>
-    /// Stores and maps <see cref="ServiceMessage"/> types to the census types they represent.
+    /// Stores and maps <see cref="ServiceMessage{T}"/> types to the census types they represent.
     /// </summary>
     public interface IServiceMessageTypeRepository
     {
