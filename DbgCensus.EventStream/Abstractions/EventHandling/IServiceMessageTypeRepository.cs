@@ -20,6 +20,7 @@ namespace DbgCensus.EventStream.Abstractions.EventHandling
         /// <summary>
         /// Registers a <see cref="ServiceMessage{T}"/> to the census event type that it carries a payload for.
         /// </summary>
+        /// <typeparam name="TObject">The type of <see cref="ServiceMessage{T}"/>.</typeparam>
         /// <typeparam name="TPayload">The type of the payload.</typeparam>
         /// <param name="eventName">The name of the event that this payload is for.</param>
         /// <returns>A value indicating if the service message type was added to the repository. If false, the type has already been registered.</returns>
