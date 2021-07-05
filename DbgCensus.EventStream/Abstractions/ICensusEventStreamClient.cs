@@ -47,5 +47,12 @@ namespace DbgCensus.EventStream.Abstractions
         /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task SendCommandAsync<T>(T command, CancellationToken ct = default) where T : IEventStreamCommand;
+
+        /// <summary>
+        /// Closes and reconnects to the websocket. Can help in cases where Census stops pushing data for your subscription.
+        /// </summary>
+        /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task ReconnectAsync(CancellationToken ct = default);
     }
 }

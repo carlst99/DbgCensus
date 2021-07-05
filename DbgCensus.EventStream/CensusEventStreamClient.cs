@@ -151,6 +151,18 @@ namespace DbgCensus.EventStream
         }
 
         /// <inheritdoc />
+        public virtual async Task ReconnectAsync(CancellationToken ct = default)
+        {
+            await StopAsync().ConfigureAwait(false);
+            _logger.LogWarning("Websocket was closed with status {code} and description {description}.", _webSocket.CloseStatus, _webSocket.CloseStatusDescription);
+
+            await Task.Delay(RECONNECT_DELAY, ct).ConfigureAwait(false);
+
+            _logger.LogInformation("Attempting to reconnect websocket.");
+            await ConnectWebsocket(ct).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
@@ -210,17 +222,6 @@ namespace DbgCensus.EventStream
             _webSocket = _services.GetRequiredService<ClientWebSocket>();
             _webSocket.Options.KeepAliveInterval = TimeSpan.FromSeconds(KEEPALIVE_INTERVAL_SEC);
             await _webSocket.ConnectAsync(_endpoint!, ct).ConfigureAwait(false);
-        }
-
-        protected virtual async Task ReconnectAsync(CancellationToken ct = default)
-        {
-            await StopAsync().ConfigureAwait(false);
-            _logger.LogWarning("Websocket was closed with status {code} and description {description}.", _webSocket.CloseStatus, _webSocket.CloseStatusDescription);
-
-            await Task.Delay(RECONNECT_DELAY, ct).ConfigureAwait(false);
-
-            _logger.LogInformation("Attempting to reconnect websocket.");
-            await ConnectWebsocket(ct).ConfigureAwait(false);
         }
 
         /// <summary>
