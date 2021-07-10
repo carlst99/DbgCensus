@@ -1,6 +1,7 @@
 ﻿using DbgCensus.Core.Utils;
 using DbgCensus.Rest.Abstractions.Queries;
 using System;
+using System.Collections.Generic;
 
 namespace DbgCensus.Rest.Queries
 {
@@ -29,16 +30,36 @@ namespace DbgCensus.Rest.Queries
         /// </summary>
         /// <param name="field">The collection property to search on.</param>
         /// <param name="modifier">The search modifier.</param>
-        /// <param name="filterValues">The value to filter by.</param>
+        /// <param name="filterValue">The value to filter by.</param>
         /// <exception cref="ArgumentNullException">Thrown when a null or empty string is passed in as the 'property' and/or one of the 'filterValues' parameter/s.</exception>
-        public QueryFilter(string field, SearchModifier modifier, params string[] filterValues)
+        public QueryFilter(string field, SearchModifier modifier, string filterValue)
+        {
+            if (string.IsNullOrEmpty(field))
+                throw new ArgumentNullException(nameof(field));
+
+            if (string.IsNullOrEmpty(filterValue))
+                throw new ArgumentNullException(nameof(filterValue));
+
+            Field = field;
+            Modifier = modifier;
+            Value = filterValue;
+        }
+
+        /// <summary>
+        /// Stores the data required to perform a search on a collection in the Census REST API.
+        /// </summary>
+        /// <param name="field">The collection property to search on.</param>
+        /// <param name="modifier">The search modifier.</param>
+        /// <param name="filterValues">The values to filter by.</param>
+        /// <exception cref="ArgumentNullException">Thrown when a null or empty string is passed in as the 'property' and/or one of the 'filterValues' parameter/s.</exception>
+        public QueryFilter(string field, SearchModifier modifier, IEnumerable<string> filterValues)
         {
             if (string.IsNullOrEmpty(field))
                 throw new ArgumentNullException(nameof(field));
 
             Field = field;
-            Value = StringUtils.JoinWithoutNullOrEmptyValues(',', filterValues);
             Modifier = modifier;
+            Value = StringUtils.JoinWithoutNullOrEmptyValues(',', filterValues);
         }
 
         public static implicit operator string(QueryFilter f) => f.ToString();

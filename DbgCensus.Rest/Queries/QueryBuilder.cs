@@ -2,6 +2,7 @@
 using DbgCensus.Rest.Abstractions.Queries;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DbgCensus.Rest.Queries
 {
@@ -163,25 +164,25 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public virtual IQueryBuilder Where<T>(string field, SearchModifier modifier, params T[] filterValues) where T : notnull
+        public virtual IQueryBuilder Where<T>(string field, SearchModifier modifier, T filterValue) where T : notnull
         {
-            if (filterValues.Length == 0)
+            string value = StringUtils.SafeToString(filterValue);
+            _filters.Add(new QueryFilter(field, modifier, value));
+
+            return this;
+        }
+
+        /// <inheritdoc />
+        public virtual IQueryBuilder Where<T>(string field, SearchModifier modifier, IEnumerable<T> filterValues) where T : notnull
+        {
+            if (!filterValues.Any())
                 throw new ArgumentException("At least one value must be provided", nameof(filterValues));
 
-            string[] stringValues = new string[filterValues.Length];
-            string? typeName = typeof(T).FullName;
+            List<string> values = new();
+            foreach (T element in filterValues)
+                values.Add(StringUtils.SafeToString(element));
 
-            for (int i = 0; i < filterValues.Length; i++)
-            {
-                string? value = filterValues[i].ToString();
-                if (string.IsNullOrEmpty(value) || value == typeName)
-                    throw new ArgumentException("The type " + typeName + " must have properly implemented ToString()", nameof(filterValues));
-
-                stringValues[i] = value;
-            }
-
-            QueryFilter queryFilter = new(field, modifier, stringValues);
-            _filters.Add(queryFilter);
+            _filters.Add(new QueryFilter(field, modifier, values));
 
             return this;
         }

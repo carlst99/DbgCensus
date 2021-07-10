@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DbgCensus.Rest.Abstractions.Queries
 {
@@ -54,13 +55,25 @@ namespace DbgCensus.Rest.Abstractions.Queries
         IQueryBuilder WithStartIndex(uint index);
 
         /// <summary>
-        /// Performs a search on the collection. Multiple fields can be searched.
+        /// Performs a search on the collection.
         /// </summary>
+        /// <typeparam name="T">The type of filter value.</typeparam>
+        /// <param name="field">The collection field to filter on.</param>
+        /// <param name="modifier">The comparison operator.</param>
+        /// <param name="filterValue">The value to filter by.</param>
+        /// <returns>An <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
+        IQueryBuilder Where<T>(string field, SearchModifier modifier, T filterValue) where T : notnull;
+
+        /// <summary>
+        /// Performs a search on the collection for multiple values. These are combined with a boolean OR operator.
+        /// </summary>
+        /// <remarks>Filtering for multiple values removes the need to use <see cref="WithLimit(uint)"/>.</remarks>
+        /// <typeparam name="T">The type of filter value.</typeparam>
         /// <param name="field">The collection field to filter on.</param>
         /// <param name="modifier">The comparison operator.</param>
         /// <param name="filterValues">The values to filter by.</param>
         /// <returns>An <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
-        IQueryBuilder Where<T>(string field, SearchModifier modifier, params T[] filterValues) where T : notnull;
+        IQueryBuilder Where<T>(string field, SearchModifier modifier, IEnumerable<T> filterValues) where T : notnull;
 
         /// <summary>
         /// Sorts items in the result. Sorting can be performed on multiple fields.
