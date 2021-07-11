@@ -12,15 +12,17 @@ namespace DbgCensus.Core.Utils
         /// <summary>
         /// Converts an object to a string, checking that ToString() has been properly implemented.
         /// </summary>
-        /// <typeparam name="T">The type of object.</typeparam>
         /// <param name="element">The object to convert.</param>
         /// <returns>The string representation of the object.</returns>
-        public static string SafeToString<T>(T element) where T : notnull
+        public static string SafeToString(object? element)
         {
-            string? typeName = typeof(T).FullName;
+            if (element is null)
+                throw new ArgumentNullException(nameof(element));
+
+            string? typeName = element.GetType().FullName;
             string? value = element.ToString();
 
-            if (string.IsNullOrEmpty(value) || value == typeName)
+            if (string.IsNullOrEmpty(value) || value.Equals(typeName))
                 throw new ArgumentException("The type " + typeName + " must have properly implemented ToString()", nameof(element));
 
             return value;

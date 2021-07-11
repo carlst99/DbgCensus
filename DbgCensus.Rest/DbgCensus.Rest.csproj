@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     
     <!-- Package info -->
-    <Version>1.0.0-beta.7</Version>
+    <Version>1.0.0-beta.8</Version>
     <Authors>Carl Stephens</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
@@ -19,7 +19,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Include symbol files (*.pdb) in the built .nupkg -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <PackageReleaseNotes>BREAKING CHANGE: Remove params arguments from IQueryBuilder/JoinBuilder#Where methods, in favour for single-value and enumerable overloads. (fixed release)</PackageReleaseNotes>
+    <PackageReleaseNotes>Fix IQueryBuilder/JoinBuilder#Where methods.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">

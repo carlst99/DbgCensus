@@ -1,6 +1,7 @@
 ﻿using DbgCensus.Core.Utils;
 using DbgCensus.Rest.Abstractions.Queries;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -164,25 +165,20 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public virtual IQueryBuilder Where<T>(string field, SearchModifier modifier, T filterValue) where T : notnull
+        public virtual IQueryBuilder Where<T>(string field, SearchModifier modifier, T value) where T : notnull
         {
-            string value = StringUtils.SafeToString(filterValue);
-            _filters.Add(new QueryFilter(field, modifier, value));
+            if (value is IEnumerable enumerable)
+            {
+                List<string> values = new();
+                foreach (object element in enumerable)
+                    values.Add(StringUtils.SafeToString(element));
 
-            return this;
-        }
-
-        /// <inheritdoc />
-        public virtual IQueryBuilder Where<T>(string field, SearchModifier modifier, IEnumerable<T> filterValues) where T : notnull
-        {
-            if (!filterValues.Any())
-                throw new ArgumentException("At least one value must be provided", nameof(filterValues));
-
-            List<string> values = new();
-            foreach (T element in filterValues)
-                values.Add(StringUtils.SafeToString(element));
-
-            _filters.Add(new QueryFilter(field, modifier, values));
+                _filters.Add(new QueryFilter(field, modifier, values));
+            }
+            else
+            {
+                _filters.Add(new QueryFilter(field, modifier, StringUtils.SafeToString(value)));
+            }
 
             return this;
         }
