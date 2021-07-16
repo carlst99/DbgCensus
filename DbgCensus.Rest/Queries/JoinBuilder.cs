@@ -120,25 +120,9 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public virtual IJoinBuilder Where<T>(string field, SearchModifier modifier, T filterValue) where T : notnull
+        public virtual IJoinBuilder Where(string field, SearchModifier modifier, string filterValue)
         {
-            string value = StringUtils.SafeToString(filterValue);
-            _filterTerms.AddArgument(new QueryFilter(field, modifier, value));
-
-            return this;
-        }
-
-        /// <inheritdoc />
-        public virtual IJoinBuilder Where<T>(string field, SearchModifier modifier, IEnumerable<T> filterValues) where T : notnull
-        {
-            if (!filterValues.Any())
-                throw new ArgumentException("At least one value must be provided", nameof(filterValues));
-
-            List<string> values = new();
-            foreach (T element in filterValues)
-                values.Add(StringUtils.SafeToString(element));
-
-            _filterTerms.AddArgument(new QueryFilter(field, modifier, values));
+            _filterTerms.AddArgument(new QueryFilter(field, modifier, filterValue));
 
             return this;
         }

@@ -57,12 +57,11 @@ namespace DbgCensus.Rest.Abstractions.Queries
         /// <summary>
         /// Performs a search on the collection. Enumerable filter values are supported.
         /// </summary>
-        /// <typeparam name="T">The type of filter value.</typeparam>
         /// <param name="field">The collection field to filter on.</param>
         /// <param name="modifier">The comparison operator.</param>
         /// <param name="filterValue">The value to filter by.</param>
         /// <returns>An <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
-        IQueryBuilder Where<T>(string field, SearchModifier modifier, T filterValue) where T : notnull;
+        IQueryBuilder Where(string field, SearchModifier modifier, string filterValue);
 
         /// <summary>
         /// Sorts items in the result. Sorting can be performed on multiple fields.
