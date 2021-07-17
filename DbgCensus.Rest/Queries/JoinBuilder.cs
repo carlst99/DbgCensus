@@ -120,9 +120,14 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public virtual IJoinBuilder Where(string field, SearchModifier modifier, string filterValue)
+        public virtual IJoinBuilder Where<T>(string field, SearchModifier modifier, T filterValue) where T : notnull
         {
-            _filterTerms.AddArgument(new QueryFilter(field, modifier, filterValue));
+            if (modifier is SearchModifier.StartsWith)
+                throw new ArgumentException($"The modifier { SearchModifier.StartsWith } cannot be used on a join filter.", nameof(modifier));
+            if (modifier is SearchModifier.Contains)
+                throw new ArgumentException($"The modifier { SearchModifier.Contains } cannot be used on a join filter.", nameof(modifier));
+
+            _filterTerms.AddArgument(new QueryFilter(field, modifier, StringUtils.SafeToString(filterValue)));
 
             return this;
         }

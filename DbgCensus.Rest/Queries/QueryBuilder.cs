@@ -165,9 +165,21 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public virtual IQueryBuilder Where(string field, SearchModifier modifier, string value)
+        public virtual IQueryBuilder Where<T>(string field, SearchModifier modifier, T value) where T : notnull
         {
-            _filters.Add(new QueryFilter(field, modifier, value));
+            _filters.Add(new QueryFilter(field, modifier, StringUtils.SafeToString(value)));
+
+            return this;
+        }
+
+        /// <inheritdoc />
+        public virtual IQueryBuilder WhereAll<T>(string field, SearchModifier modifier, IEnumerable<T> filterValues) where T : notnull
+        {
+            List<string> values = new();
+            foreach (T value in filterValues)
+                values.Add(StringUtils.SafeToString(value));
+
+            _filters.Add(new QueryFilter(field, modifier, string.Join(',', filterValues)));
 
             return this;
         }
