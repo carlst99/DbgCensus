@@ -1,9 +1,11 @@
+using DbgCensus.Core.Exceptions;
 using DbgCensus.Rest.Abstractions;
 using DbgCensus.Rest.Abstractions.Queries;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RestSample.Objects;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,11 +27,12 @@ namespace RestSample
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await GetMapStatus(stoppingToken).ConfigureAwait(false);
             await GetCharacter(stoppingToken).ConfigureAwait(false);
             await GetOnlineOutfitMembers(stoppingToken).ConfigureAwait(false);
         }
 
-        private async Task GetCharacter(CancellationToken ct)
+        private async Task GetCharacter(CancellationToken ct = default)
         {
             _logger.LogInformation("Getting character information for FalconEye36");
 
@@ -43,18 +46,17 @@ namespace RestSample
                 if (character is null)
                 {
                     _logger.LogInformation("That character does not exist.");
+                    return;
                 }
-                else
-                {
-                    _logger.LogInformation(
-                        "The character {name} of the {faction} is battle rank {rank}~{asp} with {certs} certs available. They last logged in on {lastLogin}",
-                        character.Name.First,
-                        character.FactionId,
-                        character.BattleRank.Value,
-                        character.PrestigeLevel,
-                        character.Certs.AvailablePoints,
-                        character.Times.LastLoginDate);
-                }
+
+                _logger.LogInformation(
+                    "The character {name} of the {faction} is battle rank {rank}~{asp} with {certs} certs available. They last logged in on {lastLogin}",
+                    character.Name.First,
+                    character.FactionId,
+                    character.BattleRank.Value,
+                    character.PrestigeLevel,
+                    character.Certs.AvailablePoints,
+                    character.Times.LastLoginDate);
             }
             catch (Exception ex)
             {
@@ -62,7 +64,7 @@ namespace RestSample
             }
         }
 
-        private async Task GetOnlineOutfitMembers(CancellationToken ct)
+        private async Task GetOnlineOutfitMembers(CancellationToken ct = default)
         {
             _logger.LogInformation("Getting online outfit members for TWC2");
 
@@ -100,21 +102,54 @@ namespace RestSample
                 OutfitOnlineMembers? outfit = await _client.GetAsync<OutfitOnlineMembers>(query, ct).ConfigureAwait(false);
                 if (outfit is null)
                 {
-                    _logger.LogInformation("That character does not exist.");
+                    _logger.LogInformation("That outfit does not exist.");
+                    return;
                 }
-                else
-                {
-                    _logger.LogInformation(
-                        "The outfit [{alias}] {name} has {onlineCount} members online: {onlineMembers}",
-                        outfit.OutfitAlias,
-                        outfit.OutfitName,
-                        outfit.OnlineMembers.Count,
-                        string.Join(", ", outfit.OnlineMembers.Select(m => m.Character.Name.First)));
-                }
+
+                _logger.LogInformation(
+                    "The outfit [{alias}] {name} has {onlineCount} members online: {onlineMembers}",
+                    outfit.OutfitAlias,
+                    outfit.OutfitName,
+                    outfit.OnlineMembers.Count,
+                    string.Join(", ", outfit.OnlineMembers.Select(m => m.Character.Name.First)));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to retrieve character.");
+            }
+        }
+
+        private async Task GetMapStatus(CancellationToken ct = default)
+        {
+            ZoneType[] zones = Enum.GetValues<ZoneType>();
+
+            IQueryBuilder query = _queryFactory.Get()
+                .OnCollection("map")
+                .Where("world_id", SearchModifier.Equals, WorldType.Connery)
+                .WhereAll("zone_ids", SearchModifier.Equals, zones.Select(z => (int)z));
+
+            try
+            {
+                List<Map>? maps = await _client.GetAsync<List<Map>>(query, ct).ConfigureAwait(false);
+                if (maps is null)
+                    throw new CensusException("Census returned no data");
+
+                string message = "Connery map status: ";
+                foreach (Map m in maps)
+                {
+                    double regionCount = m.Regions.Row.Count(r => r.RowData.FactionId != Faction.None);
+                    double ncPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == Faction.NC) / regionCount) * 100;
+                    double trPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == Faction.TR) / regionCount) * 100;
+                    double vsPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == Faction.VS) / regionCount) * 100;
+
+                    message += $"\n\t-{m.ZoneId} | NC: {ncPercent:F}%, TR: {trPercent:F}%, VS: {vsPercent:F}%";
+                }
+
+                _logger.LogInformation(message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to retrieve maps.");
             }
         }
     }

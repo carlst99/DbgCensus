@@ -106,7 +106,7 @@ namespace DbgCensus.Rest
         /// <param name="collectionName">The name of the collection that was queried.</param>
         /// <param name="ct">A token which can be used to cancel asynchronous logic.</param>
         /// <returns></returns>
-        protected virtual async Task<T?> DeserializeResponseContentAsync<T>(HttpContent content, string? collectionName, CancellationToken ct = default)
+        protected virtual async Task<T?> DeserializeResponseContentAsync<T>(HttpContent content, string? collectionName = null, CancellationToken ct = default)
         {
             using JsonDocument data = await JsonDocument.ParseAsync(await content.ReadAsStreamAsync(ct).ConfigureAwait(false), cancellationToken: ct).ConfigureAwait(false);
 

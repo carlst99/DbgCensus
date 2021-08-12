@@ -18,6 +18,7 @@ namespace EventStreamSample
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseDefaultServiceProvider(o => o.ValidateScopes = true)
                 .UseSerilog(GetLogger())
                 .ConfigureServices((hostContext, services) =>
                 {
