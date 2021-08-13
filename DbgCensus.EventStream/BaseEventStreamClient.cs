@@ -1,6 +1,7 @@
 ﻿using DbgCensus.Core.Json;
 using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.Commands;
+using DbgCensus.EventStream.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
@@ -39,6 +40,7 @@ namespace DbgCensus.EventStream
 
         protected readonly ILogger<BaseEventStreamClient> _logger;
         protected readonly IServiceProvider _services;
+        protected readonly EventStreamOptions _options;
         protected readonly JsonSerializerOptions _jsonDeserializerOptions;
         protected readonly JsonSerializerOptions _jsonSerializerOptions;
 
@@ -60,21 +62,20 @@ namespace DbgCensus.EventStream
         /// <param name="name">The identifying name of this client.</param>
         /// <param name="logger">The logging interface to use.</param>
         /// <param name="services">The service provider.</param>
-        /// <param name="deserializationOptions">The JSON options to use when deserializing events.</param>
-        /// <param name="serializationOptions">The JSON options to use when serializing commands.</param>
+        /// <param name="options">The options used to configure the client.</param>
         protected BaseEventStreamClient(
             string name,
             ILogger<BaseEventStreamClient> logger,
             IServiceProvider services,
-            JsonSerializerOptions deserializationOptions,
-            JsonSerializerOptions serializationOptions)
+            EventStreamOptions options)
         {
             Name = name;
             _logger = logger;
-            _services = services;
+            _services = services; // TODO: Is this necessary? It might make more sense to have a ClientWebSocketFactory
+            _options = options;
             _webSocket = services.GetRequiredService<ClientWebSocket>();
 
-            _jsonDeserializerOptions = new JsonSerializerOptions(deserializationOptions)
+            _jsonDeserializerOptions = new JsonSerializerOptions(_options.DeserializationOptions)
             {
                 NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals
             };
@@ -88,26 +89,33 @@ namespace DbgCensus.EventStream
             _jsonDeserializerOptions.Converters.Add(new DateTimeJsonConverter());
             _jsonDeserializerOptions.Converters.Add(new DateTimeOffsetJsonConverter());
 
-            _jsonSerializerOptions = new JsonSerializerOptions(serializationOptions);
+            _jsonSerializerOptions = new JsonSerializerOptions(_options.SerializationOptions);
             if (_jsonSerializerOptions.PropertyNamingPolicy is null)
                 _jsonSerializerOptions.PropertyNamingPolicy = new CamelCaseJsonNamingPolicy();
         }
 
         /// <inheritdoc />
-        public virtual async Task StartAsync(EventStreamOptions options, CancellationToken ct = default)
+        public virtual async Task StartAsync(SubscribeCommand? initialSubscription = null, CancellationToken ct = default)
         {
             if (IsRunning || _webSocket.State is WebSocketState.Open or WebSocketState.Connecting)
                 throw new InvalidOperationException("Client has already been started.");
 
-            UriBuilder builder = new(options.RootEndpoint);
+            UriBuilder builder = new(_options.RootEndpoint);
             builder.Path = "streaming";
-            builder.Query = $"environment={ options.Environment }&service-id=s:{ options.ServiceId }";
+            builder.Query = $"environment={ _options.Environment }&service-id=s:{ _options.ServiceId }";
             _endpoint = builder.Uri;
 
             await ConnectWebsocket(ct).ConfigureAwait(false);
-
             IsRunning = true;
-            _logger.LogInformation("Connected to event stream websocket. Listening for events...");
+            _logger.LogInformation("Connected to event stream websocket.");
+
+            if (initialSubscription is not null)
+            {
+                _logger.LogInformation("Sending initial subscription...");
+                await SendCommandAsync(initialSubscription, ct).ConfigureAwait(false);
+            }
+
+            _logger.LogInformation("Listening for events...");
             await StartListeningAsync(ct).ConfigureAwait(false);
         }
 

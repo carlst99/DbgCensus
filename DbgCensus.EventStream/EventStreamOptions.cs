@@ -1,4 +1,6 @@
-﻿namespace DbgCensus.EventStream
+﻿using System.Text.Json;
+
+namespace DbgCensus.EventStream
 {
     public class EventStreamOptions
     {
@@ -17,11 +19,23 @@
         /// </summary>
         public string Environment { get; set; }
 
+        /// <summary>
+        /// The JSON options to use when deserializing events.
+        /// </summary>
+        public JsonSerializerOptions DeserializationOptions { get; set; }
+
+        /// <summary>
+        /// The JSON options to use when serializing commands.
+        /// </summary>
+        public JsonSerializerOptions SerializationOptions { get; set; }
+
         public EventStreamOptions()
         {
             RootEndpoint = "wss://push.planetside2.com";
             ServiceId = "example";
             Environment = "ps2";
+            DeserializationOptions = new JsonSerializerOptions();
+            SerializationOptions = new JsonSerializerOptions();
         }
     }
 }

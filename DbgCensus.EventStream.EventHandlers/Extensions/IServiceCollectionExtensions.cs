@@ -1,6 +1,6 @@
-﻿using DbgCensus.EventStream.Abstractions;
-using DbgCensus.EventStream.EventHandlers.Abstractions;
+﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.EventHandlers.Objects.Event;
+using DbgCensus.EventStream.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -8,8 +8,6 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.WebSockets;
-using System.Text.Json;
 
 namespace DbgCensus.EventStream.EventHandlers.Extensions
 {
@@ -20,47 +18,25 @@ namespace DbgCensus.EventStream.EventHandlers.Extensions
         /// </summary>
         /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
         /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
-        public static IServiceCollection AddCensusEventHandlingService(this IServiceCollection serviceCollection)
-            => AddCensusEventHandlingService(serviceCollection, (_) => new JsonSerializerOptions(), (_) => new JsonSerializerOptions());
-
-        /// <summary>
-        /// Adds required services for interacting with the Census REST API.
-        /// </summary>
-        /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
-        /// <param name="deserializationOptions">The JSON options to use when deserializing events.</param>
-        /// <param name="serializationOptions">The JSON options to use when serializing commands.</param>
-        /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
-        public static IServiceCollection AddCensusEventHandlingService(
-            this IServiceCollection serviceCollection,
-            Func<IServiceProvider, JsonSerializerOptions> deserializationOptions,
-            Func<IServiceProvider, JsonSerializerOptions> serializationOptions)
+        public static IServiceCollection AddCensusEventHandlingServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.TryAddTransient<ClientWebSocket>();
-
-            serviceCollection.TryAddSingleton<IEventStreamClientFactory>
-            (
-                services => new EventStreamClientFactory<EventHandlingEventStreamClient>
-                (
-                    services.GetRequiredService<IOptions<EventStreamOptions>>(),
-                    services.GetRequiredService<IServiceProvider>(),
-                    (s, name) => new EventHandlingEventStreamClient
-                    (
-                        name,
-                        s.GetRequiredService<ILogger<EventHandlingEventStreamClient>>(),
-                        s.GetRequiredService<IServiceProvider>(),
-                        deserializationOptions.Invoke(s),
-                        serializationOptions.Invoke(s),
-                        s.GetRequiredService<IEventHandlerTypeRepository>(),
-                        s.GetRequiredService<IServiceMessageTypeRepository>()
-                    ),
-                    deserializationOptions,
-                    serializationOptions
-                )
-            );
-            serviceCollection.TryAddTransient<IEventStreamClient>(s => s.GetRequiredService<IEventStreamClientFactory>().GetClient());
+            serviceCollection.ConfigureOptions<EventStreamOptions>();
 
             serviceCollection.TryAddSingleton<IEventHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
             serviceCollection.TryAddSingleton<IServiceMessageTypeRepository>(s => s.GetRequiredService<IOptions<ServiceMessageTypeRepository>>().Value);
+
+            serviceCollection.AddCensusEventStreamServices
+            (
+                (s, o, n) => new EventHandlingEventStreamClient
+                (
+                    n,
+                    s.GetRequiredService<ILogger<EventHandlingEventStreamClient>>(),
+                    s,
+                    o,
+                    s.GetRequiredService<IEventHandlerTypeRepository>(),
+                    s.GetRequiredService<IServiceMessageTypeRepository>()
+                )
+            );
 
             return serviceCollection;
         }

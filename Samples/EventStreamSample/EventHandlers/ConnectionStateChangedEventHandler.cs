@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace EventStreamSample.EventHandlers
 {
+    /// <summary>
+    /// Utilising something along the lines of this handler in your own project is NEAR MANDATORY.
+    /// You will need to resend your subscription every time the websocket drops your connection.
+    /// And unfortunately, that happens fairly frequently.
+    /// </summary>
     public class ConnectionStateChangedEventHandler : ICensusEventHandler<ConnectionStateChanged>
     {
         private readonly ILogger<ConnectionStateChangedEventHandler> _logger;

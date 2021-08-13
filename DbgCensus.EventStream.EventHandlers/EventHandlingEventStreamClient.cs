@@ -33,19 +33,17 @@ namespace DbgCensus.EventStream.EventHandlers
         /// <param name="name">The identifying name of this client.</param>
         /// <param name="logger">The logging interface to use.</param>
         /// <param name="services">The service provider.</param>
-        /// <param name="deserializationOptions">The JSON options to use when deserializing events.</param>
-        /// <param name="serializationOptions">The JSON options to use when serializing commands.</param>
+        /// <param name="options">The options used to configure the client.</param>
         /// <param name="eventHandlerTypeRepository">The repository of <see cref="ICensusEventHandler{TEvent}"/> types.</param>
         /// <param name="eventStreamObjectTypeRepository">The repository of <see cref="IEventStreamObject"/> types.</param>
         public EventHandlingEventStreamClient(
             string name,
             ILogger<EventHandlingEventStreamClient> logger,
             IServiceProvider services,
-            JsonSerializerOptions deserializationOptions,
-            JsonSerializerOptions serializationOptions,
+            EventStreamOptions options,
             IEventHandlerTypeRepository eventHandlerTypeRepository,
             IServiceMessageTypeRepository eventStreamObjectTypeRepository)
-            : base(name, logger, services, deserializationOptions, serializationOptions)
+            : base(name, logger, services, options)
         {
             _eventHandlerRepository = eventHandlerTypeRepository;
             _serviceMessageObjectRepository = eventStreamObjectTypeRepository;

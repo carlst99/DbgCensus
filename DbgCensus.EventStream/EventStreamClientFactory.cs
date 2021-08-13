@@ -2,56 +2,33 @@
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
 
 namespace DbgCensus.EventStream
 {
     /// <inheritdoc cref="IEventStreamClientFactory"/>
-    public class EventStreamClientFactory<TClient> : IEventStreamClientFactory where TClient : IEventStreamClient
+    public class EventStreamClientFactory : IEventStreamClientFactory
     {
-        private readonly Dictionary<string, TClient> _repository;
-        private readonly EventStreamOptions _options;
+        private readonly Dictionary<string, IEventStreamClient> _repository;
         private readonly IServiceProvider _services;
-        private readonly Func<IServiceProvider, string, TClient> _clientFactory;
-        private readonly Func<IServiceProvider, JsonSerializerOptions> _deserializationOptions;
-        private readonly Func<IServiceProvider, JsonSerializerOptions> _serializationOptions;
+        private readonly EventStreamOptions _options;
+        private readonly Func<IServiceProvider, EventStreamOptions, string, IEventStreamClient> _clientFactory;
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="EventStreamClientFactory{TClient}"/> class.
+        /// Initialises a new instance of the <see cref="EventStreamClientFactory"/> class.
         /// </summary>
         /// <param name="options">This parameter is currently unused.</param>
         /// <param name="services">The service provider.</param>
         /// <param name="clientFactory">The factory to use when creating new instances of an <see cref="IEventStreamClient"/>.</param>
         public EventStreamClientFactory(
-            IOptions<EventStreamOptions> options,
             IServiceProvider services,
-            Func<IServiceProvider, string, TClient> clientFactory)
-            : this(options, services, clientFactory, _ => new JsonSerializerOptions(), _ => new JsonSerializerOptions())
-        {
-        }
-
-        /// <summary>
-        /// Initialises a new instance of the <see cref="EventStreamClientFactory{TClient}"/> class.
-        /// </summary>
-        /// <param name="options">This parameter is currently unused.</param>
-        /// <param name="services">The service provider.</param>
-        /// <param name="clientFactory">The factory to use when creating new instances of an <see cref="IEventStreamClient"/>.</param>
-        /// <param name="deserializationOptions">The JSON options for each client to use when deserializing event stream objects.</param>
-        /// <param name="serializationOptions">The JSON options for each client to use when serializing commands.</param>
-        public EventStreamClientFactory(
             IOptions<EventStreamOptions> options,
-            IServiceProvider services,
-            Func<IServiceProvider, string, TClient> clientFactory,
-            Func<IServiceProvider, JsonSerializerOptions> deserializationOptions,
-            Func<IServiceProvider, JsonSerializerOptions> serializationOptions)
+            Func<IServiceProvider, EventStreamOptions, string, IEventStreamClient> clientFactory)
         {
             _options = options.Value;
             _services = services;
             _clientFactory = clientFactory;
-            _deserializationOptions = deserializationOptions;
-            _serializationOptions = serializationOptions;
 
-            _repository = new Dictionary<string, TClient>();
+            _repository = new Dictionary<string, IEventStreamClient>();
         }
 
         /// <inheritdoc />
@@ -61,7 +38,7 @@ namespace DbgCensus.EventStream
                 options = _options;
 
             if (!_repository.ContainsKey(name) || _repository[name].IsDisposed)
-                _repository[name] = _clientFactory.Invoke(_services, name);
+                _repository[name] = _clientFactory.Invoke(_services, options, name);
 
             return _repository[name];
         }

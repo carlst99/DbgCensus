@@ -25,7 +25,7 @@ namespace EventStreamSample
                 {
                     services.Configure<EventStreamOptions>(hostContext.Configuration.GetSection(nameof(EventStreamOptions)));
 
-                    services.AddCensusEventStreamServices()
+                    services.AddCensusEventHandlingServices()
                             .AddEventHandler<ConnectionStateChangedEventHandler>()
                             .AddEventHandler<HeartbeatEventHandler>()
                             .AddEventHandler<ServiceStateChangedEventHandler>()
