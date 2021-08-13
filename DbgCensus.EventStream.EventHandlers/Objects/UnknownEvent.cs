@@ -1,6 +1,6 @@
-﻿using DbgCensus.EventStream.Abstractions.Objects;
+﻿using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 
-namespace DbgCensus.EventStream.Objects
+namespace DbgCensus.EventStream.EventHandlers.Objects
 {
     public record UnknownEvent : IEventStreamObject
     {

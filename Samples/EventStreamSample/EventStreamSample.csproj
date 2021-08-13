@@ -14,6 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DbgCensus.EventStream\DbgCensus.EventStream.csproj" />
+    <ProjectReference Include="..\..\DbgCensus.EventStream.EventHandlers\DbgCensus.EventStream.EventHandlers.csproj" />
   </ItemGroup>
 </Project>

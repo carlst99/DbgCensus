@@ -8,7 +8,7 @@ namespace DbgCensus.Tests.Core.Utils
         [Fact]
         public void TestJoinWithoutNullOrEmptyValuesI()
         {
-            string?[] values = new string?[] { "1", "", "2", null, "3" };
+            string[] values = new string[] { "1", "", "2", null, "3" };
 
             Assert.Equal("1,2,3", StringUtils.JoinWithoutNullOrEmptyValues(',', values));
         }

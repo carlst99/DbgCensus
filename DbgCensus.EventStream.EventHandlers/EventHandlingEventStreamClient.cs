@@ -1,8 +1,8 @@
-﻿using DbgCensus.EventStream.Abstractions.EventHandling;
-using DbgCensus.EventStream.Abstractions.Objects;
-using DbgCensus.EventStream.Objects;
-using DbgCensus.EventStream.Objects.Event;
-using DbgCensus.EventStream.Objects.Push;
+﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
+using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
+using DbgCensus.EventStream.EventHandlers.Objects;
+using DbgCensus.EventStream.EventHandlers.Objects.Event;
+using DbgCensus.EventStream.EventHandlers.Objects.Push;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -15,10 +15,11 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DbgCensus.EventStream
+namespace DbgCensus.EventStream.EventHandlers
 {
     /// <summary>
-    /// <inheritdoc />Events are dispatched to registered instances of <see cref="ICensusEventHandler{TEvent}"/>.
+    /// <inheritdoc />
+    /// Events are dispatched to registered instances of <see cref="ICensusEventHandler{TEvent}"/>.
     /// </summary>
     public sealed class EventHandlingEventStreamClient : CensusEventStreamClient
     {

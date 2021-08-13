@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace DbgCensus.EventStream.Objects.Event
+namespace DbgCensus.EventStream.EventHandlers.Objects.Event
 {
     /// <summary>
     /// A heartbeat object sent by the event stream, to keep the connection alive.

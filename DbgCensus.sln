@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{192E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestSample", "Samples\RestSample\RestSample.csproj", "{4C123014-3A3B-40AA-92CD-1488FD0A28D3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbgCensus.EventStream.EventHandlers", "DbgCensus.EventStream.EventHandlers\DbgCensus.EventStream.EventHandlers.csproj", "{CDAF368C-5AEA-41F2-9A3B-42994F75FA40}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{4C123014-3A3B-40AA-92CD-1488FD0A28D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C123014-3A3B-40AA-92CD-1488FD0A28D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C123014-3A3B-40AA-92CD-1488FD0A28D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDAF368C-5AEA-41F2-9A3B-42994F75FA40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDAF368C-5AEA-41F2-9A3B-42994F75FA40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDAF368C-5AEA-41F2-9A3B-42994F75FA40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDAF368C-5AEA-41F2-9A3B-42994F75FA40}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

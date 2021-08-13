@@ -1,10 +1,10 @@
-﻿using DbgCensus.EventStream.Abstractions.EventHandling;
-using DbgCensus.EventStream.Objects.Event;
+﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
+using DbgCensus.EventStream.EventHandlers.Objects.Event;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace DbgCensus.EventStream.EventHandling
+namespace DbgCensus.EventStream.EventHandlers
 {
     /// <inheritdoc cref="IServiceMessageTypeRepository"/>
     public class ServiceMessageTypeRepository : IServiceMessageTypeRepository

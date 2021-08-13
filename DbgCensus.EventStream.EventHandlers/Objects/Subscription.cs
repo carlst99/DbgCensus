@@ -1,8 +1,8 @@
-﻿using DbgCensus.EventStream.Abstractions.Objects;
+﻿using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace DbgCensus.EventStream.Objects
+namespace DbgCensus.EventStream.EventHandlers.Objects
 {
     /// <summary>
     /// An object sent by the event stream to provide details of the current subscription.

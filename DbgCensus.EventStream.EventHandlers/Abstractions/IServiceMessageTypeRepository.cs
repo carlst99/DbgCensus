@@ -1,8 +1,8 @@
-﻿using DbgCensus.EventStream.Objects.Event;
+﻿using DbgCensus.EventStream.EventHandlers.Objects.Event;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace DbgCensus.EventStream.Abstractions.EventHandling
+namespace DbgCensus.EventStream.EventHandlers.Abstractions
 {
     /// <summary>
     /// Stores and maps <see cref="ServiceMessage{T}"/> types to the census types they represent.

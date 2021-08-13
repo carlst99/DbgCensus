@@ -1,4 +1,4 @@
-﻿namespace DbgCensus.EventStream.Objects.Event
+﻿namespace DbgCensus.EventStream.EventHandlers.Objects.Event
 {
     /// <summary>
     /// An object sent by the event stream when an event occurs.
