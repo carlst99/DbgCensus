@@ -12,12 +12,12 @@ namespace EventStreamSample
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly CensusEventStreamOptions _options;
-        private readonly ICensusEventStreamClientFactory _clientFactory;
+        private readonly EventStreamOptions _options;
+        private readonly IEventStreamClientFactory _clientFactory;
 
-        private ICensusEventStreamClient? _client;
+        private IEventStreamClient? _client;
 
-        public Worker(ILogger<Worker> logger, IOptions<CensusEventStreamOptions> eventStreamOptions, ICensusEventStreamClientFactory clientFactory)
+        public Worker(ILogger<Worker> logger, IOptions<EventStreamOptions> eventStreamOptions, IEventStreamClientFactory clientFactory)
         {
             _logger = logger;
             _options = eventStreamOptions.Value;

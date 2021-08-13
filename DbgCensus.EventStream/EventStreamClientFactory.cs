@@ -6,24 +6,24 @@ using System.Text.Json;
 
 namespace DbgCensus.EventStream
 {
-    /// <inheritdoc cref="ICensusEventStreamClientFactory"/>
-    public class CensusEventStreamClientFactory<TClient> : ICensusEventStreamClientFactory where TClient : ICensusEventStreamClient
+    /// <inheritdoc cref="IEventStreamClientFactory"/>
+    public class EventStreamClientFactory<TClient> : IEventStreamClientFactory where TClient : IEventStreamClient
     {
         private readonly Dictionary<string, TClient> _repository;
-        private readonly CensusEventStreamOptions _options;
+        private readonly EventStreamOptions _options;
         private readonly IServiceProvider _services;
         private readonly Func<IServiceProvider, string, TClient> _clientFactory;
         private readonly Func<IServiceProvider, JsonSerializerOptions> _deserializationOptions;
         private readonly Func<IServiceProvider, JsonSerializerOptions> _serializationOptions;
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="CensusEventStreamClientFactory{TClient}"/> class.
+        /// Initialises a new instance of the <see cref="EventStreamClientFactory{TClient}"/> class.
         /// </summary>
         /// <param name="options">This parameter is currently unused.</param>
         /// <param name="services">The service provider.</param>
-        /// <param name="clientFactory">The factory to use when creating new instances of an <see cref="ICensusEventStreamClient"/>.</param>
-        public CensusEventStreamClientFactory(
-            IOptions<CensusEventStreamOptions> options,
+        /// <param name="clientFactory">The factory to use when creating new instances of an <see cref="IEventStreamClient"/>.</param>
+        public EventStreamClientFactory(
+            IOptions<EventStreamOptions> options,
             IServiceProvider services,
             Func<IServiceProvider, string, TClient> clientFactory)
             : this(options, services, clientFactory, _ => new JsonSerializerOptions(), _ => new JsonSerializerOptions())
@@ -31,15 +31,15 @@ namespace DbgCensus.EventStream
         }
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="CensusEventStreamClientFactory{TClient}"/> class.
+        /// Initialises a new instance of the <see cref="EventStreamClientFactory{TClient}"/> class.
         /// </summary>
         /// <param name="options">This parameter is currently unused.</param>
         /// <param name="services">The service provider.</param>
-        /// <param name="clientFactory">The factory to use when creating new instances of an <see cref="ICensusEventStreamClient"/>.</param>
+        /// <param name="clientFactory">The factory to use when creating new instances of an <see cref="IEventStreamClient"/>.</param>
         /// <param name="deserializationOptions">The JSON options for each client to use when deserializing event stream objects.</param>
         /// <param name="serializationOptions">The JSON options for each client to use when serializing commands.</param>
-        public CensusEventStreamClientFactory(
-            IOptions<CensusEventStreamOptions> options,
+        public EventStreamClientFactory(
+            IOptions<EventStreamOptions> options,
             IServiceProvider services,
             Func<IServiceProvider, string, TClient> clientFactory,
             Func<IServiceProvider, JsonSerializerOptions> deserializationOptions,
@@ -55,7 +55,7 @@ namespace DbgCensus.EventStream
         }
 
         /// <inheritdoc />
-        public ICensusEventStreamClient GetClient(string name, CensusEventStreamOptions? options = null)
+        public IEventStreamClient GetClient(string name, EventStreamOptions? options = null)
         {
             if (options is null)
                 options = _options;
@@ -67,11 +67,11 @@ namespace DbgCensus.EventStream
         }
 
         /// <inheritdoc />
-        public ICensusEventStreamClient GetClient(CensusEventStreamOptions? options = null)
+        public IEventStreamClient GetClient(EventStreamOptions? options = null)
             => GetClient(Guid.NewGuid().ToString(), options);
 
         /// <inheritdoc />
-        public ICensusEventStreamClient GetClient<TConsumer>(CensusEventStreamOptions? options = null)
+        public IEventStreamClient GetClient<TConsumer>(EventStreamOptions? options = null)
             => GetClient(nameof(TConsumer), options);
     }
 }

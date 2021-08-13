@@ -23,7 +23,7 @@ namespace EventStreamSample
                 .UseSerilog(GetLogger())
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.Configure<CensusEventStreamOptions>(hostContext.Configuration.GetSection(nameof(CensusEventStreamOptions)));
+                    services.Configure<EventStreamOptions>(hostContext.Configuration.GetSection(nameof(EventStreamOptions)));
 
                     services.AddCensusEventStreamServices()
                             .AddEventHandler<ConnectionStateChangedEventHandler>()

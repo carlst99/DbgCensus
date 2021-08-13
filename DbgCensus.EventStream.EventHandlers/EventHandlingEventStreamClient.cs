@@ -21,7 +21,7 @@ namespace DbgCensus.EventStream.EventHandlers
     /// <inheritdoc />
     /// Events are dispatched to registered instances of <see cref="ICensusEventHandler{TEvent}"/>.
     /// </summary>
-    public sealed class EventHandlingEventStreamClient : CensusEventStreamClient
+    public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     {
         private readonly IEventHandlerTypeRepository _eventHandlerRepository;
         private readonly IServiceMessageTypeRepository _serviceMessageObjectRepository;

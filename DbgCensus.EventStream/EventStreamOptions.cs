@@ -1,6 +1,6 @@
 ﻿namespace DbgCensus.EventStream
 {
-    public class CensusEventStreamOptions
+    public class EventStreamOptions
     {
         /// <summary>
         /// The root endpoint of the Census event stream endpoint.
@@ -17,7 +17,7 @@
         /// </summary>
         public string Environment { get; set; }
 
-        public CensusEventStreamOptions()
+        public EventStreamOptions()
         {
             RootEndpoint = "wss://push.planetside2.com";
             ServiceId = "example";

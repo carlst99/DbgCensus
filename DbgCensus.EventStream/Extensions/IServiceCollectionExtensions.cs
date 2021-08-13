@@ -28,30 +28,11 @@ namespace DbgCensus.EventStream.Extensions
         /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
         public static IServiceCollection AddCensusEventStreamServices(
             this IServiceCollection serviceCollection,
-            Func<IServiceProvider, JsonSerializerOptions> deserializationOptions,
-            Func<IServiceProvider, JsonSerializerOptions> serializationOptions)
+            Func<IServiceProvider, IEventStreamClient> configureClient)
         {
             serviceCollection.TryAddTransient<ClientWebSocket>();
 
-            serviceCollection.TryAddSingleton<ICensusEventStreamClientFactory>
-            (
-                services => new CensusEventStreamClientFactory<CensusEventStreamClient>
-                (
-                    services.GetRequiredService<IOptions<CensusEventStreamOptions>>(),
-                    services.GetRequiredService<IServiceProvider>(),
-                    (s, name) => new CensusEventStreamClient
-                    (
-                        name,
-                        s.GetRequiredService<ILogger<CensusEventStreamClient>>(),
-                        s.GetRequiredService<IServiceProvider>(),
-                        deserializationOptions.Invoke(s),
-                        serializationOptions.Invoke(s)
-                    ),
-                    deserializationOptions,
-                    serializationOptions
-                )
-            );
-            serviceCollection.TryAddTransient<ICensusEventStreamClient>(s => s.GetRequiredService<ICensusEventStreamClientFactory>().GetClient());
+            serviceCollection.TryAddTransient<IEventStreamClient>(s => s.GetRequiredService<IEventStreamClientFactory>().GetClient());
 
             return serviceCollection;
         }

@@ -11,9 +11,9 @@ namespace EventStreamSample.EventHandlers
     public class ConnectionStateChangedEventHandler : ICensusEventHandler<ConnectionStateChanged>
     {
         private readonly ILogger<ConnectionStateChangedEventHandler> _logger;
-        private readonly ICensusEventStreamClientFactory _clientFactory;
+        private readonly IEventStreamClientFactory _clientFactory;
 
-        public ConnectionStateChangedEventHandler(ILogger<ConnectionStateChangedEventHandler> logger, ICensusEventStreamClientFactory clientFactory)
+        public ConnectionStateChangedEventHandler(ILogger<ConnectionStateChangedEventHandler> logger, IEventStreamClientFactory clientFactory)
         {
             _logger = logger;
             _clientFactory = clientFactory;
@@ -26,7 +26,7 @@ namespace EventStreamSample.EventHandlers
             if (!censusEvent.Connected)
                 return;
 
-            ICensusEventStreamClient client = _clientFactory.GetClient(censusEvent.DispatchingClientName);
+            IEventStreamClient client = _clientFactory.GetClient(censusEvent.DispatchingClientName);
             await client.SendCommandAsync
             (
                 new SubscribeCommand

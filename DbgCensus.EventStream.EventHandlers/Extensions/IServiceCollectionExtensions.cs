@@ -37,11 +37,11 @@ namespace DbgCensus.EventStream.EventHandlers.Extensions
         {
             serviceCollection.TryAddTransient<ClientWebSocket>();
 
-            serviceCollection.TryAddSingleton<ICensusEventStreamClientFactory>
+            serviceCollection.TryAddSingleton<IEventStreamClientFactory>
             (
-                services => new CensusEventStreamClientFactory<EventHandlingEventStreamClient>
+                services => new EventStreamClientFactory<EventHandlingEventStreamClient>
                 (
-                    services.GetRequiredService<IOptions<CensusEventStreamOptions>>(),
+                    services.GetRequiredService<IOptions<EventStreamOptions>>(),
                     services.GetRequiredService<IServiceProvider>(),
                     (s, name) => new EventHandlingEventStreamClient
                     (
@@ -57,7 +57,7 @@ namespace DbgCensus.EventStream.EventHandlers.Extensions
                     serializationOptions
                 )
             );
-            serviceCollection.TryAddTransient<ICensusEventStreamClient>(s => s.GetRequiredService<ICensusEventStreamClientFactory>().GetClient());
+            serviceCollection.TryAddTransient<IEventStreamClient>(s => s.GetRequiredService<IEventStreamClientFactory>().GetClient());
 
             serviceCollection.TryAddSingleton<IEventHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
             serviceCollection.TryAddSingleton<IServiceMessageTypeRepository>(s => s.GetRequiredService<IOptions<ServiceMessageTypeRepository>>().Value);

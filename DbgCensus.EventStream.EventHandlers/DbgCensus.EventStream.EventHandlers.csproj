@@ -19,7 +19,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Include symbol files (*.pdb) in the built .nupkg -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <PackageReleaseNotes>Add ICensusEventStreamClient#ReconnectAsync</PackageReleaseNotes>
+    <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
     <PackageIconUrl />
   </PropertyGroup>
 

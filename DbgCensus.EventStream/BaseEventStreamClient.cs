@@ -16,9 +16,9 @@ using System.Threading.Tasks;
 namespace DbgCensus.EventStream
 {
     /// <summary>
-    /// <inheritdoc cref="ICensusEventStreamClient"/>Reconnection is handled automatically.
+    /// <inheritdoc cref="IEventStreamClient"/>Reconnection is handled automatically.
     /// </summary>
-    public abstract class CensusEventStreamClient : ICensusEventStreamClient
+    public abstract class BaseEventStreamClient : IEventStreamClient
     {
         /// <summary>
         /// Gets the size of the buffer used to send and receive data in chunks.
@@ -37,7 +37,7 @@ namespace DbgCensus.EventStream
 
         protected static readonly RecyclableMemoryStreamManager _memoryStreamPool = new();
 
-        protected readonly ILogger<CensusEventStreamClient> _logger;
+        protected readonly ILogger<BaseEventStreamClient> _logger;
         protected readonly IServiceProvider _services;
         protected readonly JsonSerializerOptions _jsonDeserializerOptions;
         protected readonly JsonSerializerOptions _jsonSerializerOptions;
@@ -55,16 +55,16 @@ namespace DbgCensus.EventStream
         public bool IsRunning { get; protected set; }
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="CensusEventStreamClient"/> class.
+        /// Initialises a new instance of the <see cref="BaseEventStreamClient"/> class.
         /// </summary>
         /// <param name="name">The identifying name of this client.</param>
         /// <param name="logger">The logging interface to use.</param>
         /// <param name="services">The service provider.</param>
         /// <param name="deserializationOptions">The JSON options to use when deserializing events.</param>
         /// <param name="serializationOptions">The JSON options to use when serializing commands.</param>
-        protected CensusEventStreamClient(
+        protected BaseEventStreamClient(
             string name,
-            ILogger<CensusEventStreamClient> logger,
+            ILogger<BaseEventStreamClient> logger,
             IServiceProvider services,
             JsonSerializerOptions deserializationOptions,
             JsonSerializerOptions serializationOptions)
@@ -94,7 +94,7 @@ namespace DbgCensus.EventStream
         }
 
         /// <inheritdoc />
-        public virtual async Task StartAsync(CensusEventStreamOptions options, CancellationToken ct = default)
+        public virtual async Task StartAsync(EventStreamOptions options, CancellationToken ct = default)
         {
             if (IsRunning || _webSocket.State is WebSocketState.Open or WebSocketState.Connecting)
                 throw new InvalidOperationException("Client has already been started.");
@@ -170,6 +170,11 @@ namespace DbgCensus.EventStream
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Listens for messages from the websocket and automatically handles reconnection.
+        /// </summary>
+        /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task StartListeningAsync(CancellationToken ct = default)
         {
             byte[] buffer = new byte[SOCKET_BUFFER_SIZE];
