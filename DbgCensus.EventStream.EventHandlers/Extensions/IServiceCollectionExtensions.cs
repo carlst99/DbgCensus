@@ -20,8 +20,6 @@ namespace DbgCensus.EventStream.EventHandlers.Extensions
         /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
         public static IServiceCollection AddCensusEventHandlingServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.ConfigureOptions<EventStreamOptions>();
-
             serviceCollection.TryAddSingleton<IEventHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
             serviceCollection.TryAddSingleton<IServiceMessageTypeRepository>(s => s.GetRequiredService<IOptions<ServiceMessageTypeRepository>>().Value);
 
