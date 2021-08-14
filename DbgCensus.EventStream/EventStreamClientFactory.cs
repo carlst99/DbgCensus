@@ -16,8 +16,8 @@ namespace DbgCensus.EventStream
         /// <summary>
         /// Initialises a new instance of the <see cref="EventStreamClientFactory"/> class.
         /// </summary>
-        /// <param name="options">This parameter is currently unused.</param>
         /// <param name="services">The service provider.</param>
+        /// <param name="options">This parameter is currently unused.</param>
         /// <param name="clientFactory">The factory to use when creating new instances of an <see cref="IEventStreamClient"/>.</param>
         public EventStreamClientFactory(
             IServiceProvider services,

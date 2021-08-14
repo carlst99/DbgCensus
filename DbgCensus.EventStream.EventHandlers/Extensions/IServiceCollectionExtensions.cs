@@ -49,10 +49,12 @@ namespace DbgCensus.EventStream.EventHandlers.Extensions
         {
             Type handlerType = typeof(THandler);
 
+            // Get every event handler interface
             Type[] handlerTypeInterfaces = handlerType.GetInterfaces();
             IEnumerable<Type> handlerInterfaces = handlerTypeInterfaces.Where(
                 r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(ICensusEventHandler<>));
 
+            // Register the handler interface to the implementing type
             foreach (Type handlerInterface in handlerInterfaces)
                 serviceCollection.AddScoped(handlerInterface, handlerType);
 

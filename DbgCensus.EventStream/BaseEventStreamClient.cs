@@ -71,7 +71,7 @@ namespace DbgCensus.EventStream
         {
             Name = name;
             _logger = logger;
-            _services = services; // TODO: Is this necessary? It might make more sense to have a ClientWebSocketFactory
+            _services = services;
             _options = options;
             _webSocket = services.GetRequiredService<ClientWebSocket>();
 

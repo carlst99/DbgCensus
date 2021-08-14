@@ -1,6 +1,5 @@
 using DbgCensus.EventStream;
 using DbgCensus.EventStream.EventHandlers.Extensions;
-using DbgCensus.EventStream.Extensions;
 using EventStreamSample.EventHandlers;
 using EventStreamSample.Objects;
 using Microsoft.Extensions.DependencyInjection;

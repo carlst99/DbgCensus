@@ -57,15 +57,16 @@ namespace DbgCensus.EventStream.EventHandlers
         /// <inheritdoc />
         public override async Task StopAsync()
         {
+            await base.StopAsync().ConfigureAwait(false);
+
             foreach (Task runningEvent in _dispatchedEventQueue)
                 await FinaliseDispatchedEvent(runningEvent).ConfigureAwait(false);
-
-            await base.StopAsync().ConfigureAwait(false);
         }
 
         /// <inheritdoc />
         protected override async Task HandleEvent(MemoryStream eventStream, CancellationToken ct = default)
         {
+            // Attempt to finalise one event handler
             if (_dispatchedEventQueue.TryDequeue(out Task? eventTask))
             {
                 if (eventTask.IsCompleted)
@@ -76,6 +77,7 @@ namespace DbgCensus.EventStream.EventHandlers
 
             using JsonDocument jsonResponse = await JsonDocument.ParseAsync(eventStream, cancellationToken: ct).ConfigureAwait(false);
 
+            // Handle properly formed events
             if (jsonResponse.RootElement.TryGetProperty("service", out JsonElement serviceElement) && jsonResponse.RootElement.TryGetProperty("type", out JsonElement typeElement))
             {
                 string? censusService = serviceElement.GetString();
@@ -103,15 +105,15 @@ namespace DbgCensus.EventStream.EventHandlers
                     DeserializeAndBeginEventDispatch<ConnectionStateChanged>(jsonResponse.RootElement, ct);
                 }
             }
-            else if (jsonResponse.RootElement.TryGetProperty("subscription", out JsonElement subscriptionElement))
+            else if (jsonResponse.RootElement.TryGetProperty("subscription", out JsonElement subscriptionElement)) // Handle subscription events
             {
                 DeserializeAndBeginEventDispatch<Subscription>(subscriptionElement, ct);
             }
-            else if (jsonResponse.RootElement.TryGetProperty("send this for help", out _))
+            else if (jsonResponse.RootElement.TryGetProperty("send this for help", out _)) // Ignore the 'send for help'
             {
                 // No need to process this
             }
-            else
+            else // Handle unknown events
             {
                 _logger.LogWarning("An unknown event was received from the Census event stream. An UnknownEvent object will be dispatched.");
                 BeginEventDispatch(new UnknownEvent(Name, jsonResponse.RootElement.GetRawText()), ct);
@@ -138,7 +140,7 @@ namespace DbgCensus.EventStream.EventHandlers
             // Attempt to get the event name element
             if (!payloadElement.TryGetProperty("event_name", out JsonElement eventNameElement))
             {
-                _logger.LogWarning("A service message was received that did not contain a valid payload. An unknown event will be dispatched.");
+                _logger.LogWarning("A service message was received with a malformed payload (Missing 'event_name'). An unknown event will be dispatched.");
                 BeginEventDispatch(new UnknownEvent(Name, element.GetRawText()), ct);
                 return;
             }
@@ -147,7 +149,7 @@ namespace DbgCensus.EventStream.EventHandlers
             string? eventName = eventNameElement.GetString();
             if (eventName is null)
             {
-                _logger.LogWarning("An event with no name was received. An unknown event will be dispatched.");
+                _logger.LogWarning("A service message was received with a malformed payload (NULL 'event_name'). An unknown event will be dispatched.");
                 BeginEventDispatch(new UnknownEvent(Name, element.GetRawText()), ct);
                 return;
             }
@@ -155,7 +157,7 @@ namespace DbgCensus.EventStream.EventHandlers
             // Attempt to get the type of service message that represents this event
             if (!_serviceMessageObjectRepository.TryGet(eventName, out Type? serviceMessageType))
             {
-                _logger.LogWarning("A ServiceMessage object has not been registered for the received census event {event}", eventName);
+                _logger.LogWarning("A ServiceMessage object has not been registered for the received service message event {event}", eventName);
                 return;
             }
 
@@ -199,7 +201,7 @@ namespace DbgCensus.EventStream.EventHandlers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to deserialize and dispatch event");
+                _logger.LogError(ex, "Failed to deserialize and dispatch event.");
             }
         }
 
@@ -220,23 +222,40 @@ namespace DbgCensus.EventStream.EventHandlers
         /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the entire event chain.</param>
         private void BeginEventDispatch(Type eventType, object eventObject, CancellationToken ct = default)
         {
-            MethodInfo dispatchMethod = CreateDispatchMethod(eventType!);
+            MethodInfo dispatchMethod = CreateDispatchMethod(eventType);
             Task? dispatchTask = (Task?)dispatchMethod.Invoke(this, new object[] { eventObject!, ct });
             if (dispatchTask is null)
             {
-                _logger.LogError("Failed to dispatch an event");
+                _logger.LogError("Failed to dispatch an event.");
                 return;
             }
             _dispatchedEventQueue.Enqueue(dispatchTask);
         }
 
         /// <summary>
-        /// Dispatches an event to all appropriate event handlers.
+        /// Constructs a <see cref="MethodInfo"/> instance of the <see cref="DispatchEventAsync{T}(T, CancellationToken)"/> method.
+        /// </summary>
+        /// <param name="eventType">The type of event that will be dispatched through the method.</param>
+        /// <returns></returns>
+        private MethodInfo CreateDispatchMethod(Type eventType)
+        {
+            MethodInfo? dispatchMethod = GetType().GetMethod(nameof(DispatchEventAsync), BindingFlags.NonPublic | BindingFlags.Instance);
+            if (dispatchMethod is null)
+            {
+                MissingMethodException ex = new(nameof(EventHandlingEventStreamClient), nameof(DispatchEventAsync));
+                _logger.LogCritical(ex, "Failed to get the event dispatch method.");
+                throw ex;
+            }
+            return dispatchMethod.MakeGenericMethod(new Type[] { eventType });
+        }
+
+        /// <summary>
+        /// Dispatches an event to all appropriate event handlers. DO NOT call this directly. Use <see cref="CreateDispatchMethod(Type)"/> instead to ensure handlers do not block the receive queue.
         /// </summary>
         /// <typeparam name="T">The type of <see cref="IEventStreamObject"/> to dispatch.</typeparam>
         /// <param name="eventObject">The event object to dispatch.</param>
         /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the entire event chain.</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task DispatchEventAsync<T>(T eventObject, CancellationToken ct = default) where T : IEventStreamObject
         {
             IReadOnlyList<Type> handlerTypes = _eventHandlerRepository.GetHandlerTypes<T>();
@@ -272,23 +291,6 @@ namespace DbgCensus.EventStream.EventHandlers
                     }
                 )
             ).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Constructs a <see cref="MethodInfo"/> instance of the <see cref="DispatchEventAsync{T}(T, CancellationToken)"/> method.
-        /// </summary>
-        /// <param name="eventType">The type of event that will be dispatched through the method.</param>
-        /// <returns></returns>
-        private MethodInfo CreateDispatchMethod(Type eventType)
-        {
-            MethodInfo? dispatchMethod = GetType().GetMethod(nameof(DispatchEventAsync), BindingFlags.NonPublic | BindingFlags.Instance);
-            if (dispatchMethod is null)
-            {
-                MissingMethodException ex = new(nameof(EventHandlingEventStreamClient), nameof(DispatchEventAsync));
-                _logger.LogCritical(ex, "Failed to get the event dispatch method.");
-                throw ex;
-            }
-            return dispatchMethod.MakeGenericMethod(new Type[] { eventType });
         }
 
         /// <summary>
