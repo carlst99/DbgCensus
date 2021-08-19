@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     
     <!-- Package info -->
-    <Version>1.0.0-beta.11</Version>
+    <Version>1.0.0</Version>
     <Authors>Carl Stephens</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
