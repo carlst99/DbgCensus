@@ -1,9 +1,7 @@
 ﻿using DbgCensus.Core.Utils;
 using DbgCensus.Rest.Abstractions.Queries;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DbgCensus.Rest.Queries
 {

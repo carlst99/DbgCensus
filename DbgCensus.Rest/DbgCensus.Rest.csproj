@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     
     <!-- Package info -->
-    <Version>1.0.0-beta.10</Version>
+    <Version>1.0.0-beta.11</Version>
     <Authors>Carl Stephens</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
@@ -19,7 +19,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Include symbol files (*.pdb) in the built .nupkg -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <PackageReleaseNotes>Improve filtering.</PackageReleaseNotes>
+    <PackageReleaseNotes>Add IQueryService as a convenient wrapper of IQueryBuilderFactory and ICensusRestClient.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
