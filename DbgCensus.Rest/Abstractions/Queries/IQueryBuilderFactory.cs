@@ -6,16 +6,10 @@
     public interface IQueryBuilderFactory
     {
         /// <summary>
-        /// Constructs an <see cref="IQueryBuilder"/> object
-        /// </summary>
-        /// <returns>An <see cref="IQueryBuilder"/> instance.</returns>
-        IQueryBuilder Get();
-
-        /// <summary>
         /// Constructs an <see cref="IQueryBuilder"/> object.
         /// </summary>
-        /// <param name="options">The default options to use.</param>
+        /// <param name="options">Provide an <see cref="CensusQueryOptions"/> object to override the default injected options.</param>
         /// <returns>An <see cref="IQueryBuilder"/> instance.</returns>
-        IQueryBuilder Get(CensusQueryOptions options);
+        IQueryBuilder Get(CensusQueryOptions? options = null);
     }
 }

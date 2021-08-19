@@ -40,6 +40,8 @@ namespace DbgCensus.Rest.Extensions
 
             serviceCollection.TryAddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
 
+            serviceCollection.TryAddSingleton<IQueryService, QueryService>();
+
             return serviceCollection;
         }
     }

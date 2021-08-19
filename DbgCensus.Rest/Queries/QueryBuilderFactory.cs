@@ -16,9 +16,6 @@ namespace DbgCensus.Rest.Queries
         }
 
         /// <inheritdoc />
-        public IQueryBuilder Get() => new QueryBuilder(_defaultOptions);
-
-        /// <inheritdoc />
-        public IQueryBuilder Get(CensusQueryOptions options) => new QueryBuilder(options);
+        public IQueryBuilder Get(CensusQueryOptions? options = null) => new QueryBuilder(options ?? _defaultOptions);
     }
 }
