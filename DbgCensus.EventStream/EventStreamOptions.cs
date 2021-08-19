@@ -30,6 +30,10 @@ namespace DbgCensus.EventStream
         /// </summary>
         public JsonSerializerOptions SerializationOptions { get; set; }
 
+        /// <summary>
+        /// Gets or sets the amount of time to wait before attemping a reconnection when the streaming API drops out.
+        /// </summary>
+        public int ReconnectionDelayMilliseconds { get; set; }
         public EventStreamOptions()
         {
             RootEndpoint = "wss://push.planetside2.com";
@@ -37,6 +41,7 @@ namespace DbgCensus.EventStream
             Environment = "ps2";
             DeserializationOptions = new JsonSerializerOptions();
             SerializationOptions = new JsonSerializerOptions();
+            ReconnectionDelayMilliseconds = 5000;
         }
     }
 }

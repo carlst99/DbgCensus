@@ -27,11 +27,6 @@ namespace DbgCensus.EventStream
         protected const int SOCKET_BUFFER_SIZE = 8192;
 
         /// <summary>
-        /// The delay to use in between reconnection attempts.
-        /// </summary>
-        protected const int RECONNECT_DELAY = 5000;
-
-        /// <summary>
         /// The keep-alive interval for the websocket.
         /// </summary>
         protected const int KEEPALIVE_INTERVAL_SEC = 20;
@@ -44,8 +39,13 @@ namespace DbgCensus.EventStream
         protected readonly JsonSerializerOptions _jsonDeserializerOptions;
         protected readonly JsonSerializerOptions _jsonSerializerOptions;
 
-        protected Uri? _endpoint;
+        /// <summary>
+        /// The constructed endpoint to connect to.
+        /// </summary>
+        protected readonly Uri _endpoint;
+
         protected ClientWebSocket _webSocket;
+        protected SubscribeCommand? _initialSubscription;
 
         /// <inheritdoc />
         public string Name { get; protected set; }
@@ -92,28 +92,27 @@ namespace DbgCensus.EventStream
             _jsonSerializerOptions = new JsonSerializerOptions(_options.SerializationOptions);
             if (_jsonSerializerOptions.PropertyNamingPolicy is null)
                 _jsonSerializerOptions.PropertyNamingPolicy = new CamelCaseJsonNamingPolicy();
-        }
-
-        /// <inheritdoc />
-        public virtual async Task StartAsync(SubscribeCommand? initialSubscription = null, CancellationToken ct = default)
-        {
-            if (IsRunning || _webSocket.State is WebSocketState.Open or WebSocketState.Connecting)
-                throw new InvalidOperationException("Client has already been started.");
 
             UriBuilder builder = new(_options.RootEndpoint);
             builder.Path = "streaming";
             builder.Query = $"environment={ _options.Environment }&service-id=s:{ _options.ServiceId }";
             _endpoint = builder.Uri;
 
+            if (_options.ReconnectionDelayMilliseconds < 1)
+                throw new ArgumentException("Reconnection delay cannot be less than one millisecond.", nameof(options));
+        }
+
+        /// <inheritdoc />
+        public virtual async Task StartAsync(SubscribeCommand? initialSubscription = null, CancellationToken ct = default)
+        {
+            DoDisposeChecks();
+            _initialSubscription = initialSubscription;
+
+            if (IsRunning || _webSocket.State is WebSocketState.Open or WebSocketState.Connecting)
+                throw new InvalidOperationException("Client has already been started.");
+
             await ConnectWebsocket(ct).ConfigureAwait(false);
             IsRunning = true;
-            _logger.LogInformation("Connected to event stream websocket.");
-
-            if (initialSubscription is not null)
-            {
-                _logger.LogInformation("Sending initial subscription...");
-                await SendCommandAsync(initialSubscription, ct).ConfigureAwait(false);
-            }
 
             _logger.LogInformation("Listening for events...");
             await StartListeningAsync(ct).ConfigureAwait(false);
@@ -122,19 +121,23 @@ namespace DbgCensus.EventStream
         /// <inheritdoc />
         public virtual async Task StopAsync()
         {
+            DoDisposeChecks();
+
             if (!IsRunning)
-                return;
+                throw new InvalidOperationException("Client has already been stopped.");
 
             IsRunning = false;
 
             await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None).ConfigureAwait(false);
-            _webSocket.Dispose();
             _logger.LogInformation("Disconnected from the event stream websocket.");
+            _webSocket.Dispose();
         }
 
         /// <inheritdoc />
         public virtual async Task SendCommandAsync<T>(T command, CancellationToken ct = default) where T : IEventStreamCommand
         {
+            DoDisposeChecks();
+
             if (_webSocket.State != WebSocketState.Open)
                 throw new InvalidOperationException("Websocket connection is not open.");
 
@@ -161,13 +164,21 @@ namespace DbgCensus.EventStream
         /// <inheritdoc />
         public virtual async Task ReconnectAsync(CancellationToken ct = default)
         {
-            await StopAsync().ConfigureAwait(false);
-            _logger.LogWarning("Websocket was closed with status {code} and description {description}.", _webSocket.CloseStatus, _webSocket.CloseStatusDescription);
+            DoDisposeChecks();
 
-            await Task.Delay(RECONNECT_DELAY, ct).ConfigureAwait(false);
+            _logger.LogWarning(
+                "Websocket was closed with status {code} and description {description}. Will attempt reconnection after cooldown...",
+                _webSocket.CloseStatus,
+                _webSocket.CloseStatusDescription);
+
+            _webSocket.Dispose();
+
+            await Task.Delay(_options.ReconnectionDelayMilliseconds, ct).ConfigureAwait(false);
 
             _logger.LogInformation("Attempting to reconnect websocket.");
             await ConnectWebsocket(ct).ConfigureAwait(false);
+
+            // TODO: Resend initial subscription
         }
 
         /// <inheritdoc />
@@ -187,15 +198,24 @@ namespace DbgCensus.EventStream
         {
             byte[] buffer = new byte[SOCKET_BUFFER_SIZE];
 
-            while (IsRunning)
+            while (IsRunning && !IsDisposed)
             {
                 if (ct.IsCancellationRequested)
                     throw new TaskCanceledException();
 
-                if (_webSocket.State != WebSocketState.Open)
+                switch (_webSocket.State)
                 {
-                    await ReconnectAsync(ct).ConfigureAwait(false);
-                    continue;
+                    // The streaming API occasionally closes your connection. We'll helpfully restore that.
+                    case WebSocketState.Aborted or WebSocketState.CloseReceived:
+                        await ReconnectAsync(ct).ConfigureAwait(false);
+                        continue;
+                    // Give it a chance to connect
+                    case WebSocketState.Connecting:
+                        await Task.Delay(10, ct).ConfigureAwait(false);
+                        continue;
+                    // A graceful close, or request to close on our end, indicates things are wrapping up
+                    case WebSocketState.Closed or WebSocketState.CloseSent:
+                        return;
                 }
 
                 MemoryStream stream = _memoryStreamPool.GetStream();
@@ -205,6 +225,7 @@ namespace DbgCensus.EventStream
                 {
                     result = await _webSocket.ReceiveAsync(buffer, ct).ConfigureAwait(false);
 
+                    // The streaming API occasionally closes your connection. We'll helpfully restore that.
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
                         if (IsRunning)
@@ -234,7 +255,15 @@ namespace DbgCensus.EventStream
         {
             _webSocket = _services.GetRequiredService<ClientWebSocket>();
             _webSocket.Options.KeepAliveInterval = TimeSpan.FromSeconds(KEEPALIVE_INTERVAL_SEC);
-            await _webSocket.ConnectAsync(_endpoint!, ct).ConfigureAwait(false);
+            await _webSocket.ConnectAsync(_endpoint, ct).ConfigureAwait(false);
+
+            _logger.LogInformation("Connected to event stream websocket.");
+
+            if (_initialSubscription is not null)
+            {
+                _logger.LogInformation("Sending initial subscription...");
+                await SendCommandAsync(_initialSubscription, ct).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -263,6 +292,16 @@ namespace DbgCensus.EventStream
 
                 IsDisposed = true;
             }
+        }
+
+        /// <summary>
+        /// Checks if this object has been disposed.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">Thrown if the object has been disposed.</exception>
+        protected void DoDisposeChecks()
+        {
+            if (IsDisposed)
+                throw new ObjectDisposedException(nameof(BaseEventStreamClient));
         }
     }
 }
