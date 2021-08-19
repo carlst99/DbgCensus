@@ -1,19 +1,24 @@
 ﻿using DbgCensus.EventStream.Abstractions;
-using DbgCensus.EventStream.Abstractions.EventHandling;
+using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.Commands;
-using DbgCensus.EventStream.Objects.Push;
+using DbgCensus.EventStream.EventHandlers.Objects.Push;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace EventStreamSample.EventHandlers
 {
+    /// <summary>
+    /// Utilising something along the lines of this handler in your own project is NEAR MANDATORY.
+    /// You will need to resend your subscription every time the websocket drops your connection.
+    /// And unfortunately, that happens fairly frequently.
+    /// </summary>
     public class ConnectionStateChangedEventHandler : ICensusEventHandler<ConnectionStateChanged>
     {
         private readonly ILogger<ConnectionStateChangedEventHandler> _logger;
-        private readonly ICensusEventStreamClientFactory _clientFactory;
+        private readonly IEventStreamClientFactory _clientFactory;
 
-        public ConnectionStateChangedEventHandler(ILogger<ConnectionStateChangedEventHandler> logger, ICensusEventStreamClientFactory clientFactory)
+        public ConnectionStateChangedEventHandler(ILogger<ConnectionStateChangedEventHandler> logger, IEventStreamClientFactory clientFactory)
         {
             _logger = logger;
             _clientFactory = clientFactory;
@@ -26,7 +31,7 @@ namespace EventStreamSample.EventHandlers
             if (!censusEvent.Connected)
                 return;
 
-            ICensusEventStreamClient client = _clientFactory.GetClient(censusEvent.DispatchingClientName);
+            IEventStreamClient client = _clientFactory.GetClient(censusEvent.DispatchingClientName);
             await client.SendCommandAsync
             (
                 new SubscribeCommand

@@ -1,8 +1,8 @@
-﻿using DbgCensus.EventStream.Abstractions.Objects;
+﻿using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 using System;
 using System.Collections.Generic;
 
-namespace DbgCensus.EventStream.Abstractions.EventHandling
+namespace DbgCensus.EventStream.EventHandlers.Abstractions
 {
     /// <summary>
     /// Stores and maps types that implement <see cref="ICensusEventHandler{T}"/>.

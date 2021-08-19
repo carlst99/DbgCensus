@@ -5,13 +5,13 @@
     <Nullable>enable</Nullable>
 
     <!-- Package info -->
-    <Version>1.0.0-alpha.3</Version>
+    <Version>1.0.0-alpha</Version>
     <Authors>Carl Stephens</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
     <RepositoryUrl>https://github.com/carlst99/DbgCensus</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Description>A library for receiving data from the websocket event stream of Daybreak Game Company's Census API. EXTREMELY ALPHA release.</Description>
+    <Description>An abstraction of DbgCensus.EventStream to provide an asynchronous and decoupled event handling model.</Description>
     <PackageTags>planetside2 daybreak-games daybreak-census</PackageTags>
     <PackageIcon>Icon_128.png</PackageIcon>
 
@@ -19,7 +19,8 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Include symbol files (*.pdb) in the built .nupkg -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <PackageReleaseNotes>Refactored event handling logic to DbgCensus.EventStream.EventHandlers .</PackageReleaseNotes>
+    <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+    <PackageIconUrl />
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -29,11 +30,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
-    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.1.3" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="System.Threading.Channels" Version="5.0.0" />
+    <ProjectReference Include="..\DbgCensus.EventStream\DbgCensus.EventStream.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,10 +42,6 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\DbgCensus.Core\DbgCensus.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,6 @@
-using DbgCensus.EventStream;
 using DbgCensus.EventStream.Abstractions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,15 +10,13 @@ namespace EventStreamSample
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly CensusEventStreamOptions _options;
-        private readonly ICensusEventStreamClientFactory _clientFactory;
+        private readonly IEventStreamClientFactory _clientFactory;
 
-        private ICensusEventStreamClient? _client;
+        private IEventStreamClient? _client;
 
-        public Worker(ILogger<Worker> logger, IOptions<CensusEventStreamOptions> eventStreamOptions, ICensusEventStreamClientFactory clientFactory)
+        public Worker(ILogger<Worker> logger, IEventStreamClientFactory clientFactory)
         {
             _logger = logger;
-            _options = eventStreamOptions.Value;
             _clientFactory = clientFactory;
         }
 
@@ -34,7 +30,9 @@ namespace EventStreamSample
 
                 try
                 {
-                    await _client.StartAsync(_options, stoppingToken).ConfigureAwait(false);
+                    // We don't supply an initial subscription here, although you are able to.
+                    // Instead, it is supplied in the ConnectionStateChangedEventHandler .
+                    await _client.StartAsync(ct: stoppingToken).ConfigureAwait(false);
                 }
                 catch (Exception ex) when (ex is not TaskCanceledException)
                 {

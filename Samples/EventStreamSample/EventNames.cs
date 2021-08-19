@@ -1,4 +1,4 @@
-﻿namespace EventStreamSample.Objects
+﻿namespace EventStreamSample
 {
     public static class EventNames
     {

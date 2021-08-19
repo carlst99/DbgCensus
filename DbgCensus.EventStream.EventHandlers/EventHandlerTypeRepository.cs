@@ -1,10 +1,10 @@
-﻿using DbgCensus.EventStream.Abstractions.EventHandling;
-using DbgCensus.EventStream.Abstractions.Objects;
+﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
+using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DbgCensus.EventStream.EventHandling
+namespace DbgCensus.EventStream.EventHandlers
 {
     /// <inheritdoc cref="IEventHandlerTypeRepository"/>
     public class EventHandlerTypeRepository : IEventHandlerTypeRepository

@@ -1,5 +1,5 @@
 using DbgCensus.EventStream;
-using DbgCensus.EventStream.Extensions;
+using DbgCensus.EventStream.EventHandlers.Extensions;
 using EventStreamSample.EventHandlers;
 using EventStreamSample.Objects;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,9 +22,9 @@ namespace EventStreamSample
                 .UseSerilog(GetLogger())
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.Configure<CensusEventStreamOptions>(hostContext.Configuration.GetSection(nameof(CensusEventStreamOptions)));
+                    services.Configure<EventStreamOptions>(hostContext.Configuration.GetSection(nameof(EventStreamOptions)));
 
-                    services.AddCensusEventStreamServices()
+                    services.AddCensusEventHandlingServices()
                             .AddEventHandler<ConnectionStateChangedEventHandler>()
                             .AddEventHandler<HeartbeatEventHandler>()
                             .AddEventHandler<ServiceStateChangedEventHandler>()

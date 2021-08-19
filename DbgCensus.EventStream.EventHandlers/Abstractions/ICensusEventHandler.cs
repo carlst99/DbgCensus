@@ -1,8 +1,8 @@
-﻿using DbgCensus.EventStream.Abstractions.Objects;
+﻿using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DbgCensus.EventStream.Abstractions.EventHandling
+namespace DbgCensus.EventStream.EventHandlers.Abstractions
 {
     public interface ICensusEventHandler
     {

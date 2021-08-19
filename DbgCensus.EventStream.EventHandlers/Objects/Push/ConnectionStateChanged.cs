@@ -1,4 +1,4 @@
-﻿namespace DbgCensus.EventStream.Objects.Push
+﻿namespace DbgCensus.EventStream.EventHandlers.Objects.Push
 {
     /// <summary>
     /// An object sent by the event stream when the state of the connection changes.
