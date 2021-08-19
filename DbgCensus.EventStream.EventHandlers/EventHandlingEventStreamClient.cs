@@ -5,6 +5,7 @@ using DbgCensus.EventStream.EventHandlers.Objects.Event;
 using DbgCensus.EventStream.EventHandlers.Objects.Push;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ namespace DbgCensus.EventStream.EventHandlers
             string name,
             ILogger<EventHandlingEventStreamClient> logger,
             IServiceProvider services,
-            EventStreamOptions options,
+            IOptions<EventStreamOptions> options,
             IEventHandlerTypeRepository eventHandlerTypeRepository,
             IServiceMessageTypeRepository eventStreamObjectTypeRepository)
             : base(name, logger, services, options)

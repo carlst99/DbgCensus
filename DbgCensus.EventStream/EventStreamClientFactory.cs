@@ -10,8 +10,8 @@ namespace DbgCensus.EventStream
     {
         private readonly Dictionary<string, IEventStreamClient> _repository;
         private readonly IServiceProvider _services;
-        private readonly EventStreamOptions _options;
-        private readonly Func<IServiceProvider, EventStreamOptions, string, IEventStreamClient> _clientFactory;
+        private readonly IOptions<EventStreamOptions> _options;
+        private readonly Func<IServiceProvider, IOptions<EventStreamOptions>, string, IEventStreamClient> _clientFactory;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="EventStreamClientFactory"/> class.
@@ -22,9 +22,9 @@ namespace DbgCensus.EventStream
         public EventStreamClientFactory(
             IServiceProvider services,
             IOptions<EventStreamOptions> options,
-            Func<IServiceProvider, EventStreamOptions, string, IEventStreamClient> clientFactory)
+            Func<IServiceProvider, IOptions<EventStreamOptions>, string, IEventStreamClient> clientFactory)
         {
-            _options = options.Value;
+            _options = options;
             _services = services;
             _clientFactory = clientFactory;
 
@@ -35,10 +35,10 @@ namespace DbgCensus.EventStream
         public IEventStreamClient GetClient(string name, EventStreamOptions? options = null)
         {
             if (options is null)
-                options = _options;
+                options = _options.Value;
 
             if (!_repository.ContainsKey(name) || _repository[name].IsDisposed)
-                _repository[name] = _clientFactory.Invoke(_services, options, name);
+                _repository[name] = _clientFactory.Invoke(_services, Options.Create(options), name);
 
             return _repository[name];
         }

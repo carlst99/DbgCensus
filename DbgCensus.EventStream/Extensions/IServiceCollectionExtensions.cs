@@ -17,7 +17,7 @@ namespace DbgCensus.EventStream.Extensions
         /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
         public static IServiceCollection AddCensusEventStreamServices(
             this IServiceCollection serviceCollection,
-            Func<IServiceProvider, EventStreamOptions, string, IEventStreamClient> configureClient)
+            Func<IServiceProvider, IOptions<EventStreamOptions>, string, IEventStreamClient> configureClient)
         {
             serviceCollection.TryAddTransient<ClientWebSocket>();
 

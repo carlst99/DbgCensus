@@ -4,6 +4,7 @@ using DbgCensus.EventStream.Abstractions.Commands;
 using DbgCensus.EventStream.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IO;
 using System;
 using System.IO;
@@ -67,12 +68,12 @@ namespace DbgCensus.EventStream
             string name,
             ILogger<BaseEventStreamClient> logger,
             IServiceProvider services,
-            EventStreamOptions options)
+            IOptions<EventStreamOptions> options)
         {
             Name = name;
             _logger = logger;
             _services = services;
-            _options = options;
+            _options = options.Value;
             _webSocket = services.GetRequiredService<ClientWebSocket>();
 
             _jsonDeserializerOptions = new JsonSerializerOptions(_options.DeserializationOptions)
