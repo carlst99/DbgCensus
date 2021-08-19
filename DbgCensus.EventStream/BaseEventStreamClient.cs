@@ -177,8 +177,6 @@ namespace DbgCensus.EventStream
 
             _logger.LogInformation("Attempting to reconnect websocket.");
             await ConnectWebsocket(ct).ConfigureAwait(false);
-
-            // TODO: Resend initial subscription
         }
 
         /// <inheritdoc />
@@ -248,7 +246,7 @@ namespace DbgCensus.EventStream
         }
 
         /// <summary>
-        /// Gets a new <see cref="ClientWebSocket"/> instance and connects it to the <see cref="_endpoint"/>.
+        /// Gets a new <see cref="ClientWebSocket"/> instance and connects it to the <see cref="_endpoint"/>, along with sending an initial subscription if specified.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task ConnectWebsocket(CancellationToken ct = default)

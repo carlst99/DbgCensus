@@ -25,6 +25,5 @@ namespace DbgCensus.EventStream.EventHandlers.Abstractions
         /// <param name="eventName">The name of the event that this payload is for.</param>
         /// <returns>A value indicating if the service message type was added to the repository. If false, the type has already been registered.</returns>
         bool TryRegister<TObject, TPayload>(string eventName) where TObject : ServiceMessage<TPayload>;
-        // TODO: Try and revise the TObject generic
     }
 }
