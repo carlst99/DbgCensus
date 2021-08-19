@@ -4,6 +4,7 @@ using DbgCensus.Rest.Abstractions;
 using DbgCensus.Rest.Abstractions.Queries;
 using DbgCensus.Rest.Exceptions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -21,6 +22,7 @@ namespace DbgCensus.Rest
         protected readonly ILogger<CensusRestClient> _logger;
         protected readonly HttpClient _client;
         protected readonly JsonSerializerOptions _jsonOptions;
+        protected readonly CensusQueryOptions _queryOptions;
 
         public bool IsDisposed { get; protected set; }
 
@@ -29,22 +31,14 @@ namespace DbgCensus.Rest
         /// </summary>
         /// <param name="logger">The logging interface to use.</param>
         /// <param name="client">The <see cref="HttpClient"/> to send requests with.</param>
-        public CensusRestClient(ILogger<CensusRestClient> logger, HttpClient client)
-            : this(logger, client, new JsonSerializerOptions())
-        { }
-
-        /// <summary>
-        /// Initialises a new instance of the <see cref="CensusRestClient"/> class.
-        /// </summary>
-        /// <param name="logger">The logging interface to use.</param>
-        /// <param name="client">The <see cref="HttpClient"/> to send requests with.</param>
-        /// <param name="jsonOptions">JSON options to conform to when deserialising the response.</param>
-        public CensusRestClient(ILogger<CensusRestClient> logger, HttpClient client, JsonSerializerOptions jsonOptions)
+        /// <param name="options">The query options to conform to.</param>
+        public CensusRestClient(ILogger<CensusRestClient> logger, HttpClient client, IOptions<CensusQueryOptions> options)
         {
             _logger = logger;
             _client = client;
+            _queryOptions = options.Value;
 
-            _jsonOptions = new JsonSerializerOptions(jsonOptions)
+            _jsonOptions = new JsonSerializerOptions(_queryOptions.DeserializationOptions)
             {
                 NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals
             };

@@ -15,14 +15,12 @@ namespace RestSample
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly ICensusRestClient _client;
-        private readonly IQueryBuilderFactory _queryFactory;
+        private readonly IQueryService _queryService;
 
-        public Worker(ILogger<Worker> logger, ICensusRestClient client, IQueryBuilderFactory queryFactory)
+        public Worker(ILogger<Worker> logger, IQueryService queryService)
         {
             _logger = logger;
-            _client = client;
-            _queryFactory = queryFactory;
+            _queryService = queryService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,13 +34,13 @@ namespace RestSample
         {
             _logger.LogInformation("Getting character information for FalconEye36");
 
-            IQueryBuilder query = _queryFactory.Get()
+            IQueryBuilder query = _queryService.CreateQuery()
                 .OnCollection("character")
                 .Where("name.first_lower", SearchModifier.Equals, "falconeye36");
 
             try
             {
-                Character? character = await _client.GetAsync<Character>(query, ct).ConfigureAwait(false);
+                Character? character = await _queryService.GetAsync<Character>(query, ct).ConfigureAwait(false);
                 if (character is null)
                 {
                     _logger.LogInformation("That character does not exist.");
@@ -68,7 +66,7 @@ namespace RestSample
         {
             _logger.LogInformation("Getting online outfit members for TWC2");
 
-            IQueryBuilder query = _queryFactory.Get();
+            IQueryBuilder query = _queryService.CreateQuery();
 
             query.OnCollection("outfit")
                 .Where("alias_lower", SearchModifier.Equals, "twc2")
@@ -99,7 +97,7 @@ namespace RestSample
 
             try
             {
-                OutfitOnlineMembers? outfit = await _client.GetAsync<OutfitOnlineMembers>(query, ct).ConfigureAwait(false);
+                OutfitOnlineMembers? outfit = await _queryService.GetAsync<OutfitOnlineMembers>(query, ct).ConfigureAwait(false);
                 if (outfit is null)
                 {
                     _logger.LogInformation("That outfit does not exist.");
@@ -123,14 +121,14 @@ namespace RestSample
         {
             ZoneType[] zones = Enum.GetValues<ZoneType>();
 
-            IQueryBuilder query = _queryFactory.Get()
+            IQueryBuilder query = _queryService.CreateQuery()
                 .OnCollection("map")
                 .Where("world_id", SearchModifier.Equals, WorldType.Connery)
                 .WhereAll("zone_ids", SearchModifier.Equals, zones.Select(z => (int)z));
 
             try
             {
-                List<Map>? maps = await _client.GetAsync<List<Map>>(query, ct).ConfigureAwait(false);
+                List<Map>? maps = await _queryService.GetAsync<List<Map>>(query, ct).ConfigureAwait(false);
                 if (maps is null)
                     throw new CensusException("Census returned no data");
 

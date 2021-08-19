@@ -10,7 +10,7 @@ namespace DbgCensus.Rest.Abstractions
     /// </summary>
     public interface IQueryService
     {
-        /// <inheritdoc cref="IQueryBuilderFactory.Get()"/>
+        /// <inheritdoc cref="IQueryBuilderFactory.Get(CensusQueryOptions?)"/>
         IQueryBuilder CreateQuery(CensusQueryOptions? options = null);
 
         /// <inheritdoc cref="ICensusRestClient.GetAsync{T}(IQueryBuilder, CancellationToken)"/>

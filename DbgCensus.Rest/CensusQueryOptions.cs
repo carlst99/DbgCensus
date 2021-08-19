@@ -1,4 +1,6 @@
-﻿namespace DbgCensus.Rest
+﻿using System.Text.Json;
+
+namespace DbgCensus.Rest
 {
     public class CensusQueryOptions
     {
@@ -27,11 +29,17 @@
         /// </summary>
         public uint? Limit { get; set; }
 
+        /// <summary>
+        /// The JSON options to use when deserializing requests.
+        /// </summary>
+        public JsonSerializerOptions DeserializationOptions { get; set; }
+
         public CensusQueryOptions()
         {
             RootEndpoint = "https://census.daybreakgames.com";
             ServiceId = "example";
             Namespace = "ps2";
+            DeserializationOptions = new JsonSerializerOptions();
         }
     }
 }

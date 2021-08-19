@@ -4,9 +4,8 @@ using DbgCensus.Rest.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using System;
+using Microsoft.Extensions.Options;
 using System.Net.Http;
-using System.Text.Json;
 
 namespace DbgCensus.Rest.Extensions
 {
@@ -17,18 +16,8 @@ namespace DbgCensus.Rest.Extensions
         /// </summary>
         /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
         /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
-        public static IServiceCollection AddCensusRestServices(this IServiceCollection serviceCollection)
-            => AddCensusRestServices(serviceCollection, (_) => new JsonSerializerOptions());
-
-        /// <summary>
-        /// Adds required services for interacting with the Census REST API.
-        /// </summary>
-        /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
-        /// <param name="jsonOptions">JSON options to conform to when deserialising Census data.</param>
-        /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
         public static IServiceCollection AddCensusRestServices(
-            this IServiceCollection serviceCollection,
-            Func<IServiceProvider, JsonSerializerOptions> jsonOptions)
+            this IServiceCollection serviceCollection)
         {
             serviceCollection.AddHttpClient<CensusRestClient>();
 
@@ -36,7 +25,7 @@ namespace DbgCensus.Rest.Extensions
                 new CensusRestClient(
                     s.GetRequiredService<ILogger<CensusRestClient>>(),
                     s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(CensusRestClient)),
-                    jsonOptions.Invoke(s)));
+                    s.GetRequiredService<IOptions<CensusQueryOptions>>()));
 
             serviceCollection.TryAddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
 
