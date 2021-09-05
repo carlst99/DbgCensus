@@ -1,6 +1,9 @@
-﻿namespace EventStreamSample.Objects
+﻿namespace DbgCensus.Core.Objects
 {
-    public enum World
+    /// <summary>
+    /// Defines the worlds as represented by the Census API.
+    /// </summary>
+    public enum WorldDefinition
     {
         Connery = 1,
         Miller = 10,

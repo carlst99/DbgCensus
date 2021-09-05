@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EventStreamSample.EventHandlers
+namespace EventStreamSample.EventHandlers.System
 {
     public class ServiceStateChangedEventHandler : ICensusEventHandler<ServiceStateChanged>
     {

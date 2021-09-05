@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DbgCensus.Core.Objects;
+using System;
 
 namespace RestSample.Objects
 {

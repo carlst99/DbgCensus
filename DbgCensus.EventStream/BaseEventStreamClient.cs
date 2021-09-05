@@ -11,7 +11,6 @@ using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -76,19 +75,8 @@ namespace DbgCensus.EventStream
             _options = options.Value;
             _webSocket = services.GetRequiredService<ClientWebSocket>();
 
-            _jsonDeserializerOptions = new JsonSerializerOptions(_options.DeserializationOptions)
-            {
-                NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals
-            };
-
-            if (_jsonDeserializerOptions.PropertyNamingPolicy is null)
-                _jsonDeserializerOptions.PropertyNamingPolicy = new SnakeCaseJsonNamingPolicy();
-
-            _jsonDeserializerOptions.Converters.Add(new BooleanJsonConverter());
-            _jsonDeserializerOptions.Converters.Add(new JsonStringEnumConverter());
-
-            _jsonDeserializerOptions.Converters.Add(new DateTimeJsonConverter());
-            _jsonDeserializerOptions.Converters.Add(new DateTimeOffsetJsonConverter());
+            _jsonDeserializerOptions = new JsonSerializerOptions(_options.DeserializationOptions);
+            _jsonDeserializerOptions.AddCensusDeserializationOptions();
 
             _jsonSerializerOptions = new JsonSerializerOptions(_options.SerializationOptions);
             if (_jsonSerializerOptions.PropertyNamingPolicy is null)

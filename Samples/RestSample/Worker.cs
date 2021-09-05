@@ -1,4 +1,5 @@
 using DbgCensus.Core.Exceptions;
+using DbgCensus.Core.Objects;
 using DbgCensus.Rest.Abstractions;
 using DbgCensus.Rest.Abstractions.Queries;
 using Microsoft.Extensions.Hosting;
@@ -119,12 +120,12 @@ namespace RestSample
 
         private async Task GetMapStatus(CancellationToken ct = default)
         {
-            ZoneType[] zones = Enum.GetValues<ZoneType>();
+            IEnumerable<ushort> zones = new ZoneDefinition[] { ZoneDefinition.Amerish, ZoneDefinition.Esamir, ZoneDefinition.Hossin, ZoneDefinition.Indar }.Cast<ushort>();
 
             IQueryBuilder query = _queryService.CreateQuery()
                 .OnCollection("map")
-                .Where("world_id", SearchModifier.Equals, WorldType.Connery)
-                .WhereAll("zone_ids", SearchModifier.Equals, zones.Select(z => (int)z));
+                .Where("world_id", SearchModifier.Equals, WorldDefinition.Connery)
+                .WhereAll("zone_ids", SearchModifier.Equals, zones);
 
             try
             {
@@ -140,7 +141,7 @@ namespace RestSample
                     double trPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == Faction.TR) / regionCount) * 100;
                     double vsPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == Faction.VS) / regionCount) * 100;
 
-                    message += $"\n\t-{m.ZoneId} | NC: {ncPercent:F}%, TR: {trPercent:F}%, VS: {vsPercent:F}%";
+                    message += $"\n\t- {m.ZoneId} | NC: {ncPercent:F}%, TR: {trPercent:F}%, VS: {vsPercent:F}%";
                 }
 
                 _logger.LogInformation(message);

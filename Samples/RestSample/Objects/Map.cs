@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using DbgCensus.Core.Objects;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace RestSample.Objects
@@ -43,7 +44,7 @@ namespace RestSample.Objects
         }
 
         [JsonPropertyName("ZoneId")]
-        public ZoneType ZoneId { get; init; }
+        public ZoneId ZoneId { get; init; }
 
         [JsonPropertyName("Regions")]
         public RegionModel Regions { get; init; }
@@ -51,6 +52,7 @@ namespace RestSample.Objects
         public Map()
         {
             Regions = new RegionModel();
+            ZoneId = ZoneId.Default;
         }
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EventStreamSample.EventHandlers
+namespace EventStreamSample.EventHandlers.System
 {
     /// <summary>
     /// Utilising something along the lines of this handler in your own project is NEAR MANDATORY.
@@ -37,7 +37,7 @@ namespace EventStreamSample.EventHandlers
                 new SubscribeCommand
                 (
                     new string[] { "all" },
-                    new string[] { "PlayerLogin", "PlayerLogout" },
+                    new string[] { EventNames.FACILITY_CONTROL, EventNames.PLAYER_LOGIN, EventNames.PLAYER_LOGOUT },
                     worlds: new string[] { "all" }
                 ),
                 ct

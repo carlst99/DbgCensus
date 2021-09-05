@@ -1,6 +1,7 @@
 using DbgCensus.EventStream;
 using DbgCensus.EventStream.EventHandlers.Extensions;
 using EventStreamSample.EventHandlers;
+using EventStreamSample.EventHandlers.System;
 using EventStreamSample.Objects;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,6 +30,7 @@ namespace EventStreamSample
                             .AddEventHandler<HeartbeatEventHandler>()
                             .AddEventHandler<ServiceStateChangedEventHandler>()
                             .AddEventHandler<SubscriptionEventHandler>()
+                            .AddEventHandler<FacilityControlEventHandler, FacilityControl>(EventNames.FACILITY_CONTROL)
                             .AddEventHandler<PlayerLogEventHandler, PlayerLogin>(EventNames.PLAYER_LOGIN)
                             .AddEventHandler<PlayerLogEventHandler, PlayerLogout>(EventNames.PLAYER_LOGOUT)
                             .AddEventHandler<UnknownEventHandler>();

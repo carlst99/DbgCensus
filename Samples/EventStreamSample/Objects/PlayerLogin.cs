@@ -1,6 +1,7 @@
-﻿using System;
+﻿using DbgCensus.Core.Objects;
+using System;
 
 namespace EventStreamSample.Objects
 {
-    public record PlayerLogin(ulong CharacterId, DateTimeOffset Timestamp, World WorldId);
+    public record PlayerLogin(ulong CharacterId, DateTimeOffset Timestamp, WorldDefinition WorldId);
 }

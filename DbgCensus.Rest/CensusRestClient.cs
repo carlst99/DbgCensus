@@ -1,5 +1,4 @@
 ﻿using DbgCensus.Core.Exceptions;
-using DbgCensus.Core.Json;
 using DbgCensus.Rest.Abstractions;
 using DbgCensus.Rest.Abstractions.Queries;
 using DbgCensus.Rest.Exceptions;
@@ -10,7 +9,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,19 +36,8 @@ namespace DbgCensus.Rest
             _client = client;
             _queryOptions = options.Value;
 
-            _jsonOptions = new JsonSerializerOptions(_queryOptions.DeserializationOptions)
-            {
-                NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals
-            };
-
-            if (_jsonOptions.PropertyNamingPolicy is null)
-                _jsonOptions.PropertyNamingPolicy = new SnakeCaseJsonNamingPolicy();
-
-            _jsonOptions.Converters.Add(new BooleanJsonConverter());
-            _jsonOptions.Converters.Add(new JsonStringEnumConverter());
-
-            _jsonOptions.Converters.Add(new DateTimeJsonConverter());
-            _jsonOptions.Converters.Add(new DateTimeOffsetJsonConverter());
+            _jsonOptions = new JsonSerializerOptions(_queryOptions.DeserializationOptions);
+            _jsonOptions.AddCensusDeserializationOptions();
         }
 
         /// <inheritdoc />
