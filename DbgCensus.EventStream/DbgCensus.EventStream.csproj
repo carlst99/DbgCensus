@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
 
     <!-- Package info -->
-    <Version>1.0.0-alpha.3</Version>
+    <Version>1.0.0-beta</Version>
     <Authors>Carl Stephens</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
@@ -19,7 +19,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Include symbol files (*.pdb) in the built .nupkg -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <PackageReleaseNotes>Refactored event handling logic to DbgCensus.EventStream.EventHandlers .</PackageReleaseNotes>
+    <PackageReleaseNotes></PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
