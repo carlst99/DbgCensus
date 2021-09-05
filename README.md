@@ -13,17 +13,17 @@ DbgCensus is a C# wrapper for [Daybreak Game Company's Census API](https://censu
 
 ***
 
-- Fluent query building API with full coverage of the Census query interface.
+- Fluent query building API
+- Full coverage of the Census query and event streaming interfaces.
 - Fully asynchronous.
-- Highly extendable - core components can be extended, replaced and used individually.
 - Built around the `Microsoft.Extensions` framework.
 - Compiled for .NET 5.0.
 
-> :warning: DbgCensus is currently in a pre-release state. This means that:
+> :warning: DbgCensus is currently in an unstable. This means that:
 >
 > - The code has been 'tested' by my own workloads, but not thoroughly hand or unit tested.
-> - The API is liable to change, although it is beginning to reach a more mature point.
-> - Documentation is light on the ground, although the code is fully XML documented.
+> - The API is liable to change, although it is beginning to reach maturity.
+> - Documentation is a bit lacking, although the code is fully XML documented.
 
 ***
 
@@ -47,13 +47,22 @@ Check out the [samples](Samples) to get up and running quickly with DbgCensus. T
 
 The `EventStreamSample` utilises DbgCensus' event handling framework. If you'd prefer to use another method of dispatching and handling events, you'll need to extend the `BaseEventStreamClient` instead, and register it yourself using the `AddCensusEventStreamServices` extension method.
 
+## Core Components
+
+The *Core* library contains common types and extensions. Of these, it is likely you will find the Census objects useful (`DbgCensus.Core.Objects`). There are:
+
+- Enumerations of the faction, world and zone IDs that Census uses.
+- A `ZoneId` record that represents Census' special zone ID format - [see here](https://github.com/cooltrain7/Planetside-2-API-Tracker/wiki/Zone-ID-Tutorial) for more info. JSON converters are registered by default for this type, so you can use it anywhere that you would normally use an integer zone ID in your models.
+
+There are also converters, extensions and naming policies for `System.Text.Json` that you may find useful should you decide to perform your own JSON deserialisation.
+
 ## Interacting with Census Query Endpoints
 
 Check out [REST Sample](Samples/RestSample) as you read through this.
 
 Start off by creating a new project. I would highly recommend using a template that implements the [Generic Host](https://docs.microsoft.com/en-us/dotnet/core/extensions/generic-host), such as a *Worker Service* or an *ASP.NET Core* project.
 
-Then, install the REST package, either by using the Visual Studio Package Manager:
+Then, install the REST package:
 
 ```powershell
 # Visual Studio Package Manager
@@ -69,7 +78,7 @@ using DbgCensus.Rest.Extensions;
 
 public static IHostBuilder CreateHostBuilder(string[] args) =>
     Host.CreateDefaultBuilder(args)
-        .ConfigureServices((c, services) =>
+        .ConfigureServices((configuration, services) =>
         {
             services.AddCensusRestServices();
         });
@@ -92,7 +101,7 @@ You will need configure an instance of the `CensusQueryOptions` class to ensure 
 
 ### Performing Queries
 
-Grab an `IQueryService` instance. This is a wrapper around the registered `IQueryBuilderFactory` and `ICensusRestClient` objects, which you can use if you need slightly more control over your queries.
+Grab an `IQueryService` instance. This is a wrapper around the registered `IQueryBuilderFactory` and `ICensusRestClient` objects, which you can use individually if you need slightly more control over your queries.
 
 ```csharp
 IQueryBuilder query = _queryService.CreateQuery()
