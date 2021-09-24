@@ -11,7 +11,7 @@
     <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
     <RepositoryUrl>https://github.com/carlst99/DbgCensus</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Description>Contains core data types and utilities for the DbgCensus.* libraries - low level wrappers for interacting with Daybreak Game Company's Census API.</Description>
+    <Description>Contains core data types and utilities for the DbgCensus.* libraries -wrappers for interacting with Daybreak Game Company's Census API.</Description>
     <PackageTags>planetside2 daybreak-games daybreak-census</PackageTags>
     <PackageIcon>Icon_128.png</PackageIcon>
     
