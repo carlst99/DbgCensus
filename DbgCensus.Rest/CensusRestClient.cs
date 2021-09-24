@@ -96,23 +96,26 @@ namespace DbgCensus.Rest
             if (collectionName is null)
                 collectionName = "datatype";
 
-            //if (!data.RootElement.TryGetProperty("returned", out JsonElement returnedElement) || !returnedElement.TryGetUInt64(out ulong returnedCount))
-            //    throw new CensusInvalidDataException("Expected a valid 'returned' element.", data.RootElement.GetString());
-
             // TODO: Test with distinct and other commands that vastly modify the result
-            // Check that object count matches returned results count if list?
             if (!data.RootElement.TryGetProperty(collectionName + "_list", out JsonElement collectionElement))
             {
                 _logger.LogWarning("Returned data was not in the expected format: {data}", data.RootElement.GetRawText());
                 throw new CensusInvalidDataException("Returned data was not in the expected format.", data.RootElement.GetRawText());
             }
 
+            if (collectionElement.ValueKind != JsonValueKind.Array)
+                throw new CensusInvalidDataException("The Census result was expected to contain an array of data.", data.RootElement.GetRawText());
+
             if (typeof(T).IsAssignableTo(typeof(System.Collections.IEnumerable)))
                 return JsonSerializer.Deserialize<T>(collectionElement.GetRawText(), _jsonOptions);
-            else if (collectionElement.GetArrayLength() == 1)
-                return JsonSerializer.Deserialize<T>(collectionElement.GetRawText().Trim('[', ']'), _jsonOptions);
+
+            int length = collectionElement.GetArrayLength();
+            if (length > 1)
+                throw new JsonException("You are trying to deserialise to a single object, but the Census data contained more than one entity.");
+            else if (length == 0)
+                return default;
             else
-                throw new JsonException("Cannot deserialise an array to a single object");
+                return JsonSerializer.Deserialize<T>(collectionElement[0].GetRawText(), _jsonOptions);
         }
 
         /// <summary>
