@@ -34,6 +34,7 @@ namespace DbgCensus.EventStream
         /// Gets or sets the amount of time to wait before attemping a reconnection when the streaming API drops out.
         /// </summary>
         public int ReconnectionDelayMilliseconds { get; set; }
+
         public EventStreamOptions()
         {
             RootEndpoint = "wss://push.planetside2.com";

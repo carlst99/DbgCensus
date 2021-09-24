@@ -6,12 +6,14 @@ DbgCensus is a C# wrapper for [Daybreak Game Company's Census API](https://censu
 
 **This package is unofficial and is not affiliated with Daybreak Games Company in any way.**
 
-[![Nuget | DbgCensus.Core](https://img.shields.io/nuget/v/DbgCensus.Core?label=DbgCensus.Core)](https://www.nuget.org/packages/DbgCensus.Core)
-[![Nuget | DbgCensus.Rest](https://img.shields.io/nuget/v/DbgCensus.Rest?label=DbgCensus.Rest)](https://www.nuget.org/packages/DbgCensus.Rest)
-[![Nuget | DbgCensus.EventStream](https://img.shields.io/nuget/v/DbgCensus.EventStream?label=DbgCensus.EventStream)](https://www.nuget.org/packages/DbgCensus.EventStream)
-[![Nuget | DbgCensus.EventStream.EventHandlers](https://img.shields.io/nuget/v/DbgCensus.EventStream.EventHandlers?label=DbgCensus.EventStream.EventHandlers)](https://www.nuget.org/packages/DbgCensus.EventStream.EventHandlers)
+[![Nuget | DbgCensus.Core](https://img.shields.io/nuget/v/DbgCensus.Core?label=DbgCensus.Core)](https://www.nuget.org/packages/DbgCensus.Core) - Core data types and utilities.\
+[![Nuget | DbgCensus.Rest](https://img.shields.io/nuget/v/DbgCensus.Rest?label=DbgCensus.Rest)](https://www.nuget.org/packages/DbgCensus.Rest) - Services for interacting with the query endpoints.\
+[![Nuget | DbgCensus.EventStream](https://img.shields.io/nuget/v/DbgCensus.EventStream?label=DbgCensus.EventStream)](https://www.nuget.org/packages/DbgCensus.EventStream) - Base services for interacting with the event streaming API.\
+[![Nuget | DbgCensus.EventStream.EventHandlers](https://img.shields.io/nuget/v/DbgCensus.EventStream.EventHandlers?label=DbgCensus.EventStream.EventHandlers)](https://www.nuget.org/packages/DbgCensus.EventStream.EventHandlers) - An abstraction of DbgCensus.EventStream providing an asynchronous and decoupled event handling model.
 
 ***
+
+# Features
 
 - Fluent query building API
 - Full coverage of the Census query and event streaming interfaces.
@@ -19,7 +21,7 @@ DbgCensus is a C# wrapper for [Daybreak Game Company's Census API](https://censu
 - Built around the `Microsoft.Extensions` framework.
 - Compiled for .NET 5.0.
 
-> :warning: DbgCensus is currently in an unstable. This means that:
+> :warning: DbgCensus is currently in an unstable state. This means that:
 >
 > - The code has been 'tested' by my own workloads, but not thoroughly hand or unit tested.
 > - The API is liable to change, although it is beginning to reach maturity.

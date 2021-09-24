@@ -5,13 +5,13 @@
     <Nullable>enable</Nullable>
     
     <!-- Package info -->
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>Carl Stephens</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
     <RepositoryUrl>https://github.com/carlst99/DbgCensus</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Description>A low-level wrapper for interacting with the query endpoints of Daybreak Game Company's Census API.</Description>
+    <Description>A wrapper for interacting with the query endpoints of Daybreak Game Company's Census API.</Description>
     <PackageTags>planetside2 daybreak-games daybreak-census</PackageTags>
     <PackageIcon>Icon_128.png</PackageIcon>
 
@@ -20,6 +20,7 @@
     <!-- Include symbol files (*.pdb) in the built .nupkg -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <PackageReleaseNotes>Update zone definitions to include Tutorial2.</PackageReleaseNotes>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -41,6 +42,10 @@
       <PackagePath></PackagePath>
     </None>
     <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
