@@ -41,7 +41,6 @@ You will also need to have a good understanding of how the Census API works. I h
 - [Leonhard's Census API Primer.](https://github.com/leonhard-s/auraxium/wiki/Census-API-Primer)
 - [The community API issue tracker/info repository](https://github.com/cooltrain7/Planetside-2-API-Tracker)
 - [Leonhard's unofficial docs for PlanetSide 2 endpoints.](https://ps2-api-docs.readthedocs.io/en/latest/openapi.html)
-- [#api-dev channel in the PlanetSide 2 Community Discord server for general API questions.](https://discord.me/planetside)
 
 ## Examples
 
