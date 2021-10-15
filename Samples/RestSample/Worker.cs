@@ -120,7 +120,14 @@ namespace RestSample
 
         private async Task GetMapStatus(CancellationToken ct = default)
         {
-            IEnumerable<ushort> zones = new ZoneDefinition[] { ZoneDefinition.Amerish, ZoneDefinition.Esamir, ZoneDefinition.Hossin, ZoneDefinition.Indar }.Cast<ushort>();
+            IEnumerable<ushort> zones = new ZoneDefinition[]
+            {
+                ZoneDefinition.Amerish,
+                ZoneDefinition.Esamir,
+                ZoneDefinition.Hossin,
+                ZoneDefinition.Indar,
+                ZoneDefinition.Koltyr
+            }.Cast<ushort>();
 
             IQueryBuilder query = _queryService.CreateQuery()
                 .OnCollection("map")

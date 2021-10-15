@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Microsoft.IO;
 using System;
 using System.Net.WebSockets;
 
@@ -19,6 +20,7 @@ namespace DbgCensus.EventStream.Extensions
             this IServiceCollection serviceCollection,
             Func<IServiceProvider, IOptions<EventStreamOptions>, string, IEventStreamClient> configureClient)
         {
+            serviceCollection.TryAddSingleton<RecyclableMemoryStreamManager>();
             serviceCollection.TryAddTransient<ClientWebSocket>();
 
             serviceCollection.TryAddSingleton<IEventStreamClientFactory>

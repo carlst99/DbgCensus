@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IO;
 using System;
+using System.Buffers;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text;
@@ -31,11 +32,15 @@ namespace DbgCensus.EventStream
         /// </summary>
         protected const int KEEPALIVE_INTERVAL_SEC = 20;
 
-        protected static readonly RecyclableMemoryStreamManager _memoryStreamPool = new();
+        private readonly SemaphoreSlim _sendSemaphore;
+        private readonly Utf8JsonWriter _sendJsonWriter;
+
+        private ArrayBufferWriter<byte> _sendBuffer;
 
         protected readonly ILogger<BaseEventStreamClient> _logger;
         protected readonly IServiceProvider _services;
         protected readonly EventStreamOptions _options;
+        protected readonly RecyclableMemoryStreamManager _memoryStreamPool;
         protected readonly JsonSerializerOptions _jsonDeserializerOptions;
         protected readonly JsonSerializerOptions _jsonSerializerOptions;
 
@@ -61,17 +66,23 @@ namespace DbgCensus.EventStream
         /// </summary>
         /// <param name="name">The identifying name of this client.</param>
         /// <param name="logger">The logging interface to use.</param>
-        /// <param name="services">The service provider.</param>
+        /// <param name="services">The service provider, used to retrieve <see cref="ClientWebSocket"/> instances.</param>
+        /// <param name="memoryStreamPool">The memory stream pool.</param>
         /// <param name="options">The options used to configure the client.</param>
         protected BaseEventStreamClient(
             string name,
             ILogger<BaseEventStreamClient> logger,
             IServiceProvider services,
+            RecyclableMemoryStreamManager memoryStreamPool,
             IOptions<EventStreamOptions> options)
         {
+            if (options.Value.ReconnectionDelayMilliseconds < 1)
+                throw new ArgumentException("Reconnection delay cannot be less than one millisecond.", nameof(options));
+
             Name = name;
             _logger = logger;
             _services = services;
+            _memoryStreamPool = memoryStreamPool;
             _options = options.Value;
             _webSocket = services.GetRequiredService<ClientWebSocket>();
 
@@ -87,8 +98,13 @@ namespace DbgCensus.EventStream
             builder.Query = $"environment={ _options.Environment }&service-id=s:{ _options.ServiceId }";
             _endpoint = builder.Uri;
 
-            if (_options.ReconnectionDelayMilliseconds < 1)
-                throw new ArgumentException("Reconnection delay cannot be less than one millisecond.", nameof(options));
+            _sendSemaphore = new SemaphoreSlim(1, 1);
+            _sendBuffer = new ArrayBufferWriter<byte>(SOCKET_BUFFER_SIZE);
+            _sendJsonWriter = new Utf8JsonWriter
+            (
+                _sendBuffer,
+                new JsonWriterOptions { SkipValidation = true } // The JSON Serializer should handle everything correctly
+            );
         }
 
         /// <inheritdoc />
@@ -127,26 +143,48 @@ namespace DbgCensus.EventStream
         {
             DoDisposeChecks();
 
-            if (_webSocket.State != WebSocketState.Open)
+            if (_webSocket?.State is not WebSocketState.Open)
                 throw new InvalidOperationException("Websocket connection is not open.");
 
-            using MemoryStream stream = new();
-            await JsonSerializer.SerializeAsync(stream, command, _jsonSerializerOptions, ct).ConfigureAwait(false);
-
-            if (!stream.TryGetBuffer(out ArraySegment<byte> serialisedBuffer))
-                throw new JsonException("Could not serialise command.");
-
-            _logger.LogInformation("Sending census command: {command}", Encoding.UTF8.GetString(serialisedBuffer));
-
-            int pageCount = (int)Math.Ceiling((double)serialisedBuffer.Count / SOCKET_BUFFER_SIZE);
-
-            for (int i = 0; i < pageCount; i++)
+            try
             {
-                int offset = SOCKET_BUFFER_SIZE * i;
-                int count = SOCKET_BUFFER_SIZE * (i + 1) < serialisedBuffer.Count ? SOCKET_BUFFER_SIZE : serialisedBuffer.Count - offset;
-                bool isLastMessage = (i + 1) == pageCount;
+                JsonSerializer.Serialize(_sendJsonWriter, command, _jsonSerializerOptions);
 
-                await _webSocket.SendAsync(serialisedBuffer.Slice(offset, count), WebSocketMessageType.Text, isLastMessage, ct).ConfigureAwait(false);
+                ReadOnlyMemory<byte> data = _sendBuffer.WrittenMemory;
+
+                bool entered = await _sendSemaphore.WaitAsync(1000, ct).ConfigureAwait(false);
+                if (!entered)
+                {
+                    throw new OperationCanceledException("Could not enter semaphore.");
+                }
+
+                int pageCount = (int)Math.Ceiling((double)data.Length / SOCKET_BUFFER_SIZE);
+
+                for (int i = 0; i< pageCount; i++)
+                {
+                    int offset = SOCKET_BUFFER_SIZE * i;
+                    int count = SOCKET_BUFFER_SIZE * (i + 1) < data.Length ? SOCKET_BUFFER_SIZE : data.Length - offset;
+                    bool isLastMessage = (i + 1) == pageCount;
+
+                    await _webSocket.SendAsync(data.Slice(offset, count), WebSocketMessageType.Text, isLastMessage, ct).ConfigureAwait(false);
+                }
+
+                if (data.Length > SOCKET_BUFFER_SIZE * 8)
+                {
+                    // Reset the backing buffer so we don't hold on to more memory than necessary
+                    _sendBuffer = new ArrayBufferWriter<byte>(SOCKET_BUFFER_SIZE);
+                    _sendJsonWriter.Reset(_sendBuffer);
+                }
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                _sendSemaphore.Release();
+                _sendBuffer.Clear();
+                _sendJsonWriter.Reset();
             }
         }
 

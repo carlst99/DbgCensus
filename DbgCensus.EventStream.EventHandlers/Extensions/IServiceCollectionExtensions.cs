@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,7 @@ namespace DbgCensus.EventStream.EventHandlers.Extensions
                     n,
                     s.GetRequiredService<ILogger<EventHandlingEventStreamClient>>(),
                     s,
+                    s.GetRequiredService<RecyclableMemoryStreamManager>(),
                     o,
                     s.GetRequiredService<IEventHandlerTypeRepository>(),
                     s.GetRequiredService<IServiceMessageTypeRepository>()

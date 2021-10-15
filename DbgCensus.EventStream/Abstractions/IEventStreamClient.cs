@@ -27,7 +27,8 @@ namespace DbgCensus.EventStream.Abstractions
         bool IsRunning { get; }
 
         /// <summary>
-        /// Connects to the census event stream and begins receiving events. This method will return when <see cref="StopAsync"/> is called or the operationj= is cancelled.
+        /// Connects to the census event stream and begins receiving events.
+        /// This method will return when <see cref="StopAsync"/> is called or the operation is cancelled.
         /// </summary>
         /// <param name="initialSubscription">An initial subscription to make.</param>
         /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>

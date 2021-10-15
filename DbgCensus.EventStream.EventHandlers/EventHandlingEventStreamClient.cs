@@ -6,6 +6,7 @@ using DbgCensus.EventStream.EventHandlers.Objects.Push;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IO;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -34,6 +35,7 @@ namespace DbgCensus.EventStream.EventHandlers
         /// <param name="name">The identifying name of this client.</param>
         /// <param name="logger">The logging interface to use.</param>
         /// <param name="services">The service provider.</param>
+        /// <param name="memoryStreamPool">The memory stream pool.</param>
         /// <param name="options">The options used to configure the client.</param>
         /// <param name="eventHandlerTypeRepository">The repository of <see cref="ICensusEventHandler{TEvent}"/> types.</param>
         /// <param name="eventStreamObjectTypeRepository">The repository of <see cref="IEventStreamObject"/> types.</param>
@@ -41,10 +43,11 @@ namespace DbgCensus.EventStream.EventHandlers
             string name,
             ILogger<EventHandlingEventStreamClient> logger,
             IServiceProvider services,
+            RecyclableMemoryStreamManager memoryStreamPool,
             IOptions<EventStreamOptions> options,
             IEventHandlerTypeRepository eventHandlerTypeRepository,
             IServiceMessageTypeRepository eventStreamObjectTypeRepository)
-            : base(name, logger, services, options)
+            : base(name, logger, services, memoryStreamPool, options)
         {
             _eventHandlerRepository = eventHandlerTypeRepository;
             _serviceMessageObjectRepository = eventStreamObjectTypeRepository;
