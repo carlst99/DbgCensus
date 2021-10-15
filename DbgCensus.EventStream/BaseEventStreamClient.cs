@@ -10,7 +10,6 @@ using System;
 using System.Buffers;
 using System.IO;
 using System.Net.WebSockets;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,19 +24,23 @@ namespace DbgCensus.EventStream
         /// <summary>
         /// Gets the size of the buffer used to send and receive data in chunks.
         /// </summary>
-        protected const int SOCKET_BUFFER_SIZE = 8192;
+        protected const int SOCKET_BUFFER_SIZE = 4096;
 
         /// <summary>
         /// The keep-alive interval for the websocket.
         /// </summary>
         protected const int KEEPALIVE_INTERVAL_SEC = 20;
 
+        /// <summary>
+        /// Gets the constant used to delimit payloads in the receive pipe.
+        /// Defined as an ASCII end-of-transmission character.
+        /// </summary>
+        public const byte RECEIVE_PAYLOAD_DELIMITER = 4;
+
+        private readonly ILogger<BaseEventStreamClient> _logger;
         private readonly SemaphoreSlim _sendSemaphore;
         private readonly Utf8JsonWriter _sendJsonWriter;
 
-        private ArrayBufferWriter<byte> _sendBuffer;
-
-        protected readonly ILogger<BaseEventStreamClient> _logger;
         protected readonly IServiceProvider _services;
         protected readonly EventStreamOptions _options;
         protected readonly RecyclableMemoryStreamManager _memoryStreamPool;
@@ -48,6 +51,8 @@ namespace DbgCensus.EventStream
         /// The constructed endpoint to connect to.
         /// </summary>
         protected readonly Uri _endpoint;
+
+        private ArrayBufferWriter<byte> _sendBuffer;
 
         protected ClientWebSocket _webSocket;
         protected SubscribeCommand? _initialSubscription;
@@ -86,7 +91,16 @@ namespace DbgCensus.EventStream
             _options = options.Value;
             _webSocket = services.GetRequiredService<ClientWebSocket>();
 
-            _jsonDeserializerOptions = new JsonSerializerOptions(_options.DeserializationOptions);
+            _sendSemaphore = new SemaphoreSlim(1, 1);
+            _sendBuffer = new ArrayBufferWriter<byte>(SOCKET_BUFFER_SIZE);
+
+            _sendJsonWriter = new Utf8JsonWriter
+            (
+                _sendBuffer,
+                new JsonWriterOptions { SkipValidation = true } // The JSON Serializer should handle everything correctly
+            );
+
+            _jsonDeserializerOptions = new JsonSerializerOptions(_options.SerializationOptions);
             _jsonDeserializerOptions.AddCensusDeserializationOptions();
 
             _jsonSerializerOptions = new JsonSerializerOptions(_options.SerializationOptions);
@@ -97,14 +111,6 @@ namespace DbgCensus.EventStream
             builder.Path = "streaming";
             builder.Query = $"environment={ _options.Environment }&service-id=s:{ _options.ServiceId }";
             _endpoint = builder.Uri;
-
-            _sendSemaphore = new SemaphoreSlim(1, 1);
-            _sendBuffer = new ArrayBufferWriter<byte>(SOCKET_BUFFER_SIZE);
-            _sendJsonWriter = new Utf8JsonWriter
-            (
-                _sendBuffer,
-                new JsonWriterOptions { SkipValidation = true } // The JSON Serializer should handle everything correctly
-            );
         }
 
         /// <inheritdoc />
@@ -221,54 +227,61 @@ namespace DbgCensus.EventStream
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task StartListeningAsync(CancellationToken ct = default)
         {
-            byte[] buffer = new byte[SOCKET_BUFFER_SIZE];
+            IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent(SOCKET_BUFFER_SIZE);
+            ValueWebSocketReceiveResult result;
 
-            while (IsRunning && !IsDisposed)
+            try
             {
-                if (ct.IsCancellationRequested)
-                    throw new TaskCanceledException();
-
-                switch (_webSocket.State)
+                while (IsRunning && !IsDisposed)
                 {
-                    // The streaming API occasionally closes your connection. We'll helpfully restore that.
-                    case WebSocketState.Aborted or WebSocketState.CloseReceived:
-                        await ReconnectAsync(ct).ConfigureAwait(false);
-                        continue;
-                    // Give it a chance to connect
-                    case WebSocketState.Connecting:
-                        await Task.Delay(10, ct).ConfigureAwait(false);
-                        continue;
-                    // A graceful close, or request to close on our end, indicates things are wrapping up
-                    case WebSocketState.Closed or WebSocketState.CloseSent:
-                        return;
-                }
+                    if (ct.IsCancellationRequested)
+                        throw new TaskCanceledException();
 
-                MemoryStream stream = _memoryStreamPool.GetStream();
-                WebSocketReceiveResult result;
-
-                do
-                {
-                    result = await _webSocket.ReceiveAsync(buffer, ct).ConfigureAwait(false);
-
-                    // The streaming API occasionally closes your connection. We'll helpfully restore that.
-                    if (result.MessageType == WebSocketMessageType.Close)
+                    switch (_webSocket.State)
                     {
-                        if (IsRunning)
-                        {
+                        // The streaming API occasionally closes your connection. We'll helpfully restore that.
+                        case WebSocketState.Aborted or WebSocketState.CloseReceived:
                             await ReconnectAsync(ct).ConfigureAwait(false);
                             continue;
-                        }
-                        else
-                        {
+                        // Give it a chance to connect
+                        case WebSocketState.Connecting:
+                            await Task.Delay(10, ct).ConfigureAwait(false);
+                            continue;
+                        // A graceful close, or request to close on our end, indicates things are wrapping up
+                        case WebSocketState.Closed or WebSocketState.CloseSent:
                             return;
-                        }
                     }
 
-                    stream.Write(buffer, 0, result.Count);
-                } while (!result.EndOfMessage);
+                    MemoryStream stream = _memoryStreamPool.GetStream();
 
-                stream.Seek(0, SeekOrigin.Begin);
-                await HandleEvent(stream, ct).ConfigureAwait(false);
+                    do
+                    {
+                        result = await _webSocket.ReceiveAsync(buffer.Memory, ct).ConfigureAwait(false);
+
+                        // The streaming API occasionally closes your connection. We'll helpfully restore that.
+                        if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            if (IsRunning)
+                            {
+                                await ReconnectAsync(ct).ConfigureAwait(false);
+                                continue;
+                            }
+                            else
+                            {
+                                return;
+                            }
+                        }
+
+                        await stream.WriteAsync(buffer.Memory.Slice(0, result.Count), ct).ConfigureAwait(false);
+                    } while (!result.EndOfMessage);
+
+                    stream.Seek(0, SeekOrigin.Begin);
+                    await HandleEvent(stream, ct).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                buffer.Dispose();
             }
         }
 

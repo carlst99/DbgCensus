@@ -25,6 +25,7 @@ namespace DbgCensus.EventStream.EventHandlers
     /// </summary>
     public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     {
+        private readonly ILogger<EventHandlingEventStreamClient> _logger;
         private readonly IEventHandlerTypeRepository _eventHandlerRepository;
         private readonly IServiceMessageTypeRepository _serviceMessageObjectRepository;
         private readonly ConcurrentQueue<Task> _dispatchedEventQueue;
@@ -49,6 +50,7 @@ namespace DbgCensus.EventStream.EventHandlers
             IServiceMessageTypeRepository eventStreamObjectTypeRepository)
             : base(name, logger, services, memoryStreamPool, options)
         {
+            _logger = logger;
             _eventHandlerRepository = eventHandlerTypeRepository;
             _serviceMessageObjectRepository = eventStreamObjectTypeRepository;
 
@@ -70,60 +72,65 @@ namespace DbgCensus.EventStream.EventHandlers
         /// <inheritdoc />
         protected override async Task HandleEvent(MemoryStream eventStream, CancellationToken ct = default)
         {
-            // Attempt to finalise one event handler
-            if (_dispatchedEventQueue.TryDequeue(out Task? eventTask))
+            try
             {
-                if (eventTask.IsCompleted)
-                    await FinaliseDispatchedEvent(eventTask).ConfigureAwait(false);
-                else
-                    _dispatchedEventQueue.Enqueue(eventTask);
-            }
-
-            using JsonDocument jsonResponse = await JsonDocument.ParseAsync(eventStream, cancellationToken: ct).ConfigureAwait(false);
-
-            // Handle properly formed events
-            if (jsonResponse.RootElement.TryGetProperty("service", out JsonElement serviceElement) && jsonResponse.RootElement.TryGetProperty("type", out JsonElement typeElement))
-            {
-                string? censusService = serviceElement.GetString();
-                string? censusType = typeElement.GetString();
-
-                if (censusService is null || censusType is null)
+                // Attempt to finalise one event handler
+                if (_dispatchedEventQueue.TryDequeue(out Task? eventTask))
                 {
-                    _logger.LogWarning("An event with an unspecified service and/or type has been received. An UnknownEvent object will be dispatched.");
+                    if (eventTask.IsCompleted)
+                        await FinaliseDispatchedEvent(eventTask).ConfigureAwait(false);
+                    else
+                        _dispatchedEventQueue.Enqueue(eventTask);
+                }
+
+                using JsonDocument jsonResponse = await JsonDocument.ParseAsync(eventStream, cancellationToken: ct).ConfigureAwait(false);
+
+                // Handle properly formed events
+                if (jsonResponse.RootElement.TryGetProperty("service", out JsonElement serviceElement) && jsonResponse.RootElement.TryGetProperty("type", out JsonElement typeElement))
+                {
+                    string? censusService = serviceElement.GetString();
+                    string? censusType = typeElement.GetString();
+
+                    if (censusService is null || censusType is null)
+                    {
+                        _logger.LogWarning("An event with an unspecified service and/or type has been received. An UnknownEvent object will be dispatched.");
+                        BeginEventDispatch(new UnknownEvent(Name, jsonResponse.RootElement.GetRawText()), ct);
+                    }
+                    else if (censusService == "event" && censusType == "serviceMessage")
+                    {
+                        DispatchServiceMessage(jsonResponse.RootElement, ct);
+                    }
+                    else if (censusService == "event" && censusType == "heartbeat")
+                    {
+                        DeserializeAndBeginEventDispatch<Heartbeat>(jsonResponse.RootElement, ct);
+                    }
+                    else if (censusService == "event" && censusType == "serviceStateChanged")
+                    {
+                        DeserializeAndBeginEventDispatch<ServiceStateChanged>(jsonResponse.RootElement, ct);
+                    }
+                    else if (censusService == "push" && censusType == "connectionStateChanged")
+                    {
+                        DeserializeAndBeginEventDispatch<ConnectionStateChanged>(jsonResponse.RootElement, ct);
+                    }
+                }
+                else if (jsonResponse.RootElement.TryGetProperty("subscription", out JsonElement subscriptionElement)) // Handle subscription events
+                {
+                    DeserializeAndBeginEventDispatch<Subscription>(subscriptionElement, ct);
+                }
+                else if (jsonResponse.RootElement.TryGetProperty("send this for help", out _)) // Ignore the 'send for help'
+                {
+                    // No need to process this
+                }
+                else // Handle unknown events
+                {
+                    _logger.LogWarning("An unknown event was received from the Census event stream. An UnknownEvent object will be dispatched.");
                     BeginEventDispatch(new UnknownEvent(Name, jsonResponse.RootElement.GetRawText()), ct);
                 }
-                else if (censusService == "event" && censusType == "serviceMessage")
-                {
-                    DispatchServiceMessage(jsonResponse.RootElement, ct);
-                }
-                else if (censusService == "event" && censusType == "heartbeat")
-                {
-                    DeserializeAndBeginEventDispatch<Heartbeat>(jsonResponse.RootElement, ct);
-                }
-                else if (censusService == "event" && censusType == "serviceStateChanged")
-                {
-                    DeserializeAndBeginEventDispatch<ServiceStateChanged>(jsonResponse.RootElement, ct);
-                }
-                else if (censusService == "push" && censusType == "connectionStateChanged")
-                {
-                    DeserializeAndBeginEventDispatch<ConnectionStateChanged>(jsonResponse.RootElement, ct);
-                }
             }
-            else if (jsonResponse.RootElement.TryGetProperty("subscription", out JsonElement subscriptionElement)) // Handle subscription events
+            finally
             {
-                DeserializeAndBeginEventDispatch<Subscription>(subscriptionElement, ct);
+                eventStream.Dispose();
             }
-            else if (jsonResponse.RootElement.TryGetProperty("send this for help", out _)) // Ignore the 'send for help'
-            {
-                // No need to process this
-            }
-            else // Handle unknown events
-            {
-                _logger.LogWarning("An unknown event was received from the Census event stream. An UnknownEvent object will be dispatched.");
-                BeginEventDispatch(new UnknownEvent(Name, jsonResponse.RootElement.GetRawText()), ct);
-            }
-
-            eventStream.Dispose();
         }
 
         /// <summary>
