@@ -29,7 +29,7 @@ DbgCensus is a C# wrapper for [Daybreak Game Company's Census API](https://censu
 
 ***
 
-## Getting Started
+# Getting Started
 
 Before you do anything, you should consider getting a custom *Census Service ID*. The process is free and it generally only takes a few hours to hear back about your registration, which you can do [here](https://census.daybreakgames.com/#devSignup).
 
@@ -94,9 +94,12 @@ You will need configure an instance of the `CensusQueryOptions` class to ensure 
 ```csharp
 .ConfigureServices((hostContext, services) =>
     {
-        services.Configure<CensusQueryOptions>(hostContext.Configuration.GetSection(nameof(CensusQueryOptions)));
+        services.Configure<CensusQueryOptions>(
+            hostContext.Configuration.GetSection(nameof(CensusQueryOptions)));
+        
         // AND/OR
-        services.Configure<CensusQueryOptions>(o => o.DeserializationOptions = new JsonSerializerOptions(...));
+        services.Configure<CensusQueryOptions>(
+            o => o.DeserializationOptions = new JsonSerializerOptions(...));
     });
 ```
 
