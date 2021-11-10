@@ -1,4 +1,3 @@
-﻿namespace RestSample.Objects
-{
-    public record Name(string First, string FirstLower);
-}
+﻿namespace RestSample.Objects;
+
+public record Name(string First, string FirstLower);

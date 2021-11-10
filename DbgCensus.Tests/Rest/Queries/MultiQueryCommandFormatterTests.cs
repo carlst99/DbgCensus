@@ -6,59 +6,58 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace DbgCensus.Tests.Rest.Queries
+namespace DbgCensus.Tests.Rest.Queries;
+
+public class MultiQueryCommandFormatterTests
 {
-    public class MultiQueryCommandFormatterTests
+    [Fact]
+    public void TestConstructor()
     {
-        [Fact]
-        public void TestConstructor()
-        {
-            MultiQueryCommandFormatter<string> formatter = new("command", ';', ',');
+        MultiQueryCommandFormatter<string> formatter = new("command", ';', ',');
 
-            Assert.Equal("command", formatter.Command);
-            Assert.Equal(';', formatter.ComponentSeparator);
-            Assert.Equal(',', formatter.ArgumentSeparator);
-        }
+        Assert.Equal("command", formatter.Command);
+        Assert.Equal(';', formatter.ComponentSeparator);
+        Assert.Equal(',', formatter.ArgumentSeparator);
+    }
 
-        [Fact]
-        public void TestAddArgument()
-        {
-            MultiQueryCommandFormatter<string> formatter = new("command", ';', ',');
+    [Fact]
+    public void TestAddArgument()
+    {
+        MultiQueryCommandFormatter<string> formatter = new("command", ';', ',');
 
-            Assert.False(formatter.AnyArguments);
-            Assert.Throws<ArgumentNullException>(() => formatter.AddArgument(null!));
+        Assert.False(formatter.AnyArguments);
+        Assert.Throws<ArgumentNullException>(() => formatter.AddArgument(null!));
 
-            formatter.AddArgument("argument");
-            formatter.AddArgument("argument1");
+        formatter.AddArgument("argument");
+        formatter.AddArgument("argument1");
 
-            Assert.True(formatter.AnyArguments);
-            Assert.Contains("argument", formatter.Arguments);
-            Assert.Contains("argument1", formatter.Arguments);
-        }
+        Assert.True(formatter.AnyArguments);
+        Assert.Contains("argument", formatter.Arguments);
+        Assert.Contains("argument1", formatter.Arguments);
+    }
 
-        [Fact]
-        public void TestAddArgumentRange()
-        {
-            MultiQueryCommandFormatter<string> formatter = new("command", ';', ',');
+    [Fact]
+    public void TestAddArgumentRange()
+    {
+        MultiQueryCommandFormatter<string> formatter = new("command", ';', ',');
 
-            Assert.Throws<ArgumentNullException>(() => formatter.AddArgumentRange(null!));
-            Assert.Throws<ArgumentNullException>(() => formatter.AddArgumentRange(new string[] { null! }));
+        Assert.Throws<ArgumentNullException>(() => formatter.AddArgumentRange(null!));
+        Assert.Throws<ArgumentNullException>(() => formatter.AddArgumentRange(new string[] { null! }));
 
-            formatter.AddArgumentRange(new string[] { "argument", "argument1" });
+        formatter.AddArgumentRange(new string[] { "argument", "argument1" });
 
-            Assert.True(formatter.AnyArguments);
-            Assert.Contains("argument", formatter.Arguments);
-            Assert.Contains("argument1", formatter.Arguments);
-        }
+        Assert.True(formatter.AnyArguments);
+        Assert.Contains("argument", formatter.Arguments);
+        Assert.Contains("argument1", formatter.Arguments);
+    }
 
-        [Fact]
-        public void TestToString()
-        {
-            MultiQueryCommandFormatter<string> formatter = new("command", ';', ',');
-            formatter.AddArgument("argument");
-            formatter.AddArgument("argument1");
+    [Fact]
+    public void TestToString()
+    {
+        MultiQueryCommandFormatter<string> formatter = new("command", ';', ',');
+        formatter.AddArgument("argument");
+        formatter.AddArgument("argument1");
 
-            Assert.Equal("command;argument,argument1", formatter);
-        }
+        Assert.Equal("command;argument,argument1", formatter);
     }
 }

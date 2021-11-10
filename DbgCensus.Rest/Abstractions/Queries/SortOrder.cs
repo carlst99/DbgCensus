@@ -1,8 +1,7 @@
-﻿namespace DbgCensus.Rest.Abstractions.Queries
+﻿namespace DbgCensus.Rest.Abstractions.Queries;
+
+public enum SortOrder
 {
-    public enum SortOrder
-    {
-        Descending = -1,
-        Ascending = 1
-    }
+    Descending = -1,
+    Ascending = 1
 }

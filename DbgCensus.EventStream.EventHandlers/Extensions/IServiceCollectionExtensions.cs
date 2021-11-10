@@ -10,77 +10,76 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DbgCensus.EventStream.EventHandlers.Extensions
+namespace DbgCensus.EventStream.EventHandlers.Extensions;
+
+public static class IServiceCollectionExtensions
 {
-    public static class IServiceCollectionExtensions
+    /// <summary>
+    /// Adds required services for interacting with the Census REST API.
+    /// </summary>
+    /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
+    /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
+    public static IServiceCollection AddCensusEventHandlingServices(this IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Adds required services for interacting with the Census REST API.
-        /// </summary>
-        /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
-        /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
-        public static IServiceCollection AddCensusEventHandlingServices(this IServiceCollection serviceCollection)
-        {
-            serviceCollection.TryAddSingleton<IEventHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
-            serviceCollection.TryAddSingleton<IServiceMessageTypeRepository>(s => s.GetRequiredService<IOptions<ServiceMessageTypeRepository>>().Value);
+        serviceCollection.TryAddSingleton<IEventHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
+        serviceCollection.TryAddSingleton<IServiceMessageTypeRepository>(s => s.GetRequiredService<IOptions<ServiceMessageTypeRepository>>().Value);
 
-            serviceCollection.AddCensusEventStreamServices
+        serviceCollection.AddCensusEventStreamServices
+        (
+            (s, o, n) => new EventHandlingEventStreamClient
             (
-                (s, o, n) => new EventHandlingEventStreamClient
-                (
-                    n,
-                    s.GetRequiredService<ILogger<EventHandlingEventStreamClient>>(),
-                    s,
-                    s.GetRequiredService<RecyclableMemoryStreamManager>(),
-                    o,
-                    s.GetRequiredService<IEventHandlerTypeRepository>(),
-                    s.GetRequiredService<IServiceMessageTypeRepository>()
-                )
-            );
+                n,
+                s.GetRequiredService<ILogger<EventHandlingEventStreamClient>>(),
+                s,
+                s.GetRequiredService<RecyclableMemoryStreamManager>(),
+                o,
+                s.GetRequiredService<IEventHandlerTypeRepository>(),
+                s.GetRequiredService<IServiceMessageTypeRepository>()
+            )
+        );
 
-            return serviceCollection;
-        }
+        return serviceCollection;
+    }
 
-        /// <summary>
-        /// Adds an <see cref="ICensusEventHandler{TEvent}"/> to the service collection.
-        /// </summary>
-        /// <typeparam name="THandler">The handler type.</typeparam>
-        /// <param name="serviceCollection">The service collection.</param>
-        /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
-        public static IServiceCollection AddEventHandler<THandler>(this IServiceCollection serviceCollection) where THandler : ICensusEventHandler
-        {
-            Type handlerType = typeof(THandler);
+    /// <summary>
+    /// Adds an <see cref="ICensusEventHandler{TEvent}"/> to the service collection.
+    /// </summary>
+    /// <typeparam name="THandler">The handler type.</typeparam>
+    /// <param name="serviceCollection">The service collection.</param>
+    /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
+    public static IServiceCollection AddEventHandler<THandler>(this IServiceCollection serviceCollection) where THandler : ICensusEventHandler
+    {
+        Type handlerType = typeof(THandler);
 
-            // Get every event handler interface
-            Type[] handlerTypeInterfaces = handlerType.GetInterfaces();
-            IEnumerable<Type> handlerInterfaces = handlerTypeInterfaces.Where(
-                r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(ICensusEventHandler<>));
+        // Get every event handler interface
+        Type[] handlerTypeInterfaces = handlerType.GetInterfaces();
+        IEnumerable<Type> handlerInterfaces = handlerTypeInterfaces.Where(
+            r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(ICensusEventHandler<>));
 
-            // Register the handler interface to the implementing type
-            foreach (Type handlerInterface in handlerInterfaces)
-                serviceCollection.AddScoped(handlerInterface, handlerType);
+        // Register the handler interface to the implementing type
+        foreach (Type handlerInterface in handlerInterfaces)
+            serviceCollection.AddScoped(handlerInterface, handlerType);
 
-            serviceCollection.AddScoped(handlerType);
+        serviceCollection.AddScoped(handlerType);
 
-            serviceCollection.Configure<EventHandlerTypeRepository>(e => e.RegisterHandler<THandler>());
+        serviceCollection.Configure<EventHandlerTypeRepository>(e => e.RegisterHandler<THandler>());
 
-            return serviceCollection;
-        }
+        return serviceCollection;
+    }
 
-        /// <summary>
-        /// Adds an <see cref="ICensusEventHandler{TEvent}"/> that handles <see cref="ServiceMessage{T}"/> events.
-        /// </summary>
-        /// <typeparam name="THandler">The handler type.</typeparam>
-        /// <typeparam name="TPayload">The type of payload that the <see cref="ServiceMessage{T}"/> carries.</typeparam>
-        /// <param name="serviceCollection">The service collection.</param>
-        /// <param name="eventName">The name of the event that this payload is for.</param>
-        /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
-        public static IServiceCollection AddEventHandler<THandler, TPayload>(this IServiceCollection serviceCollection, string eventName)
-            where THandler : ICensusEventHandler<ServiceMessage<TPayload>>
-        {
-            return serviceCollection
-                .AddEventHandler<THandler>()
-                .Configure<ServiceMessageTypeRepository>(s => s.TryRegister<ServiceMessage<TPayload>, TPayload>(eventName));
-        }
+    /// <summary>
+    /// Adds an <see cref="ICensusEventHandler{TEvent}"/> that handles <see cref="ServiceMessage{T}"/> events.
+    /// </summary>
+    /// <typeparam name="THandler">The handler type.</typeparam>
+    /// <typeparam name="TPayload">The type of payload that the <see cref="ServiceMessage{T}"/> carries.</typeparam>
+    /// <param name="serviceCollection">The service collection.</param>
+    /// <param name="eventName">The name of the event that this payload is for.</param>
+    /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
+    public static IServiceCollection AddEventHandler<THandler, TPayload>(this IServiceCollection serviceCollection, string eventName)
+        where THandler : ICensusEventHandler<ServiceMessage<TPayload>>
+    {
+        return serviceCollection
+            .AddEventHandler<THandler>()
+            .Configure<ServiceMessageTypeRepository>(s => s.TryRegister<ServiceMessage<TPayload>, TPayload>(eventName));
     }
 }

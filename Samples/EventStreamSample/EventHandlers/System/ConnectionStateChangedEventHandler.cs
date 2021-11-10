@@ -6,42 +6,41 @@ using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EventStreamSample.EventHandlers.System
+namespace EventStreamSample.EventHandlers.System;
+
+/// <summary>
+/// Utilising something along the lines of this handler in your own project is NEAR MANDATORY.
+/// You will need to resend your subscription every time the websocket drops your connection.
+/// And unfortunately, that happens fairly frequently.
+/// </summary>
+public class ConnectionStateChangedEventHandler : ICensusEventHandler<ConnectionStateChanged>
 {
-    /// <summary>
-    /// Utilising something along the lines of this handler in your own project is NEAR MANDATORY.
-    /// You will need to resend your subscription every time the websocket drops your connection.
-    /// And unfortunately, that happens fairly frequently.
-    /// </summary>
-    public class ConnectionStateChangedEventHandler : ICensusEventHandler<ConnectionStateChanged>
+    private readonly ILogger<ConnectionStateChangedEventHandler> _logger;
+    private readonly IEventStreamClientFactory _clientFactory;
+
+    public ConnectionStateChangedEventHandler(ILogger<ConnectionStateChangedEventHandler> logger, IEventStreamClientFactory clientFactory)
     {
-        private readonly ILogger<ConnectionStateChangedEventHandler> _logger;
-        private readonly IEventStreamClientFactory _clientFactory;
+        _logger = logger;
+        _clientFactory = clientFactory;
+    }
 
-        public ConnectionStateChangedEventHandler(ILogger<ConnectionStateChangedEventHandler> logger, IEventStreamClientFactory clientFactory)
-        {
-            _logger = logger;
-            _clientFactory = clientFactory;
-        }
+    public async Task HandleAsync(ConnectionStateChanged censusEvent, CancellationToken ct = default)
+    {
+        _logger.LogWarning("Event stream connection state changed: we are now {state}!", censusEvent.Connected ? "connected" : "disconnected");
 
-        public async Task HandleAsync(ConnectionStateChanged censusEvent, CancellationToken ct = default)
-        {
-            _logger.LogWarning("Event stream connection state changed: we are now {state}!", censusEvent.Connected ? "connected" : "disconnected");
+        if (!censusEvent.Connected)
+            return;
 
-            if (!censusEvent.Connected)
-                return;
-
-            IEventStreamClient client = _clientFactory.GetClient(censusEvent.DispatchingClientName);
-            await client.SendCommandAsync
+        IEventStreamClient client = _clientFactory.GetClient(censusEvent.DispatchingClientName);
+        await client.SendCommandAsync
+        (
+            new SubscribeCommand
             (
-                new SubscribeCommand
-                (
-                    new string[] { "all" },
-                    new string[] { EventNames.FACILITY_CONTROL, EventNames.PLAYER_LOGIN, EventNames.PLAYER_LOGOUT },
-                    worlds: new string[] { "all" }
-                ),
-                ct
-            ).ConfigureAwait(false);
-        }
+                new string[] { "all" },
+                new string[] { EventNames.FACILITY_CONTROL, EventNames.PLAYER_LOGIN, EventNames.PLAYER_LOGOUT },
+                worlds: new string[] { "all" }
+            ),
+            ct
+        ).ConfigureAwait(false);
     }
 }
