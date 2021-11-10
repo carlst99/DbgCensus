@@ -17,7 +17,8 @@ using System.Threading.Tasks;
 namespace DbgCensus.EventStream
 {
     /// <summary>
-    /// <inheritdoc cref="IEventStreamClient"/>Reconnection is handled automatically.
+    /// <inheritdoc cref="IEventStreamClient"/>
+    /// Reconnection in the case of a failure is handled automatically.
     /// </summary>
     public abstract class BaseEventStreamClient : IEventStreamClient
     {
@@ -272,7 +273,7 @@ namespace DbgCensus.EventStream
                             }
                         }
 
-                        await stream.WriteAsync(buffer.Memory.Slice(0, result.Count), ct).ConfigureAwait(false);
+                        await stream.WriteAsync(buffer.Memory[..result.Count], ct).ConfigureAwait(false);
                     } while (!result.EndOfMessage);
 
                     stream.Seek(0, SeekOrigin.Begin);
