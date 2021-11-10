@@ -3,7 +3,7 @@
 namespace DbgCensus.Core.Objects;
 
 /// <summary>
-/// Defines the definition IDs of every supported zone in the Census API.
+/// Enumerates the IDs of every supported zone in the Census API.
 /// </summary>
 public enum ZoneDefinition : ushort
 {

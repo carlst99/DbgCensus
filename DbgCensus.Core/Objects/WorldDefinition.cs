@@ -1,7 +1,7 @@
 ﻿namespace DbgCensus.Core.Objects;
 
 /// <summary>
-/// Defines the worlds as represented by the Census API.
+/// Enumerates the worlds as represented by the Census API.
 /// </summary>
 public enum WorldDefinition
 {

@@ -3,7 +3,7 @@
 /// <summary>
 /// Defines the factions as represented by the Census API.
 /// </summary>
-public enum Faction
+public enum FactionDefinition
 {
     None = 0,
     VS = 1,

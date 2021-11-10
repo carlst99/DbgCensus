@@ -6,7 +6,7 @@ namespace RestSample.Objects;
 public record Character(
     ulong CharacterId,
     Name Name,
-    Faction FactionId,
+    FactionDefinition FactionId,
     int TitleId,
     Character.CharacterTimes Times,
     Character.CharacterCerts Certs,

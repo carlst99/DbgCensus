@@ -143,10 +143,10 @@ public class Worker : BackgroundService
             string message = "Connery map status: ";
             foreach (Map m in maps)
             {
-                double regionCount = m.Regions.Row.Count(r => r.RowData.FactionId != Faction.None);
-                double ncPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == Faction.NC) / regionCount) * 100;
-                double trPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == Faction.TR) / regionCount) * 100;
-                double vsPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == Faction.VS) / regionCount) * 100;
+                double regionCount = m.Regions.Row.Count(r => r.RowData.FactionId != FactionDefinition.None);
+                double ncPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == FactionDefinition.NC) / regionCount) * 100;
+                double trPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == FactionDefinition.TR) / regionCount) * 100;
+                double vsPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == FactionDefinition.VS) / regionCount) * 100;
 
                 message += $"\n\t- {m.ZoneId} | NC: {ncPercent:F}%, TR: {trPercent:F}%, VS: {vsPercent:F}%";
             }

@@ -1,8 +1,13 @@
 ﻿namespace DbgCensus.Core.Objects;
 
-public record ZoneId
+/// <summary>
+/// Represents Census' special zone ID format.
+/// A zone ID is a <see cref="uint"/> where the upper two bytes represent the instance of the zone
+/// and the lower two bytes represent the <see cref="ZoneDefinition"/>.
+/// </summary>
+public record ZoneID
 {
-    public static readonly ZoneId Default = new(0);
+    public static readonly ZoneID Default = new(0);
 
     /// <summary>
     /// Gets the instance of this zone.
@@ -20,10 +25,10 @@ public record ZoneId
     public uint CombinedId { get; }
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="ZoneId"/> record.
+    /// Initialises a new instance of the <see cref="ZoneID"/> record.
     /// </summary>
     /// <param name="combinedId">The actual combined zone-id that was retrieved from Census.</param>
-    public ZoneId(uint combinedId)
+    public ZoneID(uint combinedId)
     {
         CombinedId = combinedId;
         Definition = (ZoneDefinition)(combinedId & 0xffff);
@@ -31,20 +36,11 @@ public record ZoneId
     }
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="ZoneId"/> record.
-    /// </summary>
-    /// <param name="combinedId">The actual combined zone-id that was retrieved from Census.</param>
-    public ZoneId(int combinedId)
-        : this((uint)combinedId)
-    {
-    }
-
-    /// <summary>
-    /// Initialises a new instance of the <see cref="ZoneId"/> record.
+    /// Initialises a new instance of the <see cref="ZoneID"/> record.
     /// </summary>
     /// <param name="definition">The definition of the zone.</param>
     /// <param name="instance">The instance of the zone.</param>
-    public ZoneId(ZoneDefinition definition, ushort instance)
+    public ZoneID(ZoneDefinition definition, ushort instance)
     {
         Definition = definition;
         Instance = instance;
@@ -54,9 +50,8 @@ public record ZoneId
     public override string ToString()
         => $"{ Definition } (instance { Instance })";
 
-    public static explicit operator uint(ZoneId zoneId) => zoneId.CombinedId;
-    public static explicit operator ZoneDefinition(ZoneId zoneId) => zoneId.Definition;
+    public static explicit operator uint(ZoneID zoneId) => zoneId.CombinedId;
+    public static explicit operator ZoneDefinition(ZoneID zoneId) => zoneId.Definition;
 
-    public static explicit operator ZoneId(int combinedId) => new(combinedId);
-    public static explicit operator ZoneId(uint combinedId) => new(combinedId);
+    public static explicit operator ZoneID(uint combinedId) => new(combinedId);
 }

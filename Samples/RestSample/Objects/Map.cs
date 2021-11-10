@@ -19,7 +19,7 @@ public record Map
                 public int RegionId { get; init; }
 
                 [JsonPropertyName("FactionId")]
-                public Faction FactionId { get; init; }
+                public FactionDefinition FactionId { get; init; }
             }
 
             [JsonPropertyName("RowData")]
@@ -44,7 +44,7 @@ public record Map
     }
 
     [JsonPropertyName("ZoneId")]
-    public ZoneId ZoneId { get; init; }
+    public ZoneID ZoneId { get; init; }
 
     [JsonPropertyName("Regions")]
     public RegionModel Regions { get; init; }
@@ -52,6 +52,6 @@ public record Map
     public Map()
     {
         Regions = new RegionModel();
-        ZoneId = ZoneId.Default;
+        ZoneId = ZoneID.Default;
     }
 }
