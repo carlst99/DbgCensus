@@ -1,5 +1,6 @@
 using DbgCensus.EventStream;
 using DbgCensus.EventStream.EventHandlers.Extensions;
+using DbgCensus.EventStream.Objects;
 using EventStreamSample.EventHandlers;
 using EventStreamSample.EventHandlers.System;
 using EventStreamSample.Objects;
