@@ -1,12 +1,11 @@
 ﻿using DbgCensus.Core.Objects;
-using System;
 
-namespace DbgCensus.EventStream.Abstractions.Objects;
+namespace DbgCensus.EventStream.Abstractions.Objects.Worlds;
 
 /// <summary>
 /// Represents a MetagameEvent event.
 /// </summary>
-public interface IMetagameEvent : IEvent
+public interface IMetagameEvent : IZoneEvent
 {
     /// <summary>
     /// Gets the XP awarded for playing the entirety of this metagame event.
@@ -37,19 +36,4 @@ public interface IMetagameEvent : IEvent
     /// Gets the state of this event.
     /// </summary>
     MetagameEventState MetagameEventState { get; }
-
-    /// <summary>
-    /// Gets the time at which this event occured.
-    /// </summary>
-    DateTimeOffset Timestamp { get; }
-
-    /// <summary>
-    /// Gets the world on which this event occured.
-    /// </summary>
-    WorldDefinition WorldID { get; }
-
-    /// <summary>
-    /// Gets the zone on which this event occured.
-    /// </summary>
-    ZoneID ZoneID { get; }
 }

@@ -1,6 +1,6 @@
 ﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.EventHandlers.Objects.Event;
-using EventStreamSample.Objects;
+using DbgCensus.EventStream.Objects.Characters;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,13 +18,13 @@ public class PlayerLogEventHandler : ICensusEventHandler<ServiceMessage<PlayerLo
 
     public Task HandleAsync(ServiceMessage<PlayerLogin> censusEvent, CancellationToken ct = default)
     {
-        _logger.LogInformation("Player {playerId} logged in on {world} at {timestamp}", censusEvent.Payload.CharacterId, censusEvent.Payload.WorldId, censusEvent.Payload.Timestamp);
+        _logger.LogInformation("Player {playerId} logged in on {world} at {timestamp}", censusEvent.Payload.CharacterID, censusEvent.Payload.WorldID, censusEvent.Payload.Timestamp);
         return Task.CompletedTask;
     }
 
     public Task HandleAsync(ServiceMessage<PlayerLogout> censusEvent, CancellationToken ct = default)
     {
-        _logger.LogInformation("Player {playerId} logged out on {world} at {timestamp}", censusEvent.Payload.CharacterId, censusEvent.Payload.WorldId, censusEvent.Payload.Timestamp);
+        _logger.LogInformation("Player {playerId} logged out on {world} at {timestamp}", censusEvent.Payload.CharacterID, censusEvent.Payload.WorldID, censusEvent.Payload.Timestamp);
         return Task.CompletedTask;
     }
 }

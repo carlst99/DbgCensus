@@ -1,9 +1,9 @@
 using DbgCensus.EventStream;
 using DbgCensus.EventStream.EventHandlers.Extensions;
-using DbgCensus.EventStream.Objects;
+using DbgCensus.EventStream.Objects.Characters;
+using DbgCensus.EventStream.Objects.Worlds;
 using EventStreamSample.EventHandlers;
 using EventStreamSample.EventHandlers.System;
-using EventStreamSample.Objects;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -14,9 +14,7 @@ namespace EventStreamSample;
 public static class Program
 {
     public static void Main(string[] args)
-    {
-        CreateHostBuilder(args).Build().Run();
-    }
+        => CreateHostBuilder(args).Build().Run();
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)

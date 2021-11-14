@@ -1,12 +1,9 @@
-﻿using DbgCensus.Core.Objects;
-using System;
-
-namespace DbgCensus.EventStream.Abstractions.Objects;
+﻿namespace DbgCensus.EventStream.Abstractions.Objects.Characters;
 
 /// <summary>
 /// Represents a GainExperience event.
 /// </summary>
-public interface IGainExperience : IEvent
+public interface IGainExperience : IZoneEvent
 {
     /// <summary>
     /// Gets the amount of XP that was gained.
@@ -32,19 +29,4 @@ public interface IGainExperience : IEvent
     /// Gets the ID of the other entity/character involved in generating the XP gain.
     /// </summary>
     ulong OtherID { get; }
-
-    /// <summary>
-    /// Gets the time at which this event occured.
-    /// </summary>
-    DateTimeOffset Timestamp { get; }
-
-    /// <summary>
-    /// Gets the world on which this event occured.
-    /// </summary>
-    WorldDefinition WorldID { get; }
-
-    /// <summary>
-    /// Gets the zone on which this event occured.
-    /// </summary>
-    ZoneID ZoneID { get; }
 }

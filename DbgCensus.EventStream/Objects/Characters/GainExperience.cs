@@ -1,8 +1,8 @@
 ﻿using DbgCensus.Core.Objects;
-using DbgCensus.EventStream.Abstractions.Objects;
+using DbgCensus.EventStream.Abstractions.Objects.Characters;
 using System;
 
-namespace DbgCensus.EventStream.Objects;
+namespace DbgCensus.EventStream.Objects.Characters;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="GainExperience"/> record.

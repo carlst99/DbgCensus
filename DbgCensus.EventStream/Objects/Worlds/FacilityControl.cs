@@ -1,8 +1,8 @@
 ﻿using DbgCensus.Core.Objects;
-using DbgCensus.EventStream.Abstractions.Objects;
+using DbgCensus.EventStream.Abstractions.Objects.Worlds;
 using System;
 
-namespace DbgCensus.EventStream.Objects;
+namespace DbgCensus.EventStream.Objects.Worlds;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="FacilityControl"/> record.
@@ -25,6 +25,6 @@ public record FacilityControl
     FactionDefinition OldFactionID,
     ulong OutfitID,
     DateTimeOffset Timestamp,
-    WorldDefinition WorldId,
-    ZoneID ZoneId
+    WorldDefinition WorldID,
+    ZoneID ZoneID
 ) : IFacilityControl;

@@ -1,6 +1,6 @@
 ﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.EventHandlers.Objects.Event;
-using DbgCensus.EventStream.Objects;
+using DbgCensus.EventStream.Objects.Worlds;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,11 +23,11 @@ public class FacilityControlEventHandler : ICensusEventHandler<ServiceMessage<Fa
         _logger.LogInformation(
             "The facility {facilityId} on {world} changed ownership, from {oldFaction} to {newFaction}. It was captured at {captureTime}, in the zone {zone}.",
             controlEvent.FacilityID,
-            controlEvent.WorldId,
+            controlEvent.WorldID,
             controlEvent.OldFactionID,
             controlEvent.NewFactionID,
             controlEvent.Timestamp,
-            controlEvent.ZoneId);
+            controlEvent.ZoneID);
         return Task.CompletedTask;
     }
 }

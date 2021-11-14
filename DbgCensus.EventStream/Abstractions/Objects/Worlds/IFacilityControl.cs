@@ -1,12 +1,11 @@
 ﻿using DbgCensus.Core.Objects;
-using System;
 
-namespace DbgCensus.EventStream.Abstractions.Objects;
+namespace DbgCensus.EventStream.Abstractions.Objects.Worlds;
 
 /// <summary>
 /// Represents a FacilityControl event.
 /// </summary>
-public interface IFacilityControl : IEvent
+public interface IFacilityControl : IZoneEvent
 {
     /// <summary>
     /// Gets the duration in seconds that the facility was last held for.
@@ -32,19 +31,4 @@ public interface IFacilityControl : IEvent
     /// Gets the ID of the outfit that captured the facility, or zero if no outfit was involved in the capture.
     /// </summary>
     ulong OutfitID { get; }
-
-    /// <summary>
-    /// Gets the time at which this event occured.
-    /// </summary>
-    DateTimeOffset Timestamp { get; }
-
-    /// <summary>
-    /// Gets the world on which this event occured.
-    /// </summary>
-    WorldDefinition WorldId { get; }
-
-    /// <summary>
-    /// Gets the zone on which this event occured.
-    /// </summary>
-    ZoneID ZoneId { get; }
 }

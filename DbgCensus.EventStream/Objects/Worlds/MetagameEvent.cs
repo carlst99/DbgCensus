@@ -1,13 +1,13 @@
 ﻿using DbgCensus.Core.Objects;
-using DbgCensus.EventStream.Abstractions.Objects;
+using DbgCensus.EventStream.Abstractions.Objects.Worlds;
 using System;
 
-namespace UVOCBot.Plugins.Planetside.Objects.EventStream;
+namespace UVOCBot.Plugins.Planetside.Objects.EventStream.Worlds;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="MetagameEvent"/> record.
 /// </summary>
-/// <param name="ExperienceBonus">The (percentage-based?) XP bonus awarded for playing throughout the event.</param>
+/// <param name="ExperienceBonus">The XP awarded for playing the entirety of the metagame event.</param>
 /// <param name="EventName">The name of the event.</param>
 /// <param name="FactionNC">The amount of territory held by the NC at the time of the event.</param>
 /// <param name="FactionTR">The amount of territory held by the TR at the time of the event.</param>
