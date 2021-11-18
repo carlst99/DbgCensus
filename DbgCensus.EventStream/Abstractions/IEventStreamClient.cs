@@ -1,5 +1,4 @@
 ﻿using DbgCensus.EventStream.Abstractions.Objects.Commands;
-using DbgCensus.EventStream.Objects.Commands;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,10 +29,9 @@ public interface IEventStreamClient : IDisposable
     /// Connects to the census event stream and begins receiving events.
     /// This method will return when <see cref="StopAsync"/> is called or the operation is cancelled.
     /// </summary>
-    /// <param name="initialSubscription">An initial subscription to make.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    Task StartAsync(SubscribeCommand? initialSubscription = null, CancellationToken ct = default);
+    Task StartAsync(CancellationToken ct = default);
 
     /// <summary>
     /// Disconnects from the event stream and stops listening for events.

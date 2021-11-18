@@ -1,7 +1,6 @@
 ﻿using DbgCensus.Core.Json;
 using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.Objects.Commands;
-using DbgCensus.EventStream.Objects.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -56,7 +55,6 @@ public abstract class BaseEventStreamClient : IEventStreamClient
     private ArrayBufferWriter<byte> _sendBuffer;
 
     protected ClientWebSocket _webSocket;
-    protected SubscribeCommand? _initialSubscription;
 
     /// <inheritdoc />
     public string Name { get; protected set; }
@@ -75,12 +73,14 @@ public abstract class BaseEventStreamClient : IEventStreamClient
     /// <param name="services">The service provider, used to retrieve <see cref="ClientWebSocket"/> instances.</param>
     /// <param name="memoryStreamPool">The memory stream pool.</param>
     /// <param name="options">The options used to configure the client.</param>
-    protected BaseEventStreamClient(
+    protected BaseEventStreamClient
+    (
         string name,
         ILogger<BaseEventStreamClient> logger,
         IServiceProvider services,
         RecyclableMemoryStreamManager memoryStreamPool,
-        IOptions<EventStreamOptions> options)
+        IOptions<EventStreamOptions> options
+    )
     {
         if (options.Value.ReconnectionDelayMilliseconds < 1)
             throw new ArgumentException("Reconnection delay cannot be less than one millisecond.", nameof(options));
@@ -115,10 +115,9 @@ public abstract class BaseEventStreamClient : IEventStreamClient
     }
 
     /// <inheritdoc />
-    public virtual async Task StartAsync(SubscribeCommand? initialSubscription = null, CancellationToken ct = default)
+    public virtual async Task StartAsync(CancellationToken ct = default)
     {
         DoDisposeChecks();
-        _initialSubscription = initialSubscription;
 
         if (IsRunning || _webSocket.State is WebSocketState.Open or WebSocketState.Connecting)
             throw new InvalidOperationException("Client has already been started.");
@@ -297,12 +296,6 @@ public abstract class BaseEventStreamClient : IEventStreamClient
         await _webSocket.ConnectAsync(_endpoint, ct).ConfigureAwait(false);
 
         _logger.LogInformation("Connected to event stream websocket.");
-
-        if (_initialSubscription is not null)
-        {
-            _logger.LogInformation("Sending initial subscription...");
-            await SendCommandAsync(_initialSubscription, ct).ConfigureAwait(false);
-        }
     }
 
     /// <summary>

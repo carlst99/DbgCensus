@@ -1,6 +1,6 @@
 ﻿using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
-using DbgCensus.EventStream.Commands;
+using DbgCensus.EventStream.Objects.Commands;
 using DbgCensus.EventStream.EventHandlers.Objects.Push;
 using Microsoft.Extensions.Logging;
 using System.Threading;
@@ -35,11 +35,11 @@ public class ConnectionStateChangedEventHandler : ICensusEventHandler<Connection
         IEventStreamClient client = _clientFactory.GetClient(censusEvent.DispatchingClientName);
         await client.SendCommandAsync
         (
-            new SubscribeCommand
+            new Subscribe
             (
                 new string[] { "all" },
                 new string[] { EventNames.FacilityControl, EventNames.PlayerLogin, EventNames.PlayerLogout },
-                worlds: new string[] { "all" }
+                Worlds: new string[] { "all" }
             ),
             ct
         ).ConfigureAwait(false);
