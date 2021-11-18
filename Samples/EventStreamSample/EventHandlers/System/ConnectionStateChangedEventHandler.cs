@@ -10,18 +10,31 @@ using DbgCensus.EventStream.Abstractions.Objects.Events;
 namespace EventStreamSample.EventHandlers.System;
 
 /// <summary>
+/// <para>
 /// Utilising something along the lines of this handler in your own project is NEAR MANDATORY.
 /// You will need to resend your subscription every time the websocket drops your connection.
-/// And unfortunately, that happens fairly frequently.
+/// And unfortunately, that can happen fairly frequently.
+/// </para>
+/// <para>
+/// It is also highly recommended that you refresh your subscription every 10m or so.
+/// Otherwise, Census will start dropping off certain events entirely.
+/// </para>
 /// </summary>
 public class ConnectionStateChangedEventHandler : ICensusEventHandler<ConnectionStateChanged>
 {
     private readonly ILogger<ConnectionStateChangedEventHandler> _logger;
+    private readonly IEventContext _context;
     private readonly IEventStreamClientFactory _clientFactory;
 
-    public ConnectionStateChangedEventHandler(ILogger<ConnectionStateChangedEventHandler> logger, IEventStreamClientFactory clientFactory)
+    public ConnectionStateChangedEventHandler
+    (
+        ILogger<ConnectionStateChangedEventHandler> logger,
+        IEventContext context,
+        IEventStreamClientFactory clientFactory
+    )
     {
         _logger = logger;
+        _context = context;
         _clientFactory = clientFactory;
     }
 
@@ -32,7 +45,7 @@ public class ConnectionStateChangedEventHandler : ICensusEventHandler<Connection
         if (!censusEvent.Connected)
             return;
 
-        IEventStreamClient client = _clientFactory.GetClient(censusEvent.DispatchingClientName);
+        IEventStreamClient client = _clientFactory.GetClient(_context.DispatchingClientName);
         await client.SendCommandAsync
         (
             new Subscribe

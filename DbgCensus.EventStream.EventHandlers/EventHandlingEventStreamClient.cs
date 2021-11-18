@@ -3,6 +3,7 @@ using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 using DbgCensus.EventStream.EventHandlers.Objects;
 using DbgCensus.EventStream.EventHandlers.Objects.Event;
 using DbgCensus.EventStream.EventHandlers.Objects.Push;
+using DbgCensus.EventStream.EventHandlers.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -86,7 +87,11 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             using JsonDocument jsonResponse = await JsonDocument.ParseAsync(eventStream, cancellationToken: ct).ConfigureAwait(false);
 
             // Handle properly formed events
-            if (jsonResponse.RootElement.TryGetProperty("service", out JsonElement serviceElement) && jsonResponse.RootElement.TryGetProperty("type", out JsonElement typeElement))
+            if
+            (
+                jsonResponse.RootElement.TryGetProperty("service", out JsonElement serviceElement)
+                && jsonResponse.RootElement.TryGetProperty("type", out JsonElement typeElement)
+            )
             {
                 string? censusService = serviceElement.GetString();
                 string? censusType = typeElement.GetString();
@@ -94,7 +99,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                 if (censusService is null || censusType is null)
                 {
                     _logger.LogWarning("An event with an unspecified service and/or type has been received. An UnknownEvent object will be dispatched.");
-                    BeginEventDispatch(new UnknownEvent(Name, jsonResponse.RootElement.GetRawText()), ct);
+                    DispatchUnknownEvent(jsonResponse.RootElement.GetRawText(), ct);
                 }
                 else if (censusService == "event" && censusType == "serviceMessage")
                 {
@@ -123,8 +128,8 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             }
             else // Handle unknown events
             {
-                _logger.LogWarning("An unknown event was received from the Census event stream. An UnknownEvent object will be dispatched.");
-                BeginEventDispatch(new UnknownEvent(Name, jsonResponse.RootElement.GetRawText()), ct);
+                _logger.LogWarning($"An unknown event was received from the Census event stream. An {nameof(UnknownEvent)} object will be dispatched.");
+                DispatchUnknownEvent(jsonResponse.RootElement.GetRawText(), ct);
             }
         }
         finally
@@ -144,7 +149,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         if (!element.TryGetProperty("payload", out JsonElement payloadElement))
         {
             _logger.LogWarning("A service message was received that did not contain a payload. An unknown event will be dispatched.");
-            BeginEventDispatch(new UnknownEvent(Name, element.GetRawText()), ct);
+            DispatchUnknownEvent(element.GetRawText(), ct);
             return;
         }
 
@@ -152,7 +157,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         if (!payloadElement.TryGetProperty("event_name", out JsonElement eventNameElement))
         {
             _logger.LogWarning("A service message was received with a malformed payload (Missing 'event_name'). An unknown event will be dispatched.");
-            BeginEventDispatch(new UnknownEvent(Name, element.GetRawText()), ct);
+            DispatchUnknownEvent(element.GetRawText(), ct);
             return;
         }
 
@@ -161,7 +166,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         if (eventName is null)
         {
             _logger.LogWarning("A service message was received with a malformed payload (NULL 'event_name'). An unknown event will be dispatched.");
-            BeginEventDispatch(new UnknownEvent(Name, element.GetRawText()), ct);
+            DispatchUnknownEvent(element.GetRawText(), ct);
             return;
         }
 
@@ -179,7 +184,20 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         DeserializeAndBeginEventDispatch(serviceMessageType, element, ct);
     }
 
-    private void DeserializeAndBeginEventDispatch<T>(JsonElement element, CancellationToken ct = default) where T : IEventStreamObject
+    /// <summary>
+    /// Dispatches an <see cref="UnknownEvent"/>.
+    /// </summary>
+    /// <param name="rawJson">The raw JSON that was received.</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the dispatch handlers.</param>
+    private void DispatchUnknownEvent(string rawJson, CancellationToken ct)
+        => BeginEventDispatch
+        (
+            new UnknownEvent(Name, rawJson),
+            new EventContext(Name),
+            ct
+        );
+
+    private void DeserializeAndBeginEventDispatch<T>(JsonElement element, CancellationToken ct) where T : IEventStreamObject
     {
         try
         {
@@ -190,8 +208,12 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                 return;
             }
 
-            deserialized.DispatchingClientName = Name;
-            BeginEventDispatch(deserialized, ct);
+            BeginEventDispatch
+            (
+                deserialized,
+                new EventContext(Name),
+                ct
+            );
         }
         catch (Exception ex)
         {
@@ -199,7 +221,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         }
     }
 
-    private void DeserializeAndBeginEventDispatch(Type eventType, JsonElement element, CancellationToken ct = default)
+    private void DeserializeAndBeginEventDispatch(Type eventType, JsonElement element, CancellationToken ct)
     {
         try
         {
@@ -210,8 +232,13 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                 return;
             }
 
-            ((IEventStreamObject)deserialized).DispatchingClientName = Name;
-            BeginEventDispatch(eventType, deserialized, ct);
+            BeginEventDispatch
+            (
+                eventType,
+                deserialized,
+                new EventContext(Name),
+                ct
+            );
         }
         catch (Exception ex)
         {
@@ -224,33 +251,48 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// </summary>
     /// <typeparam name="TEvent">The type of <see cref="IEventStreamObject"/> to dispatch.</typeparam>
     /// <param name="eventObject">The event object to dispatch.</param>
+    /// <param name="context">The context to inject.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the entire event chain.</param>
-    private void BeginEventDispatch<TEvent>(TEvent eventObject, CancellationToken ct = default) where TEvent : IEventStreamObject
-        => BeginEventDispatch(typeof(TEvent), eventObject, ct);
+    private void BeginEventDispatch<TEvent>
+    (
+        TEvent eventObject,
+        IEventContext context,
+        CancellationToken ct
+    ) where TEvent : IEventStreamObject
+        => BeginEventDispatch(typeof(TEvent), eventObject, context, ct);
 
     /// <summary>
     /// Creates an instance of <see cref="DispatchEventAsync{T}(T, CancellationToken)"/> and dispatches an event.
     /// </summary>
     /// <param name="eventType">The type of <see cref="IEventStreamObject"/> to dispatch.</param>
-    /// <param name="eventObject">The evnet object to dispatch.</param>
+    /// <param name="eventObject">The event object to dispatch.</param>
+    /// <param name="context">The context to inject.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the entire event chain.</param>
-    private void BeginEventDispatch(Type eventType, object eventObject, CancellationToken ct = default)
+    private void BeginEventDispatch
+    (
+        Type eventType,
+        object eventObject,
+        IEventContext context,
+        CancellationToken ct
+    )
     {
         MethodInfo dispatchMethod = CreateDispatchMethod(eventType);
-        Task? dispatchTask = (Task?)dispatchMethod.Invoke(this, new object[] { eventObject!, ct });
+        Task? dispatchTask = (Task?)dispatchMethod.Invoke(this, new object[] { eventObject, context, ct });
+
         if (dispatchTask is null)
         {
             _logger.LogError("Failed to dispatch an event.");
             return;
         }
+
         _dispatchedEventQueue.Enqueue(dispatchTask);
     }
 
     /// <summary>
-    /// Constructs a <see cref="MethodInfo"/> instance of the <see cref="DispatchEventAsync{T}(T, CancellationToken)"/> method.
+    /// Constructs a <see cref="MethodInfo"/> instance of the <see cref="DispatchEventAsync{T}(T, IEventContext, CancellationToken)"/> method.
     /// </summary>
     /// <param name="eventType">The type of event that will be dispatched through the method.</param>
-    /// <returns></returns>
+    /// <returns>The method info.</returns>
     private MethodInfo CreateDispatchMethod(Type eventType)
     {
         MethodInfo? dispatchMethod = GetType().GetMethod(nameof(DispatchEventAsync), BindingFlags.NonPublic | BindingFlags.Instance);
@@ -260,17 +302,25 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             _logger.LogCritical(ex, "Failed to get the event dispatch method.");
             throw ex;
         }
-        return dispatchMethod.MakeGenericMethod(new Type[] { eventType });
+
+        return dispatchMethod.MakeGenericMethod(eventType);
     }
 
     /// <summary>
-    /// Dispatches an event to all appropriate event handlers. DO NOT call this directly. Use <see cref="CreateDispatchMethod(Type)"/> instead to ensure handlers do not block the receive queue.
+    /// Dispatches an event to all appropriate event handlers. DO NOT call this directly.
+    /// Use <see cref="CreateDispatchMethod(Type)"/> instead to ensure handlers do not block the receive queue.
     /// </summary>
     /// <typeparam name="T">The type of <see cref="IEventStreamObject"/> to dispatch.</typeparam>
     /// <param name="eventObject">The event object to dispatch.</param>
+    /// <param name="context">The context to inject.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the entire event chain.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    private async Task DispatchEventAsync<T>(T eventObject, CancellationToken ct = default) where T : IEventStreamObject
+    private async Task DispatchEventAsync<T>
+    (
+        T eventObject,
+        IEventContext context,
+        CancellationToken ct = default
+    ) where T : IEventStreamObject
     {
         IReadOnlyList<Type> handlerTypes = _eventHandlerRepository.GetHandlerTypes<T>();
         if (handlerTypes.Count == 0)
@@ -282,7 +332,9 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             (
                 async h =>
                 {
-                    using IServiceScope scope = _services.CreateScope();
+                    await using AsyncServiceScope scope = _services.CreateAsyncScope();
+
+                    scope.ServiceProvider.GetRequiredService<EventContextInjectionService>().Context = context;
                     ICensusEventHandler<T> handler = (ICensusEventHandler<T>)scope.ServiceProvider.GetRequiredService(h);
 
                     try

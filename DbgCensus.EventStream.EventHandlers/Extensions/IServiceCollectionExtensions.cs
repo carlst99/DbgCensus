@@ -2,7 +2,7 @@
 using DbgCensus.EventStream.Abstractions.Objects.Events.Characters;
 using DbgCensus.EventStream.Abstractions.Objects.Events.Worlds;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
-using DbgCensus.EventStream.EventHandlers.Objects.Event;
+using DbgCensus.EventStream.EventHandlers.Services;
 using DbgCensus.EventStream.Extensions;
 using DbgCensus.EventStream.Objects.Events.Characters;
 using DbgCensus.EventStream.Objects.Events.Worlds;
@@ -28,6 +28,9 @@ public static class IServiceCollectionExtensions
     {
         serviceCollection.TryAddSingleton<IEventHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
         serviceCollection.TryAddSingleton<IEventTypeRepository>(s => s.GetRequiredService<IOptions<EventTypeRepository>>().Value);
+
+        serviceCollection.TryAddScoped<EventContextInjectionService>();
+        serviceCollection.TryAddTransient<IEventContext>(s => s.GetRequiredService<EventContextInjectionService>().Context);
 
         serviceCollection.AddCensusEventStreamServices
         (

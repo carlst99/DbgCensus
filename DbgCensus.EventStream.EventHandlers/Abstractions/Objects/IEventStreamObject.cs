@@ -1,12 +1,8 @@
 ﻿namespace DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 
 /// <summary>
-/// Defines an object received from the Census event stream.
+/// Represents a marker class for payloads received from the Census Event Stream.
 /// </summary>
 public interface IEventStreamObject
 {
-    /// <summary>
-    /// The name of the <see cref="EventStream.Abstractions.IEventStreamClient"/> from which this event was dispatched.
-    /// </summary>
-    string DispatchingClientName { get; set; }
 }
