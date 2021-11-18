@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using DbgCensus.EventStream.Abstractions.Objects.Commands;
+using System.Collections.Generic;
 
 namespace DbgCensus.EventStream.Objects.Commands;
 
@@ -15,4 +16,4 @@ public record ClearSubscribe
     IEnumerable<string>? Characters = default,
     IEnumerable<string>? EventNames = default,
     IEnumerable<string>? Worlds = default
-) : CommandBase("clearSubscribe", "event");
+) : CommandBase("clearSubscribe", "event"), IClearSubscribe;

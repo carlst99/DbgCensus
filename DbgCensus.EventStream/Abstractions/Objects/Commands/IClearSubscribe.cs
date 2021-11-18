@@ -3,7 +3,7 @@
 namespace DbgCensus.EventStream.Abstractions.Objects.Commands;
 
 /// <summary>
-/// Represents a ClearSubscribe command.
+/// Represents a ClearSubscribe command, a request to clear certain parts of the current subscription.
 /// </summary>
 public interface IClearSubscribe : ICommand
 {
