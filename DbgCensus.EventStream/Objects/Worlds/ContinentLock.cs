@@ -1,5 +1,5 @@
 ﻿using DbgCensus.Core.Objects;
-using DbgCensus.EventStream.Abstractions.Objects.Worlds;
+using DbgCensus.EventStream.Abstractions.Objects.Events.Worlds;
 using System;
 
 namespace DbgCensus.EventStream.Objects.Worlds;

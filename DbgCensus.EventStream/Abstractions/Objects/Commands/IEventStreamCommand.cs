@@ -1,4 +1,4 @@
-﻿namespace DbgCensus.EventStream.Abstractions.Commands;
+﻿namespace DbgCensus.EventStream.Abstractions.Objects.Commands;
 
 /// <summary>
 /// Defines a command sent to the Census event stream.

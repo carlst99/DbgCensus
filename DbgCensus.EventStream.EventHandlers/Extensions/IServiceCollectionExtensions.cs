@@ -1,6 +1,11 @@
-﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
+﻿using DbgCensus.EventStream.Abstractions.Objects.Events;
+using DbgCensus.EventStream.Abstractions.Objects.Events.Characters;
+using DbgCensus.EventStream.Abstractions.Objects.Events.Worlds;
+using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.EventHandlers.Objects.Event;
 using DbgCensus.EventStream.Extensions;
+using DbgCensus.EventStream.Objects.Characters;
+using DbgCensus.EventStream.Objects.Worlds;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -22,7 +27,7 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddCensusEventHandlingServices(this IServiceCollection serviceCollection)
     {
         serviceCollection.TryAddSingleton<IEventHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
-        serviceCollection.TryAddSingleton<IServiceMessageTypeRepository>(s => s.GetRequiredService<IOptions<ServiceMessageTypeRepository>>().Value);
+        serviceCollection.TryAddSingleton<IEventTypeRepository>(s => s.GetRequiredService<IOptions<EventTypeRepository>>().Value);
 
         serviceCollection.AddCensusEventStreamServices
         (
@@ -34,8 +39,32 @@ public static class IServiceCollectionExtensions
                 s.GetRequiredService<RecyclableMemoryStreamManager>(),
                 o,
                 s.GetRequiredService<IEventHandlerTypeRepository>(),
-                s.GetRequiredService<IServiceMessageTypeRepository>()
+                s.GetRequiredService<IEventTypeRepository>()
             )
+        );
+
+        serviceCollection.Configure<EventTypeRepository>
+        (
+            o =>
+            {
+                // Character-level events
+                o.Register<IAchievementEarned, AchievementEarned>(EventNames.AchievementEarned);
+                o.Register<IBattleRankUp, BattleRankUp>(EventNames.BattleRankUp);
+                o.Register<IDeath, Death>(EventNames.Death);
+                o.Register<IGainExperience, GainExperience>(EventNames.GainExperience);
+                o.Register<IPlayerFacilityCapture, PlayerFacilityCapture>(EventNames.PlayerFacilityCapture);
+                o.Register<IPlayerFacilityDefend, PlayerFacilityDefend>(EventNames.PlayerFacilityDefend);
+                o.Register<IPlayerLogin, PlayerLogin>(EventNames.PlayerLogin);
+                o.Register<IPlayerLogout, PlayerLogout>(EventNames.PlayerLogout);
+                o.Register<ISkillAdded, SkillAdded>(EventNames.SkillAdded);
+                o.Register<IVehicleDestroy, VehicleDestroy>(EventNames.VehicleDestroy);
+
+                // World-level events
+                o.Register<IContinentLock, ContinentLock>(EventNames.ContinentLock);
+                o.Register<IContinentUnlock, ContinentUnlock>(EventNames.ContinentUnlock);
+                o.Register<IFacilityControl, FacilityControl>(EventNames.FacilityControl);
+                o.Register<IMetagameEvent, MetagameEvent>(EventNames.MetagameEvent);
+            }
         );
 
         return serviceCollection;
@@ -65,21 +94,5 @@ public static class IServiceCollectionExtensions
         serviceCollection.Configure<EventHandlerTypeRepository>(e => e.RegisterHandler<THandler>());
 
         return serviceCollection;
-    }
-
-    /// <summary>
-    /// Adds an <see cref="ICensusEventHandler{TEvent}"/> that handles <see cref="ServiceMessage{T}"/> events.
-    /// </summary>
-    /// <typeparam name="THandler">The handler type.</typeparam>
-    /// <typeparam name="TPayload">The type of payload that the <see cref="ServiceMessage{T}"/> carries.</typeparam>
-    /// <param name="serviceCollection">The service collection.</param>
-    /// <param name="eventName">The name of the event that this payload is for.</param>
-    /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
-    public static IServiceCollection AddEventHandler<THandler, TPayload>(this IServiceCollection serviceCollection, string eventName)
-        where THandler : ICensusEventHandler<ServiceMessage<TPayload>>
-    {
-        return serviceCollection
-            .AddEventHandler<THandler>()
-            .Configure<ServiceMessageTypeRepository>(s => s.TryRegister<ServiceMessage<TPayload>, TPayload>(eventName));
     }
 }

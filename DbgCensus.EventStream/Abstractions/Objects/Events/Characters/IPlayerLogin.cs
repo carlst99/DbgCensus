@@ -1,4 +1,4 @@
-﻿namespace DbgCensus.EventStream.Abstractions.Objects.Characters;
+﻿namespace DbgCensus.EventStream.Abstractions.Objects.Events.Characters;
 
 /// <summary>
 /// Represents a PlayerLogin event.

@@ -1,6 +1,6 @@
 ﻿using DbgCensus.Core.Objects;
 
-namespace DbgCensus.EventStream.Abstractions.Objects;
+namespace DbgCensus.EventStream.Abstractions.Objects.Events;
 
 /// <summary>
 /// Represents a marker interface for an event that occurs on a zone.

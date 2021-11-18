@@ -1,4 +1,4 @@
-﻿using DbgCensus.EventStream.Abstractions.Commands;
+﻿using DbgCensus.EventStream.Abstractions.Objects.Commands;
 using DbgCensus.EventStream.Commands;
 using System;
 using System.Threading;

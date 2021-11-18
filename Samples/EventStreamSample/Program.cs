@@ -1,7 +1,5 @@
 using DbgCensus.EventStream;
 using DbgCensus.EventStream.EventHandlers.Extensions;
-using DbgCensus.EventStream.Objects.Characters;
-using DbgCensus.EventStream.Objects.Worlds;
 using EventStreamSample.EventHandlers;
 using EventStreamSample.EventHandlers.System;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,9 +27,9 @@ public static class Program
                         .AddEventHandler<HeartbeatEventHandler>()
                         .AddEventHandler<ServiceStateChangedEventHandler>()
                         .AddEventHandler<SubscriptionEventHandler>()
-                        .AddEventHandler<FacilityControlEventHandler, FacilityControl>(EventNames.FACILITY_CONTROL)
-                        .AddEventHandler<PlayerLogEventHandler, PlayerLogin>(EventNames.PLAYER_LOGIN)
-                        .AddEventHandler<PlayerLogEventHandler, PlayerLogout>(EventNames.PLAYER_LOGOUT)
+                        .AddEventHandler<FacilityControlEventHandler>()
+                        .AddEventHandler<PlayerLogEventHandler>()
+                        .AddEventHandler<PlayerLogEventHandler>()
                         .AddEventHandler<UnknownEventHandler>();
 
                 services.AddHostedService<Worker>();

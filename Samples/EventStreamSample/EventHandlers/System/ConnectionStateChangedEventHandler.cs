@@ -5,6 +5,7 @@ using DbgCensus.EventStream.EventHandlers.Objects.Push;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using DbgCensus.EventStream.Abstractions.Objects.Events;
 
 namespace EventStreamSample.EventHandlers.System;
 
@@ -37,7 +38,7 @@ public class ConnectionStateChangedEventHandler : ICensusEventHandler<Connection
             new SubscribeCommand
             (
                 new string[] { "all" },
-                new string[] { EventNames.FACILITY_CONTROL, EventNames.PLAYER_LOGIN, EventNames.PLAYER_LOGOUT },
+                new string[] { EventNames.FacilityControl, EventNames.PlayerLogin, EventNames.PlayerLogout },
                 worlds: new string[] { "all" }
             ),
             ct

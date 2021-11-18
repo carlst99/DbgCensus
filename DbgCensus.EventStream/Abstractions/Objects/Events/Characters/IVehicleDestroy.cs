@@ -1,19 +1,16 @@
-﻿namespace DbgCensus.EventStream.Abstractions.Objects.Characters;
+﻿using DbgCensus.Core.Objects;
+
+namespace DbgCensus.EventStream.Abstractions.Objects.Events.Characters;
 
 /// <summary>
-/// Represents a Death event.
+/// Represents a VehicleDestroy event.
 /// </summary>
-public interface IDeath : IZoneEvent
+public interface IVehicleDestroy : IZoneEvent
 {
     /// <summary>
-    /// Gets the ID of the attacking character.
+    /// Gets the ID of the attacking character;
     /// </summary>
     ulong AttackerCharacterID { get; }
-
-    /// <summary>
-    /// The fire mode of the attacking character.
-    /// </summary>
-    uint AttackerFireMode { get; }
 
     /// <summary>
     /// Gets the loadout ID of the attacking character.
@@ -36,12 +33,17 @@ public interface IDeath : IZoneEvent
     ulong CharacterID { get; }
 
     /// <summary>
-    /// Gets the loadout ID of the killed character.
+    /// This field is always set to zero by the event streaming API.
     /// </summary>
-    uint CharacterLoadoutID { get; }
+    uint FacilityID { get; }
 
     /// <summary>
-    /// Gets a value indicating whether or not the kill was a headshot.
+    /// Gets the faction of the killed character.
     /// </summary>
-    bool IsHeadshot { get; }
+    FactionDefinition FactionID { get; }
+
+    /// <summary>
+    /// Gets the ID of the vehicle used by the killed character.
+    /// </summary>
+    uint VehicleID { get; }
 }

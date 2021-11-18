@@ -1,8 +1,8 @@
 ﻿using DbgCensus.Core.Objects;
-using DbgCensus.EventStream.Abstractions.Objects.Worlds;
+using DbgCensus.EventStream.Abstractions.Objects.Events.Worlds;
 using System;
 
-namespace UVOCBot.Plugins.Planetside.Objects.EventStream.Worlds;
+namespace DbgCensus.EventStream.Objects.Worlds;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="MetagameEvent"/> record.

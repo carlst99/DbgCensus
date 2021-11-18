@@ -1,9 +1,9 @@
-﻿namespace DbgCensus.EventStream.Abstractions.Objects.Characters;
+﻿namespace DbgCensus.EventStream.Abstractions.Objects.Events.Characters;
 
 /// <summary>
-/// Represents a PlayerFacilityCapture event.
+/// Represents a PlayerFacilityDefend event.
 /// </summary>
-public interface IPlayerFacilityCapture : IZoneEvent
+public interface IPlayerFacilityDefend : IZoneEvent
 {
     /// <summary>
     /// Gets the ID of the character for which this event was generated.
@@ -11,7 +11,7 @@ public interface IPlayerFacilityCapture : IZoneEvent
     ulong CharacterID { get; }
 
     /// <summary>
-    /// Gets the ID of the captured facility.
+    /// Gets the ID of the defended facility.
     /// </summary>
     public uint FacilityID { get; }
 

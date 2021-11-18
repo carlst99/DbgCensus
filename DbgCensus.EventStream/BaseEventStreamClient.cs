@@ -1,6 +1,6 @@
 ﻿using DbgCensus.Core.Json;
 using DbgCensus.EventStream.Abstractions;
-using DbgCensus.EventStream.Abstractions.Commands;
+using DbgCensus.EventStream.Abstractions.Objects.Commands;
 using DbgCensus.EventStream.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

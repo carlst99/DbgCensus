@@ -1,6 +1,6 @@
 ﻿using DbgCensus.Core.Objects;
 
-namespace DbgCensus.EventStream.Abstractions.Objects.Worlds;
+namespace DbgCensus.EventStream.Abstractions.Objects.Events.Worlds;
 
 public interface IContinentUnlock : IZoneEvent
 {

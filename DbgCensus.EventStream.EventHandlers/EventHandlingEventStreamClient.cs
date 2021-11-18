@@ -27,7 +27,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
 {
     private readonly ILogger<EventHandlingEventStreamClient> _logger;
     private readonly IEventHandlerTypeRepository _eventHandlerRepository;
-    private readonly IServiceMessageTypeRepository _serviceMessageObjectRepository;
+    private readonly IEventTypeRepository _serviceMessageObjectRepository;
     private readonly ConcurrentQueue<Task> _dispatchedEventQueue;
 
     /// <summary>
@@ -47,7 +47,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         RecyclableMemoryStreamManager memoryStreamPool,
         IOptions<EventStreamOptions> options,
         IEventHandlerTypeRepository eventHandlerTypeRepository,
-        IServiceMessageTypeRepository eventStreamObjectTypeRepository)
+        IEventTypeRepository eventStreamObjectTypeRepository)
         : base(name, logger, services, memoryStreamPool, options)
     {
         _logger = logger;
@@ -166,13 +166,16 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         }
 
         // Attempt to get the type of service message that represents this event
-        if (!_serviceMessageObjectRepository.TryGet(eventName, out Type? serviceMessageType))
+        if (!_serviceMessageObjectRepository.TryGet(eventName, out (Type abstractEvent, Type implementingEvent)? typeMap))
         {
             _logger.LogWarning("A ServiceMessage object has not been registered for the received service message event {event}", eventName);
             return;
         }
 
         // Deserialise to the service message object and dispatch an event
+        Type serviceMessageType = typeof(ServiceMessage<>);
+        serviceMessageType = serviceMessageType.MakeGenericType(typeMap.Value.implementingEvent);
+
         DeserializeAndBeginEventDispatch(serviceMessageType, element, ct);
     }
 
