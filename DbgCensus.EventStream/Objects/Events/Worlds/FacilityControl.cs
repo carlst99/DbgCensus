@@ -2,7 +2,7 @@
 using DbgCensus.EventStream.Abstractions.Objects.Events.Worlds;
 using System;
 
-namespace DbgCensus.EventStream.Objects.Worlds;
+namespace DbgCensus.EventStream.Objects.Events.Worlds;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="FacilityControl"/> record.

@@ -2,7 +2,7 @@
 using DbgCensus.EventStream.Abstractions.Objects.Events.Characters;
 using System;
 
-namespace DbgCensus.EventStream.Objects.Characters;
+namespace DbgCensus.EventStream.Objects.Events.Characters;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="PlayerLogout"/> record.

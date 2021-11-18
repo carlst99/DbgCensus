@@ -1,4 +1,4 @@
-﻿namespace DbgCensus.EventStream.Commands;
+﻿namespace DbgCensus.EventStream.Objects.Commands;
 
 /// <summary>
 /// Tells the Census event stream to echo back the payload.

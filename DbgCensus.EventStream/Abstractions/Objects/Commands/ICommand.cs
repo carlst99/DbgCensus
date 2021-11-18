@@ -1,17 +1,17 @@
 ﻿namespace DbgCensus.EventStream.Abstractions.Objects.Commands;
 
 /// <summary>
-/// Defines a command sent to the Census event stream.
+/// Represents a marker interface for a command.
 /// </summary>
-public interface IEventStreamCommand
+public interface ICommand
 {
     /// <summary>
-    /// The action that the command will perform.
+    /// Gets the action that the command will perform.
     /// </summary>
     string Action { get; }
 
     /// <summary>
-    /// The websocket service that the command is intended for.
+    /// Gets the websocket service that the command is intended for.
     /// </summary>
     string Service { get; }
 }

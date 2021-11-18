@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DbgCensus.EventStream.Commands;
+namespace DbgCensus.EventStream.Objects.Commands;
 
 /// <summary>
 /// Creates a subscription to the Census event stream.

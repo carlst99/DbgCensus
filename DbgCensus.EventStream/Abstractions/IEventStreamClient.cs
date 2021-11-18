@@ -1,5 +1,5 @@
 ﻿using DbgCensus.EventStream.Abstractions.Objects.Commands;
-using DbgCensus.EventStream.Commands;
+using DbgCensus.EventStream.Objects.Commands;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,13 +42,13 @@ public interface IEventStreamClient : IDisposable
     Task StopAsync();
 
     /// <summary>
-    /// Sends a <see cref="IEventStreamCommand"/> to the event stream.
+    /// Sends a <see cref="ICommand"/> to the event stream.
     /// </summary>
-    /// <typeparam name="T">The type of <see cref="IEventStreamCommand"/> to send.</typeparam>
+    /// <typeparam name="T">The type of <see cref="ICommand"/> to send.</typeparam>
     /// <param name="command">The command.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    Task SendCommandAsync<T>(T command, CancellationToken ct = default) where T : IEventStreamCommand;
+    Task SendCommandAsync<T>(T command, CancellationToken ct = default) where T : ICommand;
 
     /// <summary>
     /// Closes and reconnects to the websocket. Can help in cases where Census stops pushing data for your subscription.

@@ -1,4 +1,4 @@
-﻿namespace DbgCensus.EventStream.Commands;
+﻿namespace DbgCensus.EventStream.Objects.Commands;
 
 /// <summary>
 /// Get a count of character ids for which events have been encountered recently.

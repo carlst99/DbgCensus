@@ -1,7 +1,7 @@
 ﻿using DbgCensus.Core.Json;
 using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.Objects.Commands;
-using DbgCensus.EventStream.Commands;
+using DbgCensus.EventStream.Objects.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -146,7 +146,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient
     }
 
     /// <inheritdoc />
-    public virtual async Task SendCommandAsync<T>(T command, CancellationToken ct = default) where T : IEventStreamCommand
+    public virtual async Task SendCommandAsync<T>(T command, CancellationToken ct = default) where T : ICommand
     {
         DoDisposeChecks();
 
