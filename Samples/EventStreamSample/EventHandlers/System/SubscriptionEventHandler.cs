@@ -1,12 +1,12 @@
 ﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
-using DbgCensus.EventStream.EventHandlers.Objects;
+using DbgCensus.EventStream.Objects.Control;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace EventStreamSample.EventHandlers.System;
 
-public class SubscriptionEventHandler : ICensusEventHandler<Subscription>
+public class SubscriptionEventHandler : IPayloadHandler<Subscription>
 {
     private readonly ILogger<SubscriptionEventHandler> _logger;
 
@@ -25,7 +25,7 @@ public class SubscriptionEventHandler : ICensusEventHandler<Subscription>
             "\n- for events {events}" +
             "\n- logical AND characters with worlds: {logicalAnd}",
             censusEvent.CharacterCount,
-            string.Join(", ", censusEvent.Characters),
+            string.Join(", ", censusEvent.Characters ?? new[] { "none" }),
             string.Join(", ", censusEvent.Worlds),
             string.Join(", ", censusEvent.EventNames),
             censusEvent.LogicalAndCharactersWithWorlds

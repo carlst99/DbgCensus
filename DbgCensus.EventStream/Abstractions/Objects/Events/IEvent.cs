@@ -6,7 +6,7 @@ namespace DbgCensus.EventStream.Abstractions.Objects.Events;
 /// <summary>
 /// Represents a marker interface for an event.
 /// </summary>
-public interface IEvent
+public interface IEvent : IPayload
 {
     /// <summary>
     /// Gets the name of this event.

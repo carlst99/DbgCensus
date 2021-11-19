@@ -4,16 +4,16 @@ using System;
 namespace DbgCensus.EventStream.EventHandlers.Services;
 
 /// <summary>
-/// Represents a service for storing an <see cref="IEventContext"/> object.
+/// Represents a service for storing an <see cref="IPayloadContext"/> object.
 /// </summary>
 public class EventContextInjectionService
 {
-    private IEventContext? _context;
+    private IPayloadContext? _context;
 
     /// <summary>
     /// Gets or sets the stored context.
     /// </summary>
-    public IEventContext Context
+    public IPayloadContext Context
     {
         get
         {

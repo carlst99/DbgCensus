@@ -1,11 +1,11 @@
 ﻿using DbgCensus.EventStream.Abstractions;
+using DbgCensus.EventStream.Abstractions.Objects.Events;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.Objects.Commands;
-using DbgCensus.EventStream.EventHandlers.Objects.Push;
+using DbgCensus.EventStream.Objects.Control;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
-using DbgCensus.EventStream.Abstractions.Objects.Events;
 
 namespace EventStreamSample.EventHandlers.System;
 
@@ -20,16 +20,16 @@ namespace EventStreamSample.EventHandlers.System;
 /// Otherwise, Census will start dropping off certain events entirely.
 /// </para>
 /// </summary>
-public class ConnectionStateChangedEventHandler : ICensusEventHandler<ConnectionStateChanged>
+public class ConnectionStateChangedEventHandler : IPayloadHandler<ConnectionStateChanged>
 {
     private readonly ILogger<ConnectionStateChangedEventHandler> _logger;
-    private readonly IEventContext _context;
+    private readonly IPayloadContext _context;
     private readonly IEventStreamClientFactory _clientFactory;
 
     public ConnectionStateChangedEventHandler
     (
         ILogger<ConnectionStateChangedEventHandler> logger,
-        IEventContext context,
+        IPayloadContext context,
         IEventStreamClientFactory clientFactory
     )
     {

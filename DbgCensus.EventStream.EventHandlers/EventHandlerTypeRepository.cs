@@ -1,13 +1,13 @@
-﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
-using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
+﻿using DbgCensus.EventStream.Abstractions.Objects;
+using DbgCensus.EventStream.EventHandlers.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DbgCensus.EventStream.EventHandlers;
 
-/// <inheritdoc cref="IEventHandlerTypeRepository"/>
-public class EventHandlerTypeRepository : IEventHandlerTypeRepository
+/// <inheritdoc cref="IPayloadHandlerTypeRepository"/>
+public class EventHandlerTypeRepository : IPayloadHandlerTypeRepository
 {
     private readonly Dictionary<Type, List<Type>> _repository;
 
@@ -20,16 +20,16 @@ public class EventHandlerTypeRepository : IEventHandlerTypeRepository
     }
 
     /// <inheritdoc />
-    public IReadOnlyList<Type> GetHandlerTypes<TEvent>() where TEvent : IEventStreamObject
+    public IReadOnlyList<Type> GetHandlerTypes<TEvent>() where TEvent : IPayload
         => GetHandlerTypes(typeof(TEvent));
 
     /// <inheritdoc />
     public IReadOnlyList<Type> GetHandlerTypes(Type eventObjectType)
     {
-        if (!eventObjectType.GetInterfaces().Contains(typeof(IEventStreamObject)))
-            throw new ArgumentException("The type must derive from " + nameof(IEventStreamObject), nameof(eventObjectType));
+        if (!eventObjectType.GetInterfaces().Contains(typeof(IPayload)))
+            throw new ArgumentException("The type must derive from " + nameof(IPayload), nameof(eventObjectType));
 
-        Type keyType = typeof(ICensusEventHandler<>).MakeGenericType(new Type[] { eventObjectType });
+        Type keyType = typeof(IPayloadHandler<>).MakeGenericType(new Type[] { eventObjectType });
         if (_repository.ContainsKey(keyType))
             return _repository[keyType];
         else
@@ -37,13 +37,13 @@ public class EventHandlerTypeRepository : IEventHandlerTypeRepository
     }
 
     /// <inheritdoc/>
-    public void RegisterHandler<THandler>() where THandler : ICensusEventHandler
+    public void RegisterHandler<THandler>() where THandler : IPayloadHandler
     {
         Type handlerType = typeof(THandler);
 
         Type[] handlerTypeInterfaces = handlerType.GetInterfaces();
         IEnumerable<Type> handlerInterfaces = handlerTypeInterfaces.Where(
-            r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(ICensusEventHandler<>));
+            r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(IPayloadHandler<>));
 
         foreach (Type handlerInterface in handlerInterfaces)
         {

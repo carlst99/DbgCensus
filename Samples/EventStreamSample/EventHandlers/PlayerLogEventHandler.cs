@@ -1,5 +1,5 @@
 ﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
-using DbgCensus.EventStream.EventHandlers.Objects.Event;
+using DbgCensus.EventStream.Objects.Control;
 using DbgCensus.EventStream.Objects.Events.Characters;
 using Microsoft.Extensions.Logging;
 using System.Threading;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EventStreamSample.EventHandlers;
 
-public class PlayerLogEventHandler : ICensusEventHandler<ServiceMessage<PlayerLogin>>, ICensusEventHandler<ServiceMessage<PlayerLogout>>
+public class PlayerLogEventHandler : IPayloadHandler<ServiceMessage<PlayerLogin>>, IPayloadHandler<ServiceMessage<PlayerLogout>>
 {
     private readonly ILogger<PlayerLogEventHandler> _logger;
 

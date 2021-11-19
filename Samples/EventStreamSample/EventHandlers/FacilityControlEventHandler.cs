@@ -1,5 +1,5 @@
 ﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
-using DbgCensus.EventStream.EventHandlers.Objects.Event;
+using DbgCensus.EventStream.Objects.Control;
 using DbgCensus.EventStream.Objects.Events.Worlds;
 using Microsoft.Extensions.Logging;
 using System.Threading;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EventStreamSample.EventHandlers;
 
-public class FacilityControlEventHandler : ICensusEventHandler<ServiceMessage<FacilityControl>>
+public class FacilityControlEventHandler : IPayloadHandler<ServiceMessage<FacilityControl>>
 {
     private readonly ILogger<FacilityControlEventHandler> _logger;
 

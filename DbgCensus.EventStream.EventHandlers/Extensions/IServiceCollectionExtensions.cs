@@ -1,9 +1,11 @@
-﻿using DbgCensus.EventStream.Abstractions.Objects.Events;
+﻿using DbgCensus.EventStream.Abstractions.Objects.Control;
+using DbgCensus.EventStream.Abstractions.Objects.Events;
 using DbgCensus.EventStream.Abstractions.Objects.Events.Characters;
 using DbgCensus.EventStream.Abstractions.Objects.Events.Worlds;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.EventHandlers.Services;
 using DbgCensus.EventStream.Extensions;
+using DbgCensus.EventStream.Objects.Control;
 using DbgCensus.EventStream.Objects.Events.Characters;
 using DbgCensus.EventStream.Objects.Events.Worlds;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,11 +28,11 @@ public static class IServiceCollectionExtensions
     /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
     public static IServiceCollection AddCensusEventHandlingServices(this IServiceCollection serviceCollection)
     {
-        serviceCollection.TryAddSingleton<IEventHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
-        serviceCollection.TryAddSingleton<IEventTypeRepository>(s => s.GetRequiredService<IOptions<EventTypeRepository>>().Value);
+        serviceCollection.TryAddSingleton<IPayloadHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
+        serviceCollection.TryAddSingleton<IPayloadTypeRepository>(s => s.GetRequiredService<IOptions<PayloadTypeRepository>>().Value);
 
         serviceCollection.TryAddScoped<EventContextInjectionService>();
-        serviceCollection.TryAddTransient<IEventContext>(s => s.GetRequiredService<EventContextInjectionService>().Context);
+        serviceCollection.TryAddTransient<IPayloadContext>(s => s.GetRequiredService<EventContextInjectionService>().Context);
 
         serviceCollection.AddCensusEventStreamServices
         (
@@ -41,15 +43,20 @@ public static class IServiceCollectionExtensions
                 s,
                 s.GetRequiredService<RecyclableMemoryStreamManager>(),
                 o,
-                s.GetRequiredService<IEventHandlerTypeRepository>(),
-                s.GetRequiredService<IEventTypeRepository>()
+                s.GetRequiredService<IPayloadHandlerTypeRepository>(),
+                s.GetRequiredService<IPayloadTypeRepository>()
             )
         );
 
-        serviceCollection.Configure<EventTypeRepository>
+        serviceCollection.Configure<PayloadTypeRepository>
         (
             o =>
             {
+                // Control payloads
+                o.Register<IConnectionStateChanged, ConnectionStateChanged>(ControlPayloadNames.ConnectionStateChanged);
+                o.Register<IHeartbeat, Heartbeat>(ControlPayloadNames.ConnectionStateChanged);
+                o.Register<IServiceStateChanged, ServiceStateChanged>(ControlPayloadNames.ConnectionStateChanged);
+
                 // Character-level events
                 o.Register<IAchievementEarned, AchievementEarned>(EventNames.AchievementEarned);
                 o.Register<IBattleRankUp, BattleRankUp>(EventNames.BattleRankUp);
@@ -74,19 +81,19 @@ public static class IServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds an <see cref="ICensusEventHandler{TEvent}"/> to the service collection.
+    /// Adds an <see cref="IPayloadHandler{TEvent}"/> to the service collection.
     /// </summary>
     /// <typeparam name="THandler">The handler type.</typeparam>
     /// <param name="serviceCollection">The service collection.</param>
     /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
-    public static IServiceCollection AddEventHandler<THandler>(this IServiceCollection serviceCollection) where THandler : ICensusEventHandler
+    public static IServiceCollection AddEventHandler<THandler>(this IServiceCollection serviceCollection) where THandler : IPayloadHandler
     {
         Type handlerType = typeof(THandler);
 
         // Get every event handler interface
         Type[] handlerTypeInterfaces = handlerType.GetInterfaces();
         IEnumerable<Type> handlerInterfaces = handlerTypeInterfaces.Where(
-            r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(ICensusEventHandler<>));
+            r => r.IsGenericType && r.GetGenericTypeDefinition() == typeof(IPayloadHandler<>));
 
         // Register the handler interface to the implementing type
         foreach (Type handlerInterface in handlerInterfaces)

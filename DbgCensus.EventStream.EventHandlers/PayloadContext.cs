@@ -3,10 +3,10 @@
 namespace DbgCensus.EventStream.EventHandlers;
 
 /// <summary>
-/// Initializes a new instance of the <see cref="EventContext"/> record.
+/// Initializes a new instance of the <see cref="PayloadContext"/> record.
 /// </summary>
 /// <param name="DispatchingClientName">The name of the client that dispatched the event.</param>
-public record EventContext
+public record PayloadContext
 (
     string DispatchingClientName
-): IEventContext;
+): IPayloadContext;

@@ -30,7 +30,7 @@ public static class Program
                         .AddEventHandler<FacilityControlEventHandler>()
                         .AddEventHandler<PlayerLogEventHandler>()
                         .AddEventHandler<PlayerLogEventHandler>()
-                        .AddEventHandler<UnknownEventHandler>();
+                        .AddEventHandler<UnknownPayloadHandler>();
 
                 services.AddHostedService<Worker>();
             });
