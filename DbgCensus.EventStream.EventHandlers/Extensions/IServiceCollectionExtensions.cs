@@ -54,8 +54,9 @@ public static class IServiceCollectionExtensions
             {
                 // Control payloads
                 o.Register<IConnectionStateChanged, ConnectionStateChanged>(ControlPayloadNames.ConnectionStateChanged);
-                o.Register<IHeartbeat, Heartbeat>(ControlPayloadNames.ConnectionStateChanged);
-                o.Register<IServiceStateChanged, ServiceStateChanged>(ControlPayloadNames.ConnectionStateChanged);
+                o.Register<IHeartbeat, Heartbeat>(ControlPayloadNames.Heartbeat);
+                o.Register<IServiceStateChanged, ServiceStateChanged>(ControlPayloadNames.ServiceStateChanged);
+                o.Register<ISubscription, Subscription>(ControlPayloadNames.Subscription);
 
                 // Character-level events
                 o.Register<IAchievementEarned, AchievementEarned>(EventNames.AchievementEarned);
@@ -86,7 +87,7 @@ public static class IServiceCollectionExtensions
     /// <typeparam name="THandler">The handler type.</typeparam>
     /// <param name="serviceCollection">The service collection.</param>
     /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
-    public static IServiceCollection AddEventHandler<THandler>(this IServiceCollection serviceCollection) where THandler : IPayloadHandler
+    public static IServiceCollection AddPayloadHandler<THandler>(this IServiceCollection serviceCollection) where THandler : IPayloadHandler
     {
         Type handlerType = typeof(THandler);
 

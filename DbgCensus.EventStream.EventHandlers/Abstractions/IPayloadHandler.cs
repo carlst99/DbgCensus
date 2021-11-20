@@ -6,7 +6,7 @@ namespace DbgCensus.EventStream.EventHandlers.Abstractions;
 
 /// <summary>
 /// Represents a non-generic marker interface for a payload handler.
-/// See <see cref="IPayloadHandler{TEvent}"/> for the generic implementation you should use instead.
+/// See <see cref="IPayloadHandler{TPayload}"/> for the generic implementation you should use instead.
 /// </summary>
 public interface IPayloadHandler
 {
@@ -15,14 +15,14 @@ public interface IPayloadHandler
 /// <summary>
 /// Represents a marker interface for a payload handler.
 /// </summary>
-/// <typeparam name="TEvent"></typeparam>
-public interface IPayloadHandler<TEvent> : IPayloadHandler where TEvent : IPayload
+/// <typeparam name="TPayload"></typeparam>
+public interface IPayloadHandler<TPayload> : IPayloadHandler where TPayload : IPayload
 {
     /// <summary>
     /// Handles the event asynchronously.
     /// </summary>
-    /// <param name="censusEvent">The event to respond to.</param>
+    /// <param name="payload">The payload to respond to.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    Task HandleAsync(TEvent censusEvent, CancellationToken ct = default);
+    Task HandleAsync(TPayload payload, CancellationToken ct = default);
 }

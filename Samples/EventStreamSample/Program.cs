@@ -1,7 +1,7 @@
 using DbgCensus.EventStream;
 using DbgCensus.EventStream.EventHandlers.Extensions;
 using EventStreamSample.EventHandlers;
-using EventStreamSample.EventHandlers.System;
+using EventStreamSample.EventHandlers.ControlPayloads;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -23,14 +23,14 @@ public static class Program
                 services.Configure<EventStreamOptions>(hostContext.Configuration.GetSection(nameof(EventStreamOptions)));
 
                 services.AddCensusEventHandlingServices()
-                        .AddEventHandler<ConnectionStateChangedEventHandler>()
-                        .AddEventHandler<HeartbeatEventHandler>()
-                        .AddEventHandler<ServiceStateChangedEventHandler>()
-                        .AddEventHandler<SubscriptionEventHandler>()
-                        .AddEventHandler<FacilityControlEventHandler>()
-                        .AddEventHandler<PlayerLogEventHandler>()
-                        .AddEventHandler<PlayerLogEventHandler>()
-                        .AddEventHandler<UnknownPayloadHandler>();
+                        .AddPayloadHandler<ConnectionStateChangedPayloadHandler>()
+                        .AddPayloadHandler<HeartbeatPayloadHandler>()
+                        .AddPayloadHandler<ServiceStateChangedPayloadHandler>()
+                        .AddPayloadHandler<SubscriptionPayloadHandler>()
+                        .AddPayloadHandler<FacilityControlPayloadHandler>()
+                        .AddPayloadHandler<PlayerLogEventHandler>()
+                        .AddPayloadHandler<PlayerLogEventHandler>()
+                        .AddPayloadHandler<UnknownPayloadHandler>();
 
                 services.AddHostedService<Worker>();
             });

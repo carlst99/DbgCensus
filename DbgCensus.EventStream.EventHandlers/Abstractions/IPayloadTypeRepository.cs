@@ -16,7 +16,7 @@ public interface IPayloadTypeRepository
     /// <param name="name">The name of the event.</param>
     /// <param name="typeMap">The retrieved abstract and implementing types.</param>
     /// <returns>A value indicating if the object types were found in the repository.</returns>
-    bool TryGet(string name, [NotNullWhen(true)] out (Type abstractType, Type implementingType)? typeMap);
+    bool TryGet(string name, [NotNullWhen(true)] out (Type AbstractType, Type ImplementingType)? typeMap);
 
     /// <summary>
     /// Registers an event type used to deserialize socket events to.

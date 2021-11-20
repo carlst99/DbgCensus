@@ -276,7 +276,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient
                 } while (!result.EndOfMessage);
 
                 stream.Seek(0, SeekOrigin.Begin);
-                await HandleEvent(stream, ct).ConfigureAwait(false);
+                await HandlePayloadAsync(stream, ct).ConfigureAwait(false);
             }
         }
         finally
@@ -304,7 +304,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient
     /// <param name="eventStream">The event data. You must dispose of this stream when you are finished with it.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    protected abstract Task HandleEvent(MemoryStream eventStream, CancellationToken ct = default);
+    protected abstract Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct = default);
 
     protected virtual void Dispose(bool disposing)
     {

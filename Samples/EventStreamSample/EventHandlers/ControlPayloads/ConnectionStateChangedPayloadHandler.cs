@@ -1,13 +1,13 @@
 ﻿using DbgCensus.EventStream.Abstractions;
+using DbgCensus.EventStream.Abstractions.Objects.Control;
 using DbgCensus.EventStream.Abstractions.Objects.Events;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.Objects.Commands;
-using DbgCensus.EventStream.Objects.Control;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EventStreamSample.EventHandlers.System;
+namespace EventStreamSample.EventHandlers.ControlPayloads;
 
 /// <summary>
 /// <para>
@@ -20,15 +20,15 @@ namespace EventStreamSample.EventHandlers.System;
 /// Otherwise, Census will start dropping off certain events entirely.
 /// </para>
 /// </summary>
-public class ConnectionStateChangedEventHandler : IPayloadHandler<ConnectionStateChanged>
+public class ConnectionStateChangedPayloadHandler : IPayloadHandler<IConnectionStateChanged>
 {
-    private readonly ILogger<ConnectionStateChangedEventHandler> _logger;
+    private readonly ILogger<ConnectionStateChangedPayloadHandler> _logger;
     private readonly IPayloadContext _context;
     private readonly IEventStreamClientFactory _clientFactory;
 
-    public ConnectionStateChangedEventHandler
+    public ConnectionStateChangedPayloadHandler
     (
-        ILogger<ConnectionStateChangedEventHandler> logger,
+        ILogger<ConnectionStateChangedPayloadHandler> logger,
         IPayloadContext context,
         IEventStreamClientFactory clientFactory
     )
@@ -38,11 +38,11 @@ public class ConnectionStateChangedEventHandler : IPayloadHandler<ConnectionStat
         _clientFactory = clientFactory;
     }
 
-    public async Task HandleAsync(ConnectionStateChanged censusEvent, CancellationToken ct = default)
+    public async Task HandleAsync(IConnectionStateChanged payload, CancellationToken ct = default)
     {
-        _logger.LogWarning("Event stream connection state changed: we are now {state}!", censusEvent.Connected ? "connected" : "disconnected");
+        _logger.LogWarning("Event stream connection state changed: we are now {state}!", payload.Connected ? "connected" : "disconnected");
 
-        if (!censusEvent.Connected)
+        if (!payload.Connected)
             return;
 
         IEventStreamClient client = _clientFactory.GetClient(_context.DispatchingClientName);

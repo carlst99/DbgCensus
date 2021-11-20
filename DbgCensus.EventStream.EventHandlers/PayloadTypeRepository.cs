@@ -9,17 +9,17 @@ namespace DbgCensus.EventStream.EventHandlers;
 /// <inheritdoc cref="IPayloadTypeRepository"/>
 public class PayloadTypeRepository : IPayloadTypeRepository
 {
-    private readonly Dictionary<string, (Type abstractType, Type implementingType)> _eventMap;
+    private readonly Dictionary<string, (Type AbstractType, Type ImplementingType)> _eventMap;
 
-    public IReadOnlyDictionary<string, (Type abstractType, Type implementingType)> EventMap => _eventMap;
+    public IReadOnlyDictionary<string, (Type AbstractType, Type ImplementingType)> EventMap => _eventMap;
 
     public PayloadTypeRepository()
     {
-        _eventMap = new Dictionary<string, (Type abstractType, Type implementingType)>();
+        _eventMap = new Dictionary<string, (Type AbstractType, Type ImplementingType)>();
     }
 
     /// <inheritdoc />
-    public bool TryGet(string name, [NotNullWhen(true)] out (Type abstractType, Type implementingType)? typeMap)
+    public bool TryGet(string name, [NotNullWhen(true)] out (Type AbstractType, Type ImplementingType)? typeMap)
     {
         typeMap = null;
 
