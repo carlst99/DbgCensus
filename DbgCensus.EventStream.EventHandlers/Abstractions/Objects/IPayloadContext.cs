@@ -1,4 +1,4 @@
-﻿namespace DbgCensus.EventStream.EventHandlers.Abstractions;
+﻿namespace DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 
 /// <summary>
 /// Represents the context of a dispatched payload.
@@ -6,7 +6,7 @@
 public interface IPayloadContext
 {
     /// <summary>
-    /// Gets the name of the <see cref="DbgCensus.EventStream.Abstractions.IEventStreamClient"/> that dispatched this event.
+    /// Gets the name of the <see cref="EventStream.Abstractions.IEventStreamClient"/> that dispatched this event.
     /// </summary>
     string DispatchingClientName { get; }
 }

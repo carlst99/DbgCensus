@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace EventStreamSample;
 
-public class Worker : BackgroundService
+public class EventStreamWorker : BackgroundService
 {
-    private readonly ILogger<Worker> _logger;
+    private readonly ILogger<EventStreamWorker> _logger;
     private readonly IEventStreamClientFactory _clientFactory;
 
     private IEventStreamClient? _client;
 
-    public Worker(ILogger<Worker> logger, IEventStreamClientFactory clientFactory)
+    public EventStreamWorker(ILogger<EventStreamWorker> logger, IEventStreamClientFactory clientFactory)
     {
         _logger = logger;
         _clientFactory = clientFactory;
@@ -26,12 +26,10 @@ public class Worker : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            _client = _clientFactory.GetClient();
+            _client = _clientFactory.GetClient<EventStreamWorker>();
 
             try
             {
-                // We don't supply an initial subscription here, although you are able to.
-                // Instead, it is supplied in the ConnectionStateChangedEventHandler .
                 await _client.StartAsync(ct: stoppingToken).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not TaskCanceledException)

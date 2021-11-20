@@ -3,7 +3,7 @@ using DbgCensus.EventStream.Abstractions.Objects.Events;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace DbgCensus.EventStream.EventHandlers.Abstractions;
+namespace DbgCensus.EventStream.EventHandlers.Abstractions.Services;
 
 /// <summary>
 /// Stores and maps <see cref="IEvent"/> abstractions to the census objects they represent, and their implementing types.

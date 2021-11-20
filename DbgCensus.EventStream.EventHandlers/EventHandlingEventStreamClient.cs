@@ -1,6 +1,7 @@
 ﻿using DbgCensus.EventStream.Abstractions.Objects;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
+using DbgCensus.EventStream.EventHandlers.Abstractions.Services;
 using DbgCensus.EventStream.EventHandlers.Objects;
 using DbgCensus.EventStream.EventHandlers.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -317,7 +318,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                 {
                     await using AsyncServiceScope scope = _services.CreateAsyncScope();
 
-                    scope.ServiceProvider.GetRequiredService<EventContextInjectionService>().Context = context;
+                    scope.ServiceProvider.GetRequiredService<PayloadContextInjectionService>().Context = context;
                     IPayloadHandler<T> handler = (IPayloadHandler<T>)scope.ServiceProvider.GetRequiredService(h);
 
                     try

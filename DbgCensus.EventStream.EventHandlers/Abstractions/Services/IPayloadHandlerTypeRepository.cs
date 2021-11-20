@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DbgCensus.EventStream.EventHandlers.Abstractions;
+namespace DbgCensus.EventStream.EventHandlers.Abstractions.Services;
 
 /// <summary>
 /// Represents an interface for mapping types that implement <see cref="IPayloadHandler{T}"/>.
@@ -12,16 +12,16 @@ public interface IPayloadHandlerTypeRepository
     /// <summary>
     /// Gets types implementing <see cref="IPayloadHandler{TEvent}"/> for the given payload type.
     /// </summary>
-    /// <typeparam name="TEvent">The type of the <see cref="IPayload"/>.</typeparam>
+    /// <typeparam name="TPayload">The type of the <see cref="IPayload"/>.</typeparam>
     /// <returns>A list of types.</returns>
-    IReadOnlyList<Type> GetHandlerTypes<TEvent>() where TEvent : IPayload;
+    IReadOnlyList<Type> GetHandlerTypes<TPayload>() where TPayload : IPayload;
 
     /// <summary>
-    /// Gets types implementing <see cref="IPayloadHandler{TEvent}"/> for the given event type.
+    /// Gets types implementing <see cref="IPayloadHandler{TEvent}"/> for the given payload type.
     /// </summary>
-    /// <param name="eventObjectType">The type of the <see cref="IPayload"/>.</param>
+    /// <param name="payloadType">The type of the <see cref="IPayload"/>.</param>
     /// <returns>A list of types.</returns>
-    IReadOnlyList<Type> GetHandlerTypes(Type eventObjectType);
+    IReadOnlyList<Type> GetHandlerTypes(Type payloadType);
 
     /// <summary>
     /// Stores a handler in the repository, internally mapping it to each <see cref="IPayload"/> that it handles.

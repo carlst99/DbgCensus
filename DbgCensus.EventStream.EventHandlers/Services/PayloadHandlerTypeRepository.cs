@@ -1,35 +1,36 @@
 ﻿using DbgCensus.EventStream.Abstractions.Objects;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
+using DbgCensus.EventStream.EventHandlers.Abstractions.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DbgCensus.EventStream.EventHandlers;
+namespace DbgCensus.EventStream.EventHandlers.Services;
 
 /// <inheritdoc cref="IPayloadHandlerTypeRepository"/>
-public class EventHandlerTypeRepository : IPayloadHandlerTypeRepository
+public class PayloadHandlerTypeRepository : IPayloadHandlerTypeRepository
 {
     private readonly Dictionary<Type, List<Type>> _repository;
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="EventHandlerTypeRepository"/> class.
+    /// Initialises a new instance of the <see cref="PayloadHandlerTypeRepository"/> class.
     /// </summary>
-    public EventHandlerTypeRepository()
+    public PayloadHandlerTypeRepository()
     {
         _repository = new Dictionary<Type, List<Type>>();
     }
 
     /// <inheritdoc />
-    public IReadOnlyList<Type> GetHandlerTypes<TEvent>() where TEvent : IPayload
-        => GetHandlerTypes(typeof(TEvent));
+    public IReadOnlyList<Type> GetHandlerTypes<TPayload>() where TPayload : IPayload
+        => GetHandlerTypes(typeof(TPayload));
 
     /// <inheritdoc />
-    public IReadOnlyList<Type> GetHandlerTypes(Type eventObjectType)
+    public IReadOnlyList<Type> GetHandlerTypes(Type payloadType)
     {
-        if (!eventObjectType.GetInterfaces().Contains(typeof(IPayload)))
-            throw new ArgumentException("The type must derive from " + nameof(IPayload), nameof(eventObjectType));
+        if (!payloadType.GetInterfaces().Contains(typeof(IPayload)))
+            throw new ArgumentException("The type must derive from " + nameof(IPayload), nameof(payloadType));
 
-        Type keyType = typeof(IPayloadHandler<>).MakeGenericType(new Type[] { eventObjectType });
+        Type keyType = typeof(IPayloadHandler<>).MakeGenericType(new Type[] { payloadType });
         if (_repository.ContainsKey(keyType))
             return _repository[keyType];
         else

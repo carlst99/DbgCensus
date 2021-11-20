@@ -19,7 +19,7 @@ public interface IPayloadHandler
 public interface IPayloadHandler<TPayload> : IPayloadHandler where TPayload : IPayload
 {
     /// <summary>
-    /// Handles the event asynchronously.
+    /// Handles the payload asynchronously.
     /// </summary>
     /// <param name="payload">The payload to respond to.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>

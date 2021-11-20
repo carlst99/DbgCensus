@@ -2,6 +2,7 @@
 using DbgCensus.EventStream.Abstractions.Objects.Control;
 using DbgCensus.EventStream.Abstractions.Objects.Events;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
+using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 using DbgCensus.EventStream.Objects.Commands;
 using Microsoft.Extensions.Logging;
 using System.Threading;
@@ -40,7 +41,12 @@ public class ConnectionStateChangedPayloadHandler : IPayloadHandler<IConnectionS
 
     public async Task HandleAsync(IConnectionStateChanged payload, CancellationToken ct = default)
     {
-        _logger.LogWarning("Event stream connection state changed: we are now {state}!", payload.Connected ? "connected" : "disconnected");
+        _logger.LogWarning
+        (
+            "Event stream connection state changed for the client {clientName}: we are now {state}!",
+            _context.DispatchingClientName,
+            payload.Connected ? "connected" : "disconnected"
+        );
 
         if (!payload.Connected)
             return;

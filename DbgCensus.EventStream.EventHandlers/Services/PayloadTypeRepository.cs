@@ -1,10 +1,10 @@
 ﻿using DbgCensus.EventStream.Abstractions.Objects;
-using DbgCensus.EventStream.EventHandlers.Abstractions;
+using DbgCensus.EventStream.EventHandlers.Abstractions.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace DbgCensus.EventStream.EventHandlers;
+namespace DbgCensus.EventStream.EventHandlers.Services;
 
 /// <inheritdoc cref="IPayloadTypeRepository"/>
 public class PayloadTypeRepository : IPayloadTypeRepository

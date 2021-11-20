@@ -1,6 +1,6 @@
-﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
+﻿using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 
-namespace DbgCensus.EventStream.EventHandlers;
+namespace DbgCensus.EventStream.EventHandlers.Objects;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="PayloadContext"/> record.
@@ -9,4 +9,4 @@ namespace DbgCensus.EventStream.EventHandlers;
 public record PayloadContext
 (
     string DispatchingClientName
-): IPayloadContext;
+) : IPayloadContext;

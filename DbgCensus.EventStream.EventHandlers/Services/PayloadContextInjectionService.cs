@@ -1,4 +1,4 @@
-﻿using DbgCensus.EventStream.EventHandlers.Abstractions;
+﻿using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 using System;
 
 namespace DbgCensus.EventStream.EventHandlers.Services;
@@ -6,7 +6,7 @@ namespace DbgCensus.EventStream.EventHandlers.Services;
 /// <summary>
 /// Represents a service for storing an <see cref="IPayloadContext"/> object.
 /// </summary>
-public class EventContextInjectionService
+public class PayloadContextInjectionService
 {
     private IPayloadContext? _context;
 

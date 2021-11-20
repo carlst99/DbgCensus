@@ -32,7 +32,7 @@ public static class Program
                         .AddPayloadHandler<PlayerLogEventHandler>()
                         .AddPayloadHandler<UnknownPayloadHandler>();
 
-                services.AddHostedService<Worker>();
+                services.AddHostedService<EventStreamWorker>();
             });
 
     private static ILogger GetLogger()

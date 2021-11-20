@@ -3,6 +3,8 @@ using DbgCensus.EventStream.Abstractions.Objects.Events;
 using DbgCensus.EventStream.Abstractions.Objects.Events.Characters;
 using DbgCensus.EventStream.Abstractions.Objects.Events.Worlds;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
+using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
+using DbgCensus.EventStream.EventHandlers.Abstractions.Services;
 using DbgCensus.EventStream.EventHandlers.Services;
 using DbgCensus.EventStream.Extensions;
 using DbgCensus.EventStream.Objects.Control;
@@ -28,11 +30,11 @@ public static class IServiceCollectionExtensions
     /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
     public static IServiceCollection AddCensusEventHandlingServices(this IServiceCollection serviceCollection)
     {
-        serviceCollection.TryAddSingleton<IPayloadHandlerTypeRepository>(s => s.GetRequiredService<IOptions<EventHandlerTypeRepository>>().Value);
+        serviceCollection.TryAddSingleton<IPayloadHandlerTypeRepository>(s => s.GetRequiredService<IOptions<PayloadHandlerTypeRepository>>().Value);
         serviceCollection.TryAddSingleton<IPayloadTypeRepository>(s => s.GetRequiredService<IOptions<PayloadTypeRepository>>().Value);
 
-        serviceCollection.TryAddScoped<EventContextInjectionService>();
-        serviceCollection.TryAddTransient<IPayloadContext>(s => s.GetRequiredService<EventContextInjectionService>().Context);
+        serviceCollection.TryAddScoped<PayloadContextInjectionService>();
+        serviceCollection.TryAddTransient<IPayloadContext>(s => s.GetRequiredService<PayloadContextInjectionService>().Context);
 
         serviceCollection.AddCensusEventStreamServices
         (
@@ -102,7 +104,7 @@ public static class IServiceCollectionExtensions
 
         serviceCollection.AddScoped(handlerType);
 
-        serviceCollection.Configure<EventHandlerTypeRepository>(e => e.RegisterHandler<THandler>());
+        serviceCollection.Configure<PayloadHandlerTypeRepository>(e => e.RegisterHandler<THandler>());
 
         return serviceCollection;
     }
