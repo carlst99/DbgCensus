@@ -18,10 +18,16 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/carlst99/DbgCensus</RepositoryUrl>
 
-    <!-- Include compiler-generated source files for SourceLink and Deterministic builds-->
+    <PackageOutputPath>$(MSBuildThisFileDirectory)nuget</PackageOutputPath>
+  </PropertyGroup>
+
+  <!-- Source-link setup -->
+  <PropertyGroup>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <!-- Include symbol files (*.pdb) in the built .nupkg -->
+    <!-- Include symbol files (*.pdb) in the built .nupkg. We prefer this to symbol packages as it's a small library (hence restore time minimal) -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <!-- NuGet-related release properties -->
