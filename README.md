@@ -16,7 +16,7 @@ DbgCensus is a C# wrapper for [Daybreak Game Company's Census API](https://censu
 # Features
 
 - Fluent query building API.
-- Event handling model and built-in event stream types.
+- Event dispatch/handling model and built-in event stream types.
 - Fully asynchronous.
 - Built around the `Microsoft.Extensions` framework.
 - Targeting .NET 6.0.
@@ -29,6 +29,7 @@ DbgCensus is a C# wrapper for [Daybreak Game Company's Census API](https://censu
 - [Getting Started](#getting-started)
 - [Core Components](#core-components)
 - [Performing Queries](#performing-queries)
+- [Event Streaming](#event-streaming)
 
 # Getting Started
 
@@ -51,7 +52,7 @@ The `EventStreamSample` utilises DbgCensus' event handling framework. If you'd p
 
 # Core Components
 
-The *Core* library contains common types and extensions. Of these, it is likely you will find the Census objects useful (`DbgCensus.Core.Objects`). There are:
+The *Core* library contains common types and extensions. Of these, it is likely you will find the Census types useful (`DbgCensus.Core.Objects`). There are:
 
 - Enumerations of the faction, world, zone and metagame (definition and state) IDs that Census uses.
 - A `ZoneID` record that represents Census' special zone ID format - [see here](https://github.com/cooltrain7/Planetside-2-API-Tracker/wiki/Zone-ID-Tutorial) for more info. JSON converters are registered by default for this type, so you can use it anywhere that you would normally use an integer zone ID in your models.
@@ -180,3 +181,7 @@ The generic type argument of the method should match the model of the field you 
 ICensusRestClient client = ...;
 IReadOnlyList<int>? distinctValues = await client.DistinctAsync<int>("item", "max_stack_size" ct);
 ```
+
+# Event Streaming
+
+I haven't gotten around to documenting this yet! Please check out the [Event Stream Sample](Samples/EventStreamSample) in the meantime :slightly_smiling_face:.
