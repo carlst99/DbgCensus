@@ -50,14 +50,16 @@ public class Worker : BackgroundService
                 return;
             }
 
-            _logger.LogInformation(
+            _logger.LogInformation
+            (
                 "The character {name} of the {faction} is battle rank {rank}~{asp} with {certs} certs available. They last logged in on {lastLogin}",
                 character.Name.First,
                 character.FactionId,
                 character.BattleRank.Value,
                 character.PrestigeLevel,
                 character.Certs.AvailablePoints,
-                character.Times.LastLoginDate);
+                character.Times.LastLoginDate
+            );
         }
         catch (Exception ex)
         {
@@ -144,12 +146,14 @@ public class Worker : BackgroundService
                 return;
             }
 
-            _logger.LogInformation(
+            _logger.LogInformation
+            (
                 "The outfit [{alias}] {name} has {onlineCount} members online: {onlineMembers}",
                 outfit.OutfitAlias,
                 outfit.OutfitName,
                 outfit.OnlineMembers is null ? "none" : outfit.OnlineMembers.Count,
-                outfit.OnlineMembers is null ? string.Empty : string.Join(", ", outfit.OnlineMembers.Select(m => m.Character.Name.First)));
+                outfit.OnlineMembers is null ? string.Empty : string.Join(", ", outfit.OnlineMembers.Select(m => m.Character.Name.First))
+            );
         }
         catch (Exception ex)
         {
