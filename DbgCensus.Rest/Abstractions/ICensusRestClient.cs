@@ -31,6 +31,24 @@ public interface ICensusRestClient : IDisposable
     Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default);
 
     /// <summary>
+    /// Performs a query using the COUNT verb to retrieve the number of elements in the given collection.
+    /// </summary>
+    /// <param name="collectionName">The name of the collection.</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
+    /// <returns>The number of elements in the collection.</returns>
+    Task<ulong> CountAsync(string collectionName, CancellationToken ct = default);
+
+    /// <summary>
+    /// Gets all the distinct values of a collection field. Limited to 20000 results.
+    /// </summary>
+    /// <typeparam name="T">The type of the field.</typeparam>
+    /// <param name="collectionName">The collection.</param>
+    /// <param name="fieldName">The field.</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
+    /// <returns>A list of all the distinct values.</returns>
+    Task<IReadOnlyList<T>?> DistinctAsync<T>(string collectionName, string fieldName, CancellationToken ct = default);
+
+    /// <summary>
     /// Performs a query on the Census REST API, returning the results in pages.
     /// </summary>
     /// <typeparam name="T">The type to deserialise the response to.</typeparam>

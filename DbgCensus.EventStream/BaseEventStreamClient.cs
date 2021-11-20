@@ -225,7 +225,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient
     /// </summary>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    protected virtual async Task StartListeningAsync(CancellationToken ct = default)
+    protected virtual async Task StartListeningAsync(CancellationToken ct)
     {
         IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent(SOCKET_BUFFER_SIZE);
         ValueWebSocketReceiveResult result;
@@ -289,7 +289,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient
     /// Gets a new <see cref="ClientWebSocket"/> instance and connects it to the <see cref="_endpoint"/>, along with sending an initial subscription if specified.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    protected virtual async Task ConnectWebsocket(CancellationToken ct = default)
+    protected virtual async Task ConnectWebsocket(CancellationToken ct)
     {
         _webSocket = _services.GetRequiredService<ClientWebSocket>();
         _webSocket.Options.KeepAliveInterval = TimeSpan.FromSeconds(KEEPALIVE_INTERVAL_SEC);
@@ -304,7 +304,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient
     /// <param name="eventStream">The event data. You must dispose of this stream when you are finished with it.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    protected abstract Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct = default);
+    protected abstract Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct);
 
     protected virtual void Dispose(bool disposing)
     {

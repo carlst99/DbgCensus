@@ -87,7 +87,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     }
 
     /// <inheritdoc />
-    protected override async Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct = default)
+    protected override async Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct)
     {
         try
         {
@@ -156,7 +156,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// </summary>
     /// <param name="element"></param>
     /// <param name="ct"></param>
-    private void DispatchServiceMessage(JsonElement element, CancellationToken ct = default)
+    private void DispatchServiceMessage(JsonElement element, CancellationToken ct)
     {
         // Attempt to get the payload element
         if (!element.TryGetProperty("payload", out JsonElement payloadElement))
@@ -246,7 +246,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="DispatchEventAsync{T}(T, CancellationToken)"/> and dispatches an event.
+    /// Creates an instance of <see cref="DispatchPayloadAsync{T}(T, IPayloadContext, CancellationToken)"/> and dispatches an event.
     /// </summary>
     /// <param name="abstractType">The abstract type used by payload handlers.</param>
     /// <param name="eventObject">The event object to dispatch.</param>
@@ -294,16 +294,16 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// Dispatches an event to all appropriate payload handlers. DO NOT call this directly.
     /// Use <see cref="CreateDispatchMethod(Type)"/> instead to ensure handlers do not block the receive queue.
     /// </summary>
-    /// <typeparam name="T">The type of <see cref="IEventStreamObject"/> to dispatch.</typeparam>
-    /// <param name="abstractType">The abstract payload type to dispatch.</param>
+    /// <typeparam name="T">The abstract type of the payload.</typeparam>
+    /// <param name="payload">The payload to dispatch.</param>
     /// <param name="context">The context to inject.</param>
-    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the entire event chain.</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the handlers.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     private async Task DispatchPayloadAsync<T>
     (
-        T abstractType,
+        T payload,
         IPayloadContext context,
-        CancellationToken ct = default
+        CancellationToken ct
     ) where T : IPayload
     {
         IReadOnlyList<Type> handlerTypes = _handlerTypeRepository.GetHandlerTypes<T>();
@@ -323,7 +323,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
 
                     try
                     {
-                        await handler.HandleAsync(abstractType, ct).ConfigureAwait(false);
+                        await handler.HandleAsync(payload, ct).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {

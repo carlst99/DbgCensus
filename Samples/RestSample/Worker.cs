@@ -24,16 +24,18 @@ public class Worker : BackgroundService
         _queryService = queryService;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        await GetMapStatus(stoppingToken).ConfigureAwait(false);
-        await GetCharacter(stoppingToken).ConfigureAwait(false);
-        await GetOnlineOutfitMembers(stoppingToken).ConfigureAwait(false);
+        await GetMapStatus(ct).ConfigureAwait(false);
+        await GetCharacter(ct).ConfigureAwait(false);
+        await GetCharacterCollectionCount(ct).ConfigureAwait(false);
+        await GetItemMaxStackSizeDistinctValues(ct).ConfigureAwait(false);
+        await GetOnlineOutfitMembers(ct).ConfigureAwait(false);
     }
 
     private async Task GetCharacter(CancellationToken ct = default)
     {
-        _logger.LogInformation("Getting character information for FalconEye36");
+        _logger.LogInformation("Retrieving character information for FalconEye36...");
 
         IQueryBuilder query = _queryService.CreateQuery()
             .OnCollection("character")
@@ -60,6 +62,43 @@ public class Worker : BackgroundService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to retrieve character.");
+        }
+    }
+
+    private async Task GetCharacterCollectionCount(CancellationToken ct)
+    {
+        _logger.LogInformation("Retrieving the number of elements in the character collection...");
+
+        try
+        {
+            ulong count = await _queryService.CountAsync("character", ct).ConfigureAwait(false);
+
+            _logger.LogInformation("There are {count} elements in the character collection", count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to retrieve character collection count.");
+        }
+    }
+
+    private async Task GetItemMaxStackSizeDistinctValues(CancellationToken ct)
+    {
+        _logger.LogInformation("Retrieving the unique values of the 'max_stack_size' field on the 'item' collection...");
+
+        try
+        {
+            IReadOnlyList<int>? uniqueStackSizes = await _queryService.DistinctAsync<int>("item", "max_stack_size", ct).ConfigureAwait(false);
+            if (uniqueStackSizes is null)
+            {
+                _logger.LogInformation("Census returned no data!");
+                return;
+            }
+
+            _logger.LogInformation("Values: {values}", string.Join(", ", uniqueStackSizes));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to retrieve distinct values.");
         }
     }
 

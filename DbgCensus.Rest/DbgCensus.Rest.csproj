@@ -6,7 +6,7 @@
     <!-- Package info -->
     <Version>1.0.5</Version>
     <Description>A wrapper for interacting with the query endpoints of Daybreak Game Company's Census API.</Description>
-    <PackageReleaseNotes>Updated Census types.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for the `count` verb and improved support for the distinct operater.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

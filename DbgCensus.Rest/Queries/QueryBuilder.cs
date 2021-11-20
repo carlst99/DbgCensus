@@ -66,7 +66,7 @@ public class QueryBuilder : IQueryBuilder
         _startIndex = GetSingleQCF<uint?>("c:start");
 
         CollectionName = null;
-        _verb = QueryType.GET;
+        _verb = QueryType.Get;
         _showHideFields = GetMultiQCF<string>("c:show");
 
         WithLimit(100);

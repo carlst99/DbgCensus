@@ -8,12 +8,12 @@ public sealed class QueryType
     /// <summary>
     /// A regular query.
     /// </summary>
-    public static readonly QueryType GET = new("get");
+    public static readonly QueryType Get = new("get");
 
     /// <summary>
     /// Returns the number of values matching the query.
     /// </summary>
-    public static readonly QueryType COUNT = new("count");
+    public static readonly QueryType Count = new("count");
 
     /// <summary>
     /// Gets the value of the verb.
@@ -26,6 +26,7 @@ public sealed class QueryType
     }
 
     public static implicit operator string(QueryType t) => t.ToString();
+    public static explicit operator QueryType(string s) => new(s);
 
     public override string ToString() => Value;
 
