@@ -3,7 +3,8 @@ using System;
 
 namespace RestSample.Objects;
 
-public record Character(
+public record Character
+(
     ulong CharacterId,
     Name Name,
     FactionDefinition FactionId,
@@ -12,7 +13,8 @@ public record Character(
     Character.CharacterCerts Certs,
     Character.CharacterBattleRank BattleRank,
     int ProfileId,
-    int PrestigeLevel)
+    int PrestigeLevel
+)
 {
     public record CharacterTimes(DateTimeOffset CreationDate, DateTimeOffset LastSaveDate, DateTimeOffset LastLoginDate, uint LoginCount, uint MinutesPlayed);
 

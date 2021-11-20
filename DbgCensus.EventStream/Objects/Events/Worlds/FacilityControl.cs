@@ -14,8 +14,8 @@ namespace DbgCensus.EventStream.Objects.Events.Worlds;
 /// <param name="OldFactionID">The ID of the old controlling faction.</param>
 /// <param name="OutfitID">The ID of the outfit that captured the facility, or zero if no outfit was involved in the capture.</param>
 /// <param name="Timestamp">The time at which the event occured.</param>
-/// <param name="WorldId">The world on which the event occured.</param>
-/// <param name="ZoneId">The zone on which the event occured.</param>
+/// <param name="WorldID">The world on which the event occured.</param>
+/// <param name="ZoneID">The zone on which the event occured.</param>
 public record FacilityControl
 (
     uint DurationHeld,

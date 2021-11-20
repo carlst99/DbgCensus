@@ -148,8 +148,8 @@ public class Worker : BackgroundService
                 "The outfit [{alias}] {name} has {onlineCount} members online: {onlineMembers}",
                 outfit.OutfitAlias,
                 outfit.OutfitName,
-                outfit.OnlineMembers.Count,
-                string.Join(", ", outfit.OnlineMembers.Select(m => m.Character.Name.First)));
+                outfit.OnlineMembers is null ? "none" : outfit.OnlineMembers.Count,
+                outfit.OnlineMembers is null ? string.Empty : string.Join(", ", outfit.OnlineMembers.Select(m => m.Character.Name.First)));
         }
         catch (Exception ex)
         {
@@ -184,12 +184,12 @@ public class Worker : BackgroundService
             string message = $"{world} map status: ";
             foreach (Map m in maps)
             {
-                double regionCount = m.Regions.Row.Count(r => r.RowData.FactionId != FactionDefinition.None);
-                double ncPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == FactionDefinition.NC) / regionCount) * 100;
-                double trPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == FactionDefinition.TR) / regionCount) * 100;
-                double vsPercent = (m.Regions.Row.Count(r => r.RowData.FactionId == FactionDefinition.VS) / regionCount) * 100;
+                double regionCount = m.Regions.Row.Count(r => r.RowData.FactionID != FactionDefinition.None);
+                double ncPercent = (m.Regions.Row.Count(r => r.RowData.FactionID == FactionDefinition.NC) / regionCount) * 100;
+                double trPercent = (m.Regions.Row.Count(r => r.RowData.FactionID == FactionDefinition.TR) / regionCount) * 100;
+                double vsPercent = (m.Regions.Row.Count(r => r.RowData.FactionID == FactionDefinition.VS) / regionCount) * 100;
 
-                message += $"\n\t- {m.ZoneId} | NC: {ncPercent:F}%, TR: {trPercent:F}%, VS: {vsPercent:F}%";
+                message += $"\n\t- {m.ZoneID} | NC: {ncPercent:F}%, TR: {trPercent:F}%, VS: {vsPercent:F}%";
             }
 
             _logger.LogInformation(message);

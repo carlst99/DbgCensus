@@ -31,6 +31,7 @@ public class CensusRestClient : ICensusRestClient
     /// <param name="logger">The logging interface to use.</param>
     /// <param name="client">The <see cref="HttpClient"/> to send requests with.</param>
     /// <param name="options">The query options to conform to.</param>
+    /// <param name="queryFactory">The query factory.</param>
     public CensusRestClient
     (
         ILogger<CensusRestClient> logger,
@@ -160,6 +161,7 @@ public class CensusRestClient : ICensusRestClient
     /// Parses and then attempts to find an error in the Census response.
     /// </summary>
     /// <param name="responseContent">The response content.</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
     protected virtual async Task<JsonDocument> InitialiseParseAsync(HttpContent responseContent, CancellationToken ct)
     {
         JsonDocument data = await JsonDocument.ParseAsync
