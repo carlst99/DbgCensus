@@ -120,6 +120,8 @@ public class Worker : BackgroundService
 
     private async Task GetMapStatus(CancellationToken ct = default)
     {
+        const WorldDefinition world = WorldDefinition.Connery;
+
         IEnumerable<ushort> zones = new ZoneDefinition[]
         {
                 ZoneDefinition.Amerish,
@@ -131,7 +133,7 @@ public class Worker : BackgroundService
 
         IQueryBuilder query = _queryService.CreateQuery()
             .OnCollection("map")
-            .Where("world_id", SearchModifier.Equals, WorldDefinition.Connery)
+            .Where("world_id", SearchModifier.Equals, world)
             .WhereAll("zone_ids", SearchModifier.Equals, zones);
 
         try
@@ -140,7 +142,7 @@ public class Worker : BackgroundService
             if (maps is null)
                 throw new CensusException("Census returned no data");
 
-            string message = "Connery map status: ";
+            string message = $"{world} map status: ";
             foreach (Map m in maps)
             {
                 double regionCount = m.Regions.Row.Count(r => r.RowData.FactionId != FactionDefinition.None);

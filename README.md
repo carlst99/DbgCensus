@@ -15,51 +15,54 @@ DbgCensus is a C# wrapper for [Daybreak Game Company's Census API](https://censu
 
 # Features
 
-- Fluent query building API
-- Full coverage of the Census query and event streaming interfaces.
+- Fluent query building API.
+- Event handling model and built-in event stream types.
 - Fully asynchronous.
 - Built around the `Microsoft.Extensions` framework.
 - Targeting .NET 6.0.
 
-> :warning: DbgCensus is currently in an unstable state. This means that:
->
-> - The code has been 'tested' by my own workloads, but not thoroughly hand or unit tested.
-> - The API is liable to change, although it is beginning to reach maturity.
-> - Documentation is a bit lacking, although the code is fully XML documented.
 
 ***
 
+### Table of Contents
+
+- [Getting Started](#getting-started)
+- [Core Components](#core-components)
+- [Performing Queries](#performing-queries)
+
 # Getting Started
 
-Before you do anything, you should consider getting a custom *Census Service ID*. The process is free and it generally only takes a few hours to hear back about your registration, which you can do [here](https://census.daybreakgames.com/#devSignup).
+Before you do anything, you should consider getting a custom *Census Service ID*. The process is free and it generally only takes a few hours to hear back about your registration, [which you can do here](https://census.daybreakgames.com/#devSignup).
 
 Note that you can use the `example` service ID, however you will be rate-limited to 10 requests per minute, per client IP address.
 
-You will also need to have a good understanding of how the Census API works. I highly recommend making your way through these excellent official/community docs:
+You will also need to have a good understanding of how the Census API works. I highly recommend making your way through these excellent official/community resources:
 
 - [The official Census API documentation.](https://census.daybreakgames.com)
 - [Leonhard's Census API Primer.](https://github.com/leonhard-s/auraxium/wiki/Census-API-Primer)
-- [The community API issue tracker/info repository](https://github.com/cooltrain7/Planetside-2-API-Tracker)
+- [The community API issue tracker/info repository.](https://github.com/cooltrain7/Planetside-2-API-Tracker)
 - [Leonhard's unofficial docs for PlanetSide 2 endpoints.](https://ps2-api-docs.readthedocs.io/en/latest/openapi.html)
 
-## Examples
+### Examples
 
 Check out the [samples](Samples) to get up and running quickly with DbgCensus. These demonstrate typical usage of the libraries within the Generic Host framework.
 
 The `EventStreamSample` utilises DbgCensus' event handling framework. If you'd prefer to use another method of dispatching and handling events, you'll need to extend the `BaseEventStreamClient` instead, and register it yourself using the `AddCensusEventStreamServices` extension method.
 
-## Core Components
+# Core Components
 
 The *Core* library contains common types and extensions. Of these, it is likely you will find the Census objects useful (`DbgCensus.Core.Objects`). There are:
 
-- Enumerations of the faction, world and zone IDs that Census uses.
-- A `ZoneId` record that represents Census' special zone ID format - [see here](https://github.com/cooltrain7/Planetside-2-API-Tracker/wiki/Zone-ID-Tutorial) for more info. JSON converters are registered by default for this type, so you can use it anywhere that you would normally use an integer zone ID in your models.
+- Enumerations of the faction, world, zone and metagame (definition and state) IDs that Census uses.
+- A `ZoneID` record that represents Census' special zone ID format - [see here](https://github.com/cooltrain7/Planetside-2-API-Tracker/wiki/Zone-ID-Tutorial) for more info. JSON converters are registered by default for this type, so you can use it anywhere that you would normally use an integer zone ID in your models.
 
 There are also converters, extensions and naming policies for `System.Text.Json` that you may find useful should you decide to perform your own JSON deserialisation.
 
-## Interacting with Census Query Endpoints
+# Performing Queries
 
-Check out [REST Sample](Samples/RestSample) as you read through this.
+Check out the [REST Sample](Samples/RestSample) as you read through this.
+
+## Setup
 
 Start off by creating a new project. I would highly recommend using a template that implements the [Generic Host](https://docs.microsoft.com/en-us/dotnet/core/extensions/generic-host), such as a *Worker Service* or an *ASP.NET Core* project.
 
@@ -72,7 +75,9 @@ Install-Package DbgCensus.Rest
 dotnet add package DbgCensus.Rest
 ```
 
-If your project integrates with the `Microsoft.Extensions` framework, you can easily register the required services to the container with the `AddCensusRestServices` extension method:
+Register the required services to the container with the `AddCensusRestServices` extension method. If you aren't using the `Microsoft.Extensions` framework, take a look at [this file](DbgCensus.Rest/Extensions/IServiceCollectionExtensions.cs) to see how the required services are setup.
+
+You will also need to configure an instance of the `CensusQueryOptions` class to ensure that your service ID is utilised. Typically, you'd register your options from a configuration source (usually a section of `appsettings.json`) to retrieve any secrets that shouldn't be stored with the code, and then follow up with any additional configuration.
 
 ```csharp
 using DbgCensus.Rest.Extensions;
@@ -82,30 +87,25 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         .ConfigureServices((configuration, services) =>
         {
             services.AddCensusRestServices();
+
+            services.Configure<CensusQueryOptions>
+            (
+                hostContext.Configuration.GetSection(nameof(CensusQueryOptions))
+            );
+        
+            // AND/OR
+            services.Configure<CensusQueryOptions>
+            (
+                o => o.DeserializationOptions = new JsonSerializerOptions(...)
+            );
         });
 ```
 
-If you aren't using the `Microsoft.Extensions` framework, take a look at [this file](DbgCensus.Rest/Extensions/IServiceCollectionExtensions.cs) to see how the required services are setup.
-
-### Customising Query Options
-
-You will need configure an instance of the `CensusQueryOptions` class to ensure that your service ID is utilised. I like to register my options from a configuration source (usually a section of `appsettings.json`) to retrieve any secrets that shouldn't be stored with the code, and then follow up with any additional configuration.
-
-```csharp
-.ConfigureServices((hostContext, services) =>
-    {
-        services.Configure<CensusQueryOptions>(
-            hostContext.Configuration.GetSection(nameof(CensusQueryOptions)));
-        
-        // AND/OR
-        services.Configure<CensusQueryOptions>(
-            o => o.DeserializationOptions = new JsonSerializerOptions(...));
-    });
-```
-
-### Performing Queries
+## Making a Query
 
 Grab an `IQueryService` instance. This is a wrapper around the registered `IQueryBuilderFactory` and `ICensusRestClient` objects, which you can use individually if you need slightly more control over your queries.
+
+Then simply proceed to define your query, and call `GetAsync` to retrieve it. Note that the result can be null if you've made a query for a singular item that doesn't exist, or Census simply didn't return any data.
 
 ```csharp
 IQueryBuilder query = _queryService.CreateQuery()
@@ -125,4 +125,17 @@ catch (Exception ex)
 {
     _logger.LogError(ex, "Failed to retrieve character.");
 }
+```
+
+An important distinction to notice when defining queries is that filtering a property is split into two methods. If you'd like to filter a property by a singular value, use the `Where` method:
+
+```csharp
+query.Where("property", SearchModifier.LessThan, "value")
+```
+
+If you'd like to filter a property by multiple values, use the `WhereAll` method:
+
+```csharp
+int[] values = new[] { 1, 2, 3 };
+query.WhereAll("property", SearchModifier.Equals, values);
 ```

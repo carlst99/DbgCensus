@@ -4,9 +4,9 @@
     <TargetFramework>net6.0</TargetFramework>
 
     <!-- Package info -->
-    <Version>1.0.0-beta.3</Version>
+    <Version>1.0.0</Version>
     <Description>A library for receiving data from the websocket event stream of Daybreak Game Company's Census API.</Description>
-    <PackageReleaseNotes>Reduce memory allocations on payload send and receive.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added event stream types.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
