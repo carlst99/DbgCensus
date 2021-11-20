@@ -1,5 +1,4 @@
-﻿using DbgCensus.EventStream.Abstractions.Commands;
-using DbgCensus.EventStream.Commands;
+﻿using DbgCensus.EventStream.Abstractions.Objects.Commands;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,10 +29,9 @@ public interface IEventStreamClient : IDisposable
     /// Connects to the census event stream and begins receiving events.
     /// This method will return when <see cref="StopAsync"/> is called or the operation is cancelled.
     /// </summary>
-    /// <param name="initialSubscription">An initial subscription to make.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    Task StartAsync(SubscribeCommand? initialSubscription = null, CancellationToken ct = default);
+    Task StartAsync(CancellationToken ct = default);
 
     /// <summary>
     /// Disconnects from the event stream and stops listening for events.
@@ -42,13 +40,13 @@ public interface IEventStreamClient : IDisposable
     Task StopAsync();
 
     /// <summary>
-    /// Sends a <see cref="IEventStreamCommand"/> to the event stream.
+    /// Sends a <see cref="ICommand"/> to the event stream.
     /// </summary>
-    /// <typeparam name="T">The type of <see cref="IEventStreamCommand"/> to send.</typeparam>
+    /// <typeparam name="T">The type of <see cref="ICommand"/> to send.</typeparam>
     /// <param name="command">The command.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    Task SendCommandAsync<T>(T command, CancellationToken ct = default) where T : IEventStreamCommand;
+    Task SendCommandAsync<T>(T command, CancellationToken ct = default) where T : ICommand;
 
     /// <summary>
     /// Closes and reconnects to the websocket. Can help in cases where Census stops pushing data for your subscription.

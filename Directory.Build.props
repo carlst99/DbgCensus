@@ -1,0 +1,57 @@
+<Project>
+  
+  <!-- Build-related properties -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <!-- NuGet-related properties -->
+  <PropertyGroup>
+    <Authors>Carl Stephens</Authors>
+    <PackageIcon>Icon_128.png</PackageIcon>
+    <PackageReadmeFile>README.nuget.md</PackageReadmeFile>
+    <PackageTags>planetside2 daybreak-games daybreak-census</PackageTags>
+
+    <PackageLicenseExpression>ISC</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/carlst99/DbgCensus</RepositoryUrl>
+
+    <PackageOutputPath>$(MSBuildThisFileDirectory)nuget</PackageOutputPath>
+  </PropertyGroup>
+
+  <!-- Source-link setup -->
+  <PropertyGroup>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- Include symbol files (*.pdb) in the built .nupkg. We prefer this to symbol packages as it's a small library (hence restore time minimal) -->
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <!-- NuGet-related release properties -->
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- Common packages -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+  </ItemGroup>
+
+  <!-- Pack inclusions -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Assets\Icon_128.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Assets\README.nuget.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+  
+</Project>
