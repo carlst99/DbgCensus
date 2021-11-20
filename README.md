@@ -16,7 +16,7 @@ DbgCensus is a C# wrapper for [Daybreak Game Company's Census API](https://censu
 # Features
 
 - Fluent query building API.
-- Event dispatch/handling model and built-in event stream types.
+- Event dispatch/handling system and built-in event stream types.
 - Fully asynchronous.
 - Built around the `Microsoft.Extensions` framework.
 - Targeting .NET 6.0.
