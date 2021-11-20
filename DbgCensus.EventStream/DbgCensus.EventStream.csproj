@@ -2,53 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
 
     <!-- Package info -->
     <Version>1.0.0-beta.3</Version>
-    <Authors>Carl Stephens</Authors>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageProjectUrl>https://github.com/carlst99/DbgCensus</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/carlst99/DbgCensus</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <Description>A library for receiving data from the websocket event stream of Daybreak Game Company's Census API.</Description>
-    <PackageTags>planetside2 daybreak-games daybreak-census</PackageTags>
-    <PackageIcon>Icon_128.png</PackageIcon>
-
-    <!-- Include compiler-generated source files for SourceLink and Deterministic builds-->
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <!-- Include symbol files (*.pdb) in the built .nupkg -->
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <PackageReleaseNotes>Reduce memory allocations on payload send and receive.</PackageReleaseNotes>
-    <PackageReadmeFile>README.nuget.md</PackageReadmeFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\Assets\Icon_128.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
