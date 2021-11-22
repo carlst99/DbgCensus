@@ -5,7 +5,7 @@ namespace DbgCensus.EventStream.Abstractions.Objects.Commands;
 /// <summary>
 /// Represents a Subscribe command.
 /// </summary>
-public interface ISubscribe
+public interface ISubscribe : ICommand
 {
     /// <summary>
     /// Gets the characters to subscribe to.

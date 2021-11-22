@@ -4,6 +4,6 @@
 /// Represents a RecentCharacterIDsCount command, a request for the number of unique character IDs
 /// which have recently been sent through the event stream.
 /// </summary>
-public interface IRecentCharacterIDsCount
+public interface IRecentCharacterIDsCount : ICommand
 {
 }
