@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     
     <!-- Package info -->
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
     <Description>A wrapper for interacting with the query endpoints of Daybreak Game Company's Census API.</Description>
     <PackageReleaseNotes>Added support for the `count` verb and improved support for the distinct operater.</PackageReleaseNotes>
   </PropertyGroup>
