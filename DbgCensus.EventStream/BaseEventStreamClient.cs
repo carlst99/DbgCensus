@@ -31,12 +31,6 @@ public abstract class BaseEventStreamClient : IEventStreamClient
     /// </summary>
     protected const int KEEPALIVE_INTERVAL_SEC = 20;
 
-    /// <summary>
-    /// Gets the constant used to delimit payloads in the receive pipe.
-    /// Defined as an ASCII end-of-transmission character.
-    /// </summary>
-    public const byte RECEIVE_PAYLOAD_DELIMITER = 4;
-
     private readonly ILogger<BaseEventStreamClient> _logger;
     private readonly SemaphoreSlim _sendSemaphore;
     private readonly Utf8JsonWriter _sendJsonWriter;
