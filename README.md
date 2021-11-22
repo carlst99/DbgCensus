@@ -179,7 +179,7 @@ The generic type argument of the method should match the model of the field you 
 
 ```csharp
 ICensusRestClient client = ...;
-IReadOnlyList<int>? distinctValues = await client.DistinctAsync<int>("item", "max_stack_size" ct);
+IReadOnlyList<int>? distinctValues = await client.DistinctAsync<int>("item", "max_stack_size", ct);
 ```
 
 # Event Streaming
