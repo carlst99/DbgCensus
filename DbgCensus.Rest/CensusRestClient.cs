@@ -81,13 +81,15 @@ public class CensusRestClient : ICensusRestClient
             .WithDistinctFieldValues(fieldName);
 
         using HttpResponseMessage response = await PerformQueryAsync(query.ConstructEndpoint().AbsoluteUri, ct).ConfigureAwait(false);
-        using JsonDocument data = await InitialiseParseAsync(response.Content, ct).ConfigureAwait(false);
+        using JsonDocument data = await InitialParseAsync(response.Content, ct).ConfigureAwait(false);
         JsonElement collectionElement = GetCollectionArrayElement(data.RootElement, collectionName);
 
         if (!collectionElement[0].TryGetProperty(fieldName, out JsonElement fieldElement))
         {
-            _logger.LogWarning("Returned data was not in the expected format for a distinct query", data.RootElement.GetRawText());
-            throw new CensusInvalidDataException("Returned data was not in the expected format for a distinct query.", data.RootElement.GetRawText());
+            string rawJson = data.RootElement.GetRawText();
+
+            _logger.LogWarning("Returned data was not in the expected format for a distinct query", rawJson);
+            throw new CensusInvalidDataException("Returned data was not in the expected format for a distinct query.", rawJson);
         }
 
         return fieldElement.Deserialize<List<T>>(_jsonOptions);
@@ -135,7 +137,7 @@ public class CensusRestClient : ICensusRestClient
     /// <returns></returns>
     protected virtual async Task<T?> DeserializeResponseContentAsync<T>(HttpContent content, string? collectionName, CancellationToken ct)
     {
-        using JsonDocument data = await InitialiseParseAsync(content, ct).ConfigureAwait(false);
+        using JsonDocument data = await InitialParseAsync(content, ct).ConfigureAwait(false);
 
         if (collectionName is null)
             collectionName = "datatype";
@@ -146,7 +148,7 @@ public class CensusRestClient : ICensusRestClient
         JsonElement collectionElement = GetCollectionArrayElement(data.RootElement, collectionName);
 
         if (typeof(T).IsAssignableTo(typeof(System.Collections.IEnumerable)))
-            return JsonSerializer.Deserialize<T>(collectionElement.GetRawText(), _jsonOptions);
+            return collectionElement.Deserialize<T>(_jsonOptions);
 
         int length = collectionElement.GetArrayLength();
         if (length > 1)
@@ -154,7 +156,7 @@ public class CensusRestClient : ICensusRestClient
         else if (length == 0)
             return default;
         else
-            return JsonSerializer.Deserialize<T>(collectionElement[0].GetRawText(), _jsonOptions);
+            return collectionElement[0].Deserialize<T>(_jsonOptions);
     }
 
     /// <summary>
@@ -162,7 +164,7 @@ public class CensusRestClient : ICensusRestClient
     /// </summary>
     /// <param name="responseContent">The response content.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
-    protected virtual async Task<JsonDocument> InitialiseParseAsync(HttpContent responseContent, CancellationToken ct)
+    protected virtual async Task<JsonDocument> InitialParseAsync(HttpContent responseContent, CancellationToken ct)
     {
         JsonDocument data = await JsonDocument.ParseAsync
         (
@@ -176,26 +178,31 @@ public class CensusRestClient : ICensusRestClient
 
         if (data.RootElement.TryGetProperty("error", out JsonElement errorValue))
         {
-            if (errorValue.GetRawText() == "service_unavailable")
+            string errorValueText = errorValue.GetRawText();
+
+            if (errorValueText == "service_unavailable")
             {
                 _logger.LogWarning("Census service unavailable.");
                 throw new CensusServiceUnavailableException();
             }
             else
             {
-                _logger.LogError("Census query failed with an error: {error}", errorValue.GetRawText());
-                throw new CensusQueryErrorException(errorValue.GetRawText());
+                _logger.LogError("Census query failed with an error: {error}", errorValueText);
+                throw new CensusQueryErrorException(errorValueText);
             }
         }
 
         if (data.RootElement.TryGetProperty("errorCode", out JsonElement errorCode))
         {
-            if (data.RootElement.TryGetProperty("errorMessage", out errorValue))
-                _logger.LogError("Census query failed with error code {code} and message {message}", errorCode.GetRawText(), errorValue.GetRawText());
-            else
-                _logger.LogError("Census query failed with error code: {code}", errorCode.GetRawText());
+            string errorCodeText = errorCode.GetRawText();
+            string errorValueText = string.Empty;
 
-            throw new CensusQueryErrorException(errorValue.GetRawText(), errorCode.GetRawText());
+            if (data.RootElement.TryGetProperty("errorMessage", out errorValue))
+                errorValueText = errorValue.GetRawText();
+
+            _logger.LogError("Census query failed with error code {code} and message {message}", errorCodeText, errorValueText);
+
+            throw new CensusQueryErrorException(errorValueText, errorCodeText);
         }
 
         return data;
@@ -205,8 +212,10 @@ public class CensusRestClient : ICensusRestClient
     {
         if (!rootElement.TryGetProperty(collectionName + "_list", out JsonElement collectionElement))
         {
-            _logger.LogWarning("Returned data was not in the expected format: {data}", rootElement.GetRawText());
-            throw new CensusInvalidDataException("Returned data was not in the expected format.", rootElement.GetRawText());
+            string rawJson = rootElement.GetRawText();
+
+            _logger.LogWarning("Returned data was not in the expected format: {data}", rawJson);
+            throw new CensusInvalidDataException("Returned data was not in the expected format.", rawJson);
         }
 
         if (collectionElement.ValueKind != JsonValueKind.Array)
