@@ -34,7 +34,7 @@ public static class IServiceCollectionExtensions
             );
 
         serviceCollection.TryAddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
-        serviceCollection.TryAddSingleton<IQueryService, QueryService>();
+        serviceCollection.TryAddTransient<IQueryService, QueryService>();
 
         return serviceCollection;
     }
