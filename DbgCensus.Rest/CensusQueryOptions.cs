@@ -40,5 +40,6 @@ public class CensusQueryOptions
         ServiceId = "example";
         Namespace = "ps2";
         DeserializationOptions = new JsonSerializerOptions();
+        DeserializationOptions.AddCensusDeserializationOptions();
     }
 }

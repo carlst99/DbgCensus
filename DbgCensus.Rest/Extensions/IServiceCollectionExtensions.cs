@@ -3,6 +3,9 @@ using DbgCensus.Rest.Abstractions.Queries;
 using DbgCensus.Rest.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Polly;
+using Polly.Contrib.WaitAndRetry;
+using System;
 using System.Net.Http;
 
 namespace DbgCensus.Rest.Extensions;
@@ -16,13 +19,21 @@ public static class IServiceCollectionExtensions
     /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
     public static IServiceCollection AddCensusRestServices(this IServiceCollection serviceCollection)
     {
-        serviceCollection.AddHttpClient<CensusRestClient>()
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
-
-        serviceCollection.TryAddSingleton<ICensusRestClient, CensusRestClient>();
+        serviceCollection.AddHttpClient<ICensusRestClient, CensusRestClient>()
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false })
+            .AddTransientHttpErrorPolicy
+            (
+                builder => builder.WaitAndRetryAsync
+                (
+                    Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromSeconds(1), 4)
+                )
+            )
+            .AddTransientHttpErrorPolicy
+            (
+                builder => builder.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30))
+            );
 
         serviceCollection.TryAddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
-
         serviceCollection.TryAddSingleton<IQueryService, QueryService>();
 
         return serviceCollection;

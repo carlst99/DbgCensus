@@ -63,6 +63,10 @@ There are also converters, extensions and naming policies for `System.Text.Json`
 
 Check out the [REST Sample](Samples/RestSample) as you read through this.
 
+Note that `DbgCensus.Rest` configures two [Polly](https://github.com/App-vNext/Polly) policies by default. These are:
+- Wait and Retry: Performs a jittered exponential backoff up to four times if a query fails.
+- Circuit Breaker: Breaks for 30 seconds if five queries fail consecutively.
+
 ## Setup
 
 Start off by creating a new project. I would highly recommend using a template that implements the [Generic Host](https://docs.microsoft.com/en-us/dotnet/core/extensions/generic-host), such as a *Worker Service* or an *ASP.NET Core* project.
@@ -78,7 +82,7 @@ dotnet add package DbgCensus.Rest
 
 Register the required services to the container with the `AddCensusRestServices` extension method. If you aren't using the `Microsoft.Extensions` framework, take a look at [this file](DbgCensus.Rest/Extensions/IServiceCollectionExtensions.cs) to see how the required services are setup.
 
-You will also need to configure an instance of the `CensusQueryOptions` class to ensure that your service ID is utilised. Typically, you'd register your options from a configuration source (usually a section of `appsettings.json`) to retrieve any secrets that shouldn't be stored with the code, and then follow up with any additional configuration.
+You will also need to configure an instance of the `CensusQueryOptions` class to ensure that your service ID is utilised. Typically, you'd register your options from a configuration source (such as a section of `appsettings.json`) to retrieve any secrets that shouldn't be stored with the code, and then follow up with any additional runtime configuration.
 
 ```csharp
 using DbgCensus.Rest.Extensions;
@@ -97,7 +101,12 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
             // AND/OR
             services.Configure<CensusQueryOptions>
             (
-                o => o.DeserializationOptions = new JsonSerializerOptions(...)
+                o =>
+                {
+                    o.DeserializationOptions = new JsonSerializerOptions(...);
+                    o.Limit = 100; // Optional: sets a default limit for each query.
+                    // Etc.
+                }
             );
         });
 ```

@@ -44,9 +44,7 @@ public class CensusRestClient : ICensusRestClient
         _client = client;
         _queryOptions = options.Value;
         _queryFactory = queryFactory;
-
-        _jsonOptions = new JsonSerializerOptions(_queryOptions.DeserializationOptions);
-        _jsonOptions.AddCensusDeserializationOptions();
+        _jsonOptions = _queryOptions.DeserializationOptions;
     }
 
     /// <inheritdoc />
