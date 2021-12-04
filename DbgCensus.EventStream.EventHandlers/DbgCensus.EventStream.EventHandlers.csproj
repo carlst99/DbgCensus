@@ -4,9 +4,12 @@
     <TargetFramework>net6.0</TargetFramework>
 
     <!-- Package info -->
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Description>An abstraction of DbgCensus.EventStream to provide an asynchronous and decoupled event handling model.</Description>
-    <PackageReleaseNotes>Significantly re-worked the event handling system. Please see the updated sample in the repository.</PackageReleaseNotes>
+    <PackageReleaseNotes>
+      v1.0.2 - Retrieving a client without specifying a name now defaults it to 'unnamed'.
+      v1.0.1 - Significantly re-worked the event handling system. Please see the updated sample in the repository.
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
