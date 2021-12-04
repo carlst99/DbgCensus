@@ -32,7 +32,7 @@ public class EventStreamClientFactory : IEventStreamClientFactory
     }
 
     /// <inheritdoc />
-    public IEventStreamClient GetClient(string name, EventStreamOptions? options = null)
+    public IEventStreamClient GetClient(string name = IEventStreamClientFactory.DefaultClientName, EventStreamOptions? options = null)
     {
         if (options is null)
             options = _options.Value;
@@ -42,10 +42,6 @@ public class EventStreamClientFactory : IEventStreamClientFactory
 
         return _repository[name];
     }
-
-    /// <inheritdoc />
-    public IEventStreamClient GetClient(EventStreamOptions? options = null)
-        => GetClient(Guid.NewGuid().ToString(), options);
 
     /// <inheritdoc />
     public IEventStreamClient GetClient<TConsumer>(EventStreamOptions? options = null)
