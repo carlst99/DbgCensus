@@ -1,0 +1,23 @@
+{
+  "name": "dbgcensus-docs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Documentation for the DbgCensus libraries",
+  "scripts": {
+    "serve": "vuepress dev src",
+    "build": "vuepress build src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carlst99/DbgCensus.git"
+  },
+  "author": "Carl Stephens",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/carlst99/DbgCensus/issues"
+  },
+  "homepage": "https://github.com/carlst99/DbgCensus#readme",
+  "devDependencies": {
+    "vuepress-vite": "^2.0.0-beta.27"
+  }
+}
