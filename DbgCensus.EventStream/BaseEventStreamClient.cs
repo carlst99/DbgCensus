@@ -76,8 +76,18 @@ public abstract class BaseEventStreamClient : IEventStreamClient
         IOptions<EventStreamOptions> options
     )
     {
+        if (string.IsNullOrEmpty(options.Value.ServiceId))
+            throw new ArgumentNullException(nameof(options), "The provided service ID cannot be null or empty.");
+
         if (options.Value.ReconnectionDelayMilliseconds < 1)
-            throw new ArgumentException("Reconnection delay cannot be less than one millisecond.", nameof(options));
+        {
+            throw new ArgumentOutOfRangeException
+            (
+                nameof(options),
+                options.Value.ReconnectionDelayMilliseconds,
+                "Reconnection delay cannot be less than one millisecond."
+            );
+        }
 
         Name = name;
         _logger = logger;
@@ -104,7 +114,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient
 
         UriBuilder builder = new(_options.RootEndpoint);
         builder.Path = "streaming";
-        builder.Query = $"environment={ _options.Environment }&service-id=s:{ _options.ServiceId }";
+        builder.Query = $"environment={_options.Environment}&service-id=s:{_options.ServiceId}";
         _endpoint = builder.Uri;
     }
 

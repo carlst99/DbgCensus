@@ -33,8 +33,6 @@ public static class IServiceCollectionExtensions
             )
         );
 
-        serviceCollection.TryAddTransient<IEventStreamClient>(s => s.GetRequiredService<IEventStreamClientFactory>().GetClient());
-
         return serviceCollection;
     }
 }

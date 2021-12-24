@@ -6,13 +6,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
+using System.Threading.Tasks;
 
 namespace EventStreamSample;
 
 public static class Program
 {
-    public static void Main(string[] args)
-        => CreateHostBuilder(args).Build().Run();
+    public static async Task Main(string[] args)
+        => await CreateHostBuilder(args).Build().RunAsync().ConfigureAwait(false);
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
