@@ -2,7 +2,7 @@
   "name": "dbgcensus-docs",
   "version": "1.0.0",
   "private": true,
-  "description": "Documentation for the DbgCensus libraries",
+  "description": "Documentation for the DbgCensus libraries, unofficial C# wrappers for Daybreak Game Company's Census API.",
   "scripts": {
     "serve": "vuepress dev src",
     "build": "vuepress build src"

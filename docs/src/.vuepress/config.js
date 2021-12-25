@@ -1,7 +1,7 @@
 module.exports = {
     lang: 'en-US',
     title: 'DbgCensus Documentation',
-    description: 'Documentation for the DbgCensus libraries',
+    description: "Unofficial C# wrappers for Daybreak Game Company's Census API.",
     bundler: '@vuepress/bundler-vite',
 
     themeConfig: {
@@ -10,6 +10,10 @@ module.exports = {
       docsDir: 'docs',
 
       navbar: [
+        {
+          text: 'Core Info',
+          link: '/core-info'
+        },
         {
           text: 'Making Queries',
           link: '/rest/'
