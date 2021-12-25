@@ -1,14 +1,14 @@
 ﻿namespace DbgCensus.Rest.Abstractions.Queries;
 
 /// <summary>
-/// A factory for <see cref="IQueryBuilder"/> items.
+/// Represents a factory for retrieving <see cref="IQueryBuilder"/> instances.
 /// </summary>
 public interface IQueryBuilderFactory
 {
     /// <summary>
-    /// Constructs an <see cref="IQueryBuilder"/> object.
+    /// Constructs an <see cref="IQueryBuilder"/> instance.
     /// </summary>
-    /// <param name="options">Provide an <see cref="CensusQueryOptions"/> object to override the default injected options.</param>
+    /// <param name="options">Overriding options to apply instead of the factory defaults.</param>
     /// <returns>An <see cref="IQueryBuilder"/> instance.</returns>
     IQueryBuilder Get(CensusQueryOptions? options = null);
 }

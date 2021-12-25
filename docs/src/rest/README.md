@@ -32,7 +32,7 @@ Typically, you'd register your options from a configuration source (such as a se
 
 **Example**
 
-```csharp{17-22}
+```csharp{18-23}
 using DbgCensus.Rest;
 using DbgCensus.Rest.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,8 +46,8 @@ public static class Program
     public static async Task Main(string[] args)
         => await CreateHostBuilder(args).Build().RunAsync().ConfigureAwait(false);
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
+    public static IHostBuilder CreateHostBuilder(string[] args)
+        => Host.CreateDefaultBuilder(args)
             .ConfigureServices((hostContext, services) =>
             {
                 services.AddCensusRestServices();
@@ -63,23 +63,57 @@ public static class Program
                     o =>
                     {
                         o.DeserializationOptions = new JsonSerializerOptions(...);
-                        o.Limit = 100; // Optional: sets a default limit for each query.
                         // Etc.
                     }
                 );
+
+                ...
             });
 }
 ```
 
+## Components of a Query
+
+### IQueryBuilder
+
+This is the meat of any query. The `IQueryBuilder` represents a fluent interface for designing a valid query URL that can then be used with an `ICensusRestClient`, or any alternative means, to retrieve data from the Census query endpoints.
+
+```csharp
+IQueryBuilder myQuery = new QueryBuilder()
+            .OnCollection("outfit")
+            .Where("alias.first_lower", SearchModifier.Equals, myOutfitTag.ToLower());
+
+Uri queryEndpoint = myQuery.ConstructEndpoint();
+```
+
+### IQueryBuilderFactory
+
+The `IQueryBuilderFactory` interface, and its default implementation, provide the means to retrieve an `IQueryBuilder` instance that is preconfigured according to the registered `CensusQueryOptions`.
+
+As such, it is recommended that you only create instances of an `IQueryBuilder` through this factory, as you won't have to set your service ID every time.
+
+### ICensusRestClient
+
+The `ICensusRestClient` interface provides functions to perform queries on the Census REST API, and deserialize the response. The default implementation also checks the response for errors and un-nests the actual data, allowing your data model to map exactly to the collection structure.
+
+
 ## Making a Query
 
-1. Inject an `IQueryService` instance. This is a wrapper around the registered `IQueryBuilderFactory` and `ICensusRestClient` objects, which you can use individually if you need slightly more control over your queries.
+1. Begin by injecting an `IQueryService` instance. This is a wrapper around the most common functions of the `IQueryBuilderFactory` and `ICensusRestClient` interfaces that were discussed earlier.
 
 2. Call the `CreateQuery` method on the `IQueryService` instance, and define your query. Usually, it's easiest to build and test your query URL beforehand by making manual calls to the API, and then translate it.
 
 3. Call the `GetAsync` method on the `IQueryService` instance, and pass the query you want to retrieve. Note that the result of this call can be null if you've made a query for a singular item that doesn't exist.
 
 ```csharp
+public record CharacterMinified
+(
+    ulong CharacterId,
+    Name Name,
+    FactionDefinition FactionId,
+    int PrestigeLevel
+);
+
 public class RestExample
 {
     private readonly IQueryService _queryService;
@@ -89,15 +123,16 @@ public class RestExample
         _queryService = queryService;
     }
 
-    public async Task<Character?> GetCharacter(string name)
+    public async Task<CharacterMinified?> GetCharacter(string name)
     {
         IQueryBuilder query = _queryService.CreateQuery()
             .OnCollection("character")
-            .Where("name.first_lower", SearchModifier.Equals, name.ToLower());
+            .Where("name.first_lower", SearchModifier.Equals, name.ToLower())
+            .Show("character_id", "name", "faction_id", "prestige_level");
 
         try
         {
-            Character? character = await _queryService.GetAsync<Character>(query, ct).ConfigureAwait(false);
+            CharacterMinified? character = await _queryService.GetAsync<CharacterMinified>(query, ct).ConfigureAwait(false);
             if (character is null)
                 _logger.LogInformation("That character does not exist.");
 
@@ -144,7 +179,7 @@ ulong count = await _queryService.GetAsync<ulong>(query, ct).ConfigureAwait(fals
 
 ### Retrieving distinct field values
 
-There is a shortcut for the `c:distinct` parameter on the `ICensusRestClient` interface which directly returns the list of unique values, preventing you from having to define a custom model.
+There is a shortcut for the `c:distinct` parameter on the `ICensusRestClient` interface which directly returns the list of unique values, preventing you from having to define a custom model for the response.
 
 The generic type argument of the method should match the model of the field you are querying.
 

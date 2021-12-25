@@ -9,7 +9,7 @@ namespace DbgCensus.Rest.Abstractions.Queries;
 public interface IQueryBuilder
 {
     /// <summary>
-    /// The collection to perform the query on.
+    /// Gets the collection that the query is being performed on.
     /// </summary>
     string? CollectionName { get; }
 
@@ -19,14 +19,14 @@ public interface IQueryBuilder
     Uri ConstructEndpoint();
 
     /// <summary>
-    /// The type of query to perform. Known as the 'Verb' by the Census REST API.
+    /// Sets the type of query to perform. Known as the 'Verb' by the Census REST API.
     /// </summary>
     /// <param name="type">The query type / verb.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
     IQueryBuilder OfQueryType(QueryType type);
 
     /// <summary>
-    /// The collection to perform the query on.
+    /// Sets the collection to perform the query on.
     /// </summary>
     /// <param name="collection">The name of the collection.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
@@ -40,22 +40,28 @@ public interface IQueryBuilder
     IQueryBuilder WithLimit(uint limit);
 
     /// <summary>
-    /// Limits the number of items returned from each database. More predictable than <see cref="WithLimit(uint)"/> for collections that are spread across multiple databases, such as ps2/character.
+    /// Limits the number of items returned from each database.
+    /// More predictable than <see cref="WithLimit(uint)"/> for collections
+    /// that arespread across multiple databases, such as ps2/character.
     /// </summary>
     /// <param name="limit">The number of items to return per database.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
     IQueryBuilder WithLimitPerDatabase(uint limit);
 
     /// <summary>
-    /// Return items starting at the Nth index of the internal query. Use in tandem with <see cref="WithSortOrder(string, SortOrder)"/>
+    /// Return items starting at the Nth index of the internal query.
+    /// Use in tandem with <see cref="WithSortOrder(string, SortOrder)"/>
     /// </summary>
-    /// <remarks>This will have inconsistent behaviour when querying collections that span multiple databases, such as ps2/character.</remarks>
+    /// <remarks>
+    /// This will have inconsistent behaviour when querying collections
+    /// that span multiple databases, such as ps2/character.
+    /// </remarks>
     /// <param name="index">The index to return items from.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
     IQueryBuilder WithStartIndex(uint index);
 
     /// <summary>
-    /// Performs a filter for a value in the collection.
+    /// Applies a filter to the query.
     /// </summary>
     /// <typeparam name="T">The type of the value.</typeparam>
     /// <param name="field">The collection field to filter on.</param>
@@ -65,7 +71,7 @@ public interface IQueryBuilder
     IQueryBuilder Where<T>(string field, SearchModifier modifier, T filterValue) where T : notnull;
 
     /// <summary>
-    /// Performs a filter for multiple values in the collection.
+    /// Applies a multi-value filter to the query
     /// </summary>
     /// <typeparam name="T">The type of the values.</typeparam>
     /// <param name="field">The collection field to filter on.</param>
@@ -121,7 +127,10 @@ public interface IQueryBuilder
     /// <summary>
     /// Performs a pre-determined resolve. Multiple resolves can be made in the same query.
     /// </summary>
-    /// <remarks>Note that the resolve will only function if the initial query is showing the field that the resolve is keyed on.</remarks>
+    /// <remarks>
+    /// Note that the resolve will only function if the initial query
+    /// is showing the field that the resolve is keyed on.
+    /// </remarks>
     /// <param name="resolveTo">The resolve to make.</param>
     /// <param name="showFields">The fields to be shown from the resolved collection.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
@@ -142,7 +151,7 @@ public interface IQueryBuilder
     IQueryBuilder HideFields(params string[] fieldNames);
 
     /// <summary>
-    /// Only returns items in which the specified field/s exist, regardless of their value.
+    /// Only returns items in which the specified field/s exist, regardless of the field values.
     /// </summary>
     /// <param name="fieldNames">Names of the fields that must exist.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
@@ -158,7 +167,10 @@ public interface IQueryBuilder
     /// <summary>
     /// Indicates that filters/searches will be performed without using case-sensitive comparison.
     /// </summary>
-    /// <remarks>Using this command might slow down your query. If a lower case version of a field is available, use that instead for a faster result.</remarks>
+    /// <remarks>
+    /// Using this command might slow down your query. If a lower case version of a field is available,
+    /// use that instead for a faster result.
+    /// </remarks>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
     IQueryBuilder IsCaseInsensitive();
 
@@ -175,7 +187,7 @@ public interface IQueryBuilder
     IQueryBuilder WithTimings();
 
     /// <summary>
-    /// Prevents the query from being re-attempted after a failure. Useful for quick failure.
+    /// Prevents the query from being re-attempted after a failure.
     /// </summary>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
     IQueryBuilder WithoutOneTimeRetry();
@@ -188,14 +200,14 @@ public interface IQueryBuilder
     IQueryBuilder WithDistinctFieldValues(string fieldName);
 
     /// <summary>
-    /// The Census service ID to perform the query with.
+    /// Sets the Census service ID to perform the query with.
     /// </summary>
     /// <param name="serviceId">A valid Census service id.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
     IQueryBuilder WithServiceId(string serviceId);
 
     /// <summary>
-    /// The namespace to perform the query on.
+    /// Sets the namespace to perform the query on.
     /// </summary>
     /// <param name="censusNamespace">The namespace.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
