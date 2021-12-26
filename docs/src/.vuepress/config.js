@@ -8,6 +8,7 @@ module.exports = {
       logo: '/images/logo.png',
       repo: 'carlst99/DbgCensus',
       docsDir: 'docs',
+      contributors: false,
 
       navbar: [
         {

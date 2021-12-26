@@ -23,7 +23,7 @@ You will also need to have a good understanding of how the Census API works. I h
 - [The community API issue tracker/info repository.](https://github.com/cooltrain7/Planetside-2-API-Tracker)
 - [Leonhard's unofficial docs for PlanetSide 2 endpoints.](https://ps2-api-docs.readthedocs.io/en/latest/openapi.html)
 
-## Core Components
+## Core Library Components
 
 The *Core* library contains common types and extensions. Of these, it is likely you will find the Census types useful (`DbgCensus.Core.Objects`). There are:
 
