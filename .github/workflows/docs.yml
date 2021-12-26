@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '16'
 
-      # Cache node_modules
+      # Cache NPM cache
       - name: Cache dependencies
         uses: actions/cache@v2
         id: npm-cache
@@ -31,9 +31,7 @@ jobs:
             ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
-      # Install dependencies if the cache did not hit
       - name: Install dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm install
 
       # Run build script
