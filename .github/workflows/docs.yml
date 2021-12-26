@@ -28,10 +28,8 @@ jobs:
         id: npm-cache
         with:
           path: |
-            node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
       # Install dependencies if the cache did not hit
       - name: Install dependencies
