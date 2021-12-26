@@ -3,7 +3,6 @@ module.exports = {
     title: 'DbgCensus Documentation',
     description: "Unofficial C# wrappers for Daybreak Game Company's Census API.",
     base: '/DbgCensus/',
-    bundler: '@vuepress/bundler-vite',
 
     themeConfig: {
       logo: '/images/logo.png',
