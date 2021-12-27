@@ -8,7 +8,7 @@ namespace DbgCensus.EventStream.Abstractions;
 /// <summary>
 /// Allows connecting to, and receiving data from the Census event stream.
 /// </summary>
-public interface IEventStreamClient : IDisposable
+public interface IEventStreamClient
 {
     /// <summary>
     /// The unique name of the client.
@@ -16,7 +16,7 @@ public interface IEventStreamClient : IDisposable
     string Name { get; }
 
     /// <summary>
-    /// Gets a value indicating if this <see cref="BaseEventStreamClient"/> instance has been disposed.
+    /// Gets a value indicating if this <see cref="IEventStreamClient"/> instance has been disposed.
     /// </summary>
     bool IsDisposed { get; }
 

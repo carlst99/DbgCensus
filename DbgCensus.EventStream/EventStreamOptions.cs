@@ -21,16 +21,6 @@ public class EventStreamOptions
     public string Environment { get; set; }
 
     /// <summary>
-    /// The JSON options to use when deserializing events.
-    /// </summary>
-    public JsonSerializerOptions DeserializationOptions { get; set; }
-
-    /// <summary>
-    /// The JSON options to use when serializing commands.
-    /// </summary>
-    public JsonSerializerOptions SerializationOptions { get; set; }
-
-    /// <summary>
     /// Gets or sets the amount of time to wait before attemping a reconnection when the streaming API drops out.
     /// </summary>
     public int ReconnectionDelayMilliseconds { get; set; }
@@ -40,8 +30,6 @@ public class EventStreamOptions
         RootEndpoint = "wss://push.planetside2.com";
         ServiceId = "example";
         Environment = "ps2";
-        DeserializationOptions = new JsonSerializerOptions();
-        SerializationOptions = new JsonSerializerOptions();
         ReconnectionDelayMilliseconds = 5000;
     }
 }

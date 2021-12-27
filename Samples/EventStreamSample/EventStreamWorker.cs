@@ -26,7 +26,7 @@ public class EventStreamWorker : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            _client = _clientFactory.GetClient<EventStreamWorker>();
+            _client = _clientFactory.GetClient();
 
             try
             {
@@ -34,11 +34,7 @@ public class EventStreamWorker : BackgroundService
             }
             catch (Exception ex) when (ex is not TaskCanceledException)
             {
-                _logger.LogError(ex, "An error occured in the event stream client");
-            }
-            finally
-            {
-                _client.Dispose();
+                _logger.LogError(ex, "An error occurred in the event stream client");
             }
 
             await Task.Delay(15000, stoppingToken).ConfigureAwait(false);

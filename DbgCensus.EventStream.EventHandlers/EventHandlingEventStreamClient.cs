@@ -45,19 +45,25 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// <param name="name">The identifying name of this client.</param>
     /// <param name="logger">The logging interface to use.</param>
     /// <param name="services">The service provider.</param>
-    /// <param name="memoryStreamPool">The memory stream pool.</param>
     /// <param name="options">The options used to configure the client.</param>
+    /// <param name="deserializationOptions">The JSON serializer options to use when deserializing payloads.</param>
+    /// <param name="serializationOptions">The JSON serializer options to use when serializing payloads.</param>
+    /// <param name="memoryStreamPool">The memory stream pool.</param>
     /// <param name="handlerTypeRepository">The payload handler type repository.</param>
     /// <param name="payloadTypeRepository">The payload type repository types.</param>
-    public EventHandlingEventStreamClient(
+    public EventHandlingEventStreamClient
+    (
         string name,
         ILogger<EventHandlingEventStreamClient> logger,
         IServiceProvider services,
-        RecyclableMemoryStreamManager memoryStreamPool,
         IOptions<EventStreamOptions> options,
+        IOptionsMonitor<JsonSerializerOptions> deserializationOptions,
+        IOptionsMonitor<JsonSerializerOptions> serializationOptions,
+        RecyclableMemoryStreamManager memoryStreamPool,
         IPayloadHandlerTypeRepository handlerTypeRepository,
-        IPayloadTypeRepository payloadTypeRepository)
-        : base(name, logger, services, memoryStreamPool, options)
+        IPayloadTypeRepository payloadTypeRepository
+    )
+        : base(name, logger, services, options, deserializationOptions, serializationOptions, memoryStreamPool)
     {
         _logger = logger;
         _handlerTypeRepository = handlerTypeRepository;

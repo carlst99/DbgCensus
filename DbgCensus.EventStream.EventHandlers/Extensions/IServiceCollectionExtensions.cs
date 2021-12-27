@@ -18,6 +18,7 @@ using Microsoft.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace DbgCensus.EventStream.EventHandlers.Extensions;
 
@@ -43,8 +44,10 @@ public static class IServiceCollectionExtensions
                 n,
                 s.GetRequiredService<ILogger<EventHandlingEventStreamClient>>(),
                 s,
-                s.GetRequiredService<RecyclableMemoryStreamManager>(),
                 o,
+                s.GetRequiredService<IOptionsMonitor<JsonSerializerOptions>>(),
+                s.GetRequiredService<IOptionsMonitor<JsonSerializerOptions>>(),
+                s.GetRequiredService<RecyclableMemoryStreamManager>(),
                 s.GetRequiredService<IPayloadHandlerTypeRepository>(),
                 s.GetRequiredService<IPayloadTypeRepository>()
             )

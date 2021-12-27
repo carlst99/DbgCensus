@@ -1,5 +1,4 @@
-﻿using DbgCensus.Core.Json;
-using DbgCensus.EventStream.Abstractions;
+﻿using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.Objects.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,7 +18,7 @@ namespace DbgCensus.EventStream;
 /// <inheritdoc cref="IEventStreamClient"/>
 /// Reconnection in the case of a failure is handled automatically.
 /// </summary>
-public abstract class BaseEventStreamClient : IEventStreamClient
+public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposable
 {
     /// <summary>
     /// Gets the size of the buffer used to send and receive data in chunks.
@@ -65,15 +64,19 @@ public abstract class BaseEventStreamClient : IEventStreamClient
     /// <param name="name">The identifying name of this client.</param>
     /// <param name="logger">The logging interface to use.</param>
     /// <param name="services">The service provider, used to retrieve <see cref="ClientWebSocket"/> instances.</param>
-    /// <param name="memoryStreamPool">The memory stream pool.</param>
     /// <param name="options">The options used to configure the client.</param>
+    /// <param name="deserializationOptions">The JSON serializer options to use when deserializing payloads.</param>
+    /// <param name="serializationOptions">The JSON serializer options to use when serializing payloads.</param>
+    /// <param name="memoryStreamPool">The memory stream pool.</param>
     protected BaseEventStreamClient
     (
         string name,
         ILogger<BaseEventStreamClient> logger,
         IServiceProvider services,
-        RecyclableMemoryStreamManager memoryStreamPool,
-        IOptions<EventStreamOptions> options
+        IOptions<EventStreamOptions> options,
+        IOptionsMonitor<JsonSerializerOptions> deserializationOptions,
+        IOptionsMonitor<JsonSerializerOptions> serializationOptions,
+        RecyclableMemoryStreamManager memoryStreamPool
     )
     {
         if (string.IsNullOrEmpty(options.Value.ServiceId))
@@ -105,12 +108,8 @@ public abstract class BaseEventStreamClient : IEventStreamClient
             new JsonWriterOptions { SkipValidation = true } // The JSON Serializer should handle everything correctly
         );
 
-        _jsonDeserializerOptions = new JsonSerializerOptions(_options.SerializationOptions);
-        _jsonDeserializerOptions.AddCensusDeserializationOptions();
-
-        _jsonSerializerOptions = new JsonSerializerOptions(_options.SerializationOptions);
-        if (_jsonSerializerOptions.PropertyNamingPolicy is null)
-            _jsonSerializerOptions.PropertyNamingPolicy = new CamelCaseJsonNamingPolicy();
+        _jsonDeserializerOptions = deserializationOptions.Get(Constants.JsonDeserializationOptionsName);
+        _jsonSerializerOptions = serializationOptions.Get(Constants.JsonSerializationOptionsName);
 
         UriBuilder builder = new(_options.RootEndpoint);
         builder.Path = "streaming";
@@ -217,11 +216,25 @@ public abstract class BaseEventStreamClient : IEventStreamClient
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual async ValueTask DisposeAsync()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        if (!IsDisposed)
+        {
+            _sendSemaphore.Dispose();
+            await _sendJsonWriter.DisposeAsync().ConfigureAwait(false);
+
+            try
+            {
+                _webSocket.Dispose();
+            }
+            catch (ObjectDisposedException)
+            {
+                // This is fine, we dispose websockets when reconnecting or stopping
+            }
+
+            GC.SuppressFinalize(this);
+            IsDisposed = true;
+        }
     }
 
     /// <summary>
@@ -309,26 +322,6 @@ public abstract class BaseEventStreamClient : IEventStreamClient
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected abstract Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct);
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!IsDisposed)
-        {
-            if (disposing)
-            {
-                try
-                {
-                    _webSocket.Dispose();
-                }
-                catch (ObjectDisposedException)
-                {
-                    // This is fine, we dispose websockets when reconnecting or stopping
-                }
-            }
-
-            IsDisposed = true;
-        }
-    }
 
     /// <summary>
     /// Checks if this object has been disposed.
