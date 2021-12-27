@@ -1,4 +1,5 @@
 ﻿using DbgCensus.EventStream.Abstractions.Objects;
+using DbgCensus.EventStream.Abstractions.Objects.Control;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 using DbgCensus.EventStream.EventHandlers.Abstractions.Services;
@@ -29,9 +30,14 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     private readonly ILogger<EventHandlingEventStreamClient> _logger;
     private readonly IPayloadHandlerTypeRepository _handlerTypeRepository;
     private readonly IPayloadTypeRepository _payloadTypeRepository;
-    private readonly ConcurrentQueue<Task> _dispatchedPayloadQueue;
+    private readonly ConcurrentQueue<Task> _dispatchedPayloadHandlerQueue;
 
     private CancellationTokenSource _dispatchCts;
+
+    /// <summary>
+    /// Gets the current subscription of this client.
+    /// </summary>
+    public ISubscription? CurrentSubscription { get; private set; }
 
     /// <summary>
     /// Initialises a new instance of the <see cref="EventHandlingEventStreamClient"/> class.
@@ -57,7 +63,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         _handlerTypeRepository = handlerTypeRepository;
         _payloadTypeRepository = payloadTypeRepository;
 
-        _dispatchedPayloadQueue = new ConcurrentQueue<Task>();
+        _dispatchedPayloadHandlerQueue = new ConcurrentQueue<Task>();
         _dispatchCts = new CancellationTokenSource();
     }
 
@@ -80,8 +86,8 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
 
         _dispatchCts.Cancel();
 
-        foreach (Task runningEvent in _dispatchedPayloadQueue)
-            await FinaliseDispatchedEvent(runningEvent).ConfigureAwait(false);
+        foreach (Task runningEvent in _dispatchedPayloadHandlerQueue)
+            await FinaliseDispatchedPayloadHandler(runningEvent).ConfigureAwait(false);
 
         _dispatchCts.Dispose();
     }
@@ -91,13 +97,13 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     {
         try
         {
-            // Attempt to finalise one event handler
-            if (_dispatchedPayloadQueue.TryDequeue(out Task? eventTask))
+            // Attempt to finalise one payload handler
+            if (_dispatchedPayloadHandlerQueue.TryDequeue(out Task? handlerTask))
             {
-                if (eventTask.IsCompleted)
-                    await FinaliseDispatchedEvent(eventTask).ConfigureAwait(false);
+                if (handlerTask.IsCompleted)
+                    await FinaliseDispatchedPayloadHandler(handlerTask).ConfigureAwait(false);
                 else
-                    _dispatchedPayloadQueue.Enqueue(eventTask);
+                    _dispatchedPayloadHandlerQueue.Enqueue(handlerTask);
             }
 
             using JsonDocument jsonResponse = await JsonDocument.ParseAsync(eventStream, cancellationToken: ct).ConfigureAwait(false);
@@ -133,7 +139,9 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                     return;
                 }
 
-                DeserializeAndDispatchPayload(typeMap.Value.AbstractType, typeMap.Value.ImplementingType, subscriptionElement, _dispatchCts.Token);
+                object? currentSub = DeserializeAndDispatchPayload(typeMap.Value.AbstractType, typeMap.Value.ImplementingType, subscriptionElement, _dispatchCts.Token);
+                if (currentSub is not null)
+                    CurrentSubscription = (ISubscription)currentSub;
             }
             else if (jsonResponse.RootElement.TryGetProperty("send this for help", out _))
             {
@@ -147,7 +155,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         }
         finally
         {
-            eventStream.Dispose();
+            await eventStream.DisposeAsync().ConfigureAwait(false);
         }
     }
 
@@ -214,7 +222,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// <param name="implementingType">The type that implements the payload.</param>
     /// <param name="payload">The payload.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop any handlers associated with this payload.</param>
-    private void DeserializeAndDispatchPayload
+    private object? DeserializeAndDispatchPayload
     (
         Type abstractType,
         Type implementingType,
@@ -228,7 +236,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             if (deserialized is null)
             {
                 _logger.LogError("Could not deserialise websocket payload. Raw response: {raw}", payload.GetRawText());
-                return;
+                return null;
             }
 
             BeginPayloadDispatch
@@ -238,10 +246,15 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                 new PayloadContext(Name),
                 ct
             );
+
+            return deserialized;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to deserialize and dispatch event.");
+            _logger.LogError(ex, $"Failed to deserialize and dispatch event. An  {nameof(UnknownPayload)} will be dispatched.");
+            DispatchUnknownPayload(payload.GetRawText(), ct);
+
+            return null;
         }
     }
 
@@ -269,7 +282,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             return;
         }
 
-        _dispatchedPayloadQueue.Enqueue(dispatchTask);
+        _dispatchedPayloadHandlerQueue.Enqueue(dispatchTask);
     }
 
     /// <summary>
@@ -330,29 +343,21 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                         _logger.LogError(ex, "Failed to execute event handler");
                         throw;
                     }
-                    finally
-                    {
-                        if (h is IDisposable disposable)
-                            disposable.Dispose();
-
-                        if (h is IAsyncDisposable asyncDisposable)
-                            await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                    }
                 }
             )
         ).ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Logs any errors that occured while executing the event handler.
+    /// Logs any errors that occured while executing the payload handler.
     /// </summary>
-    /// <param name="eventTask">The task representing the event handling operation.</param>
+    /// <param name="payloadTask">The task representing the payload handling operation.</param>
     /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
-    private async Task FinaliseDispatchedEvent(Task eventTask)
+    private async Task FinaliseDispatchedPayloadHandler(Task payloadTask)
     {
         try
         {
-            await eventTask.ConfigureAwait(false);
+            await payloadTask.ConfigureAwait(false);
         }
         catch (AggregateException aex)
         {
@@ -361,12 +366,12 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                 if (ex is TaskCanceledException)
                     continue;
 
-                _logger.LogError(ex, "Error occured in an event handler");
+                _logger.LogError(ex, "An exception occured in a payload handler");
             }
         }
         catch (Exception ex) when (ex is not TaskCanceledException)
         {
-            _logger.LogError(ex, "Error occured in an event handler");
+            _logger.LogError(ex, "An exception occured in a payload handler");
         }
     }
 }
