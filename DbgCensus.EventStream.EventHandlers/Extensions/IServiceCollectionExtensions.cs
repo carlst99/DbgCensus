@@ -45,6 +45,7 @@ public static class IServiceCollectionExtensions
                 s.GetRequiredService<ILogger<EventHandlingEventStreamClient>>(),
                 s,
                 o,
+                s.GetRequiredService<IOptions<EventHandlingClientOptions>>(),
                 s.GetRequiredService<IOptionsMonitor<JsonSerializerOptions>>(),
                 s.GetRequiredService<IOptionsMonitor<JsonSerializerOptions>>(),
                 s.GetRequiredService<RecyclableMemoryStreamManager>(),

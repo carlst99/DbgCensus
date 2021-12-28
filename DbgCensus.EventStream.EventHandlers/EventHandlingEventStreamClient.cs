@@ -29,11 +29,13 @@ namespace DbgCensus.EventStream.EventHandlers;
 public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
 {
     private readonly ILogger<EventHandlingEventStreamClient> _logger;
+    private readonly EventHandlingClientOptions _handlingOptions;
     private readonly IPayloadHandlerTypeRepository _handlerTypeRepository;
     private readonly IPayloadTypeRepository _payloadTypeRepository;
     private readonly ConcurrentQueue<Task> _dispatchedPayloadHandlerQueue;
 
     private CancellationTokenSource _dispatchCts;
+    private long _lastSubscriptionRefresh;
 
     /// <summary>
     /// Gets the current subscription of this client.
@@ -46,7 +48,8 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// <param name="name">The identifying name of this client.</param>
     /// <param name="logger">The logging interface to use.</param>
     /// <param name="services">The service provider.</param>
-    /// <param name="options">The options used to configure the client.</param>
+    /// <param name="baseOptions">The options used to configure the client.</param>
+    /// <param name="handlingOptions">The options used to configure the client.</param>
     /// <param name="deserializationOptions">The JSON serializer options to use when deserializing payloads.</param>
     /// <param name="serializationOptions">The JSON serializer options to use when serializing payloads.</param>
     /// <param name="memoryStreamPool">The memory stream pool.</param>
@@ -57,29 +60,32 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         string name,
         ILogger<EventHandlingEventStreamClient> logger,
         IServiceProvider services,
-        IOptions<EventStreamOptions> options,
+        IOptions<EventStreamOptions> baseOptions,
+        IOptions<EventHandlingClientOptions> handlingOptions,
         IOptionsMonitor<JsonSerializerOptions> deserializationOptions,
         IOptionsMonitor<JsonSerializerOptions> serializationOptions,
         RecyclableMemoryStreamManager memoryStreamPool,
         IPayloadHandlerTypeRepository handlerTypeRepository,
         IPayloadTypeRepository payloadTypeRepository
     )
-        : base(name, logger, services, options, deserializationOptions, serializationOptions, memoryStreamPool)
+        : base(name, logger, services, baseOptions, deserializationOptions, serializationOptions, memoryStreamPool)
     {
         _logger = logger;
+        _handlingOptions = handlingOptions.Value;
         _handlerTypeRepository = handlerTypeRepository;
         _payloadTypeRepository = payloadTypeRepository;
 
         _dispatchedPayloadHandlerQueue = new ConcurrentQueue<Task>();
         _dispatchCts = new CancellationTokenSource();
+        _lastSubscriptionRefresh = DateTimeOffset.UtcNow.Ticks;
     }
 
     /// <inheritdoc />
     public override async Task StartAsync(CancellationToken ct = default)
     {
-        await base.StartAsync(ct).ConfigureAwait(false);
-
         _dispatchCts = new CancellationTokenSource();
+
+        await base.StartAsync(ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -170,6 +176,29 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         {
             await eventStream.DisposeAsync().ConfigureAwait(false);
         }
+
+        await AttemptSubscriptionRefresh(ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Refreshes the current subscription if necessary.
+    /// </summary>
+    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    private async Task AttemptSubscriptionRefresh(CancellationToken ct)
+    {
+        if (!IsRunning || CurrentSubscription is null)
+            return;
+
+        long lastSubRefreshTicks = Interlocked.Read(ref _lastSubscriptionRefresh);
+        DateTimeOffset lastSubRefresh = new(lastSubRefreshTicks, TimeSpan.Zero);
+
+        if (lastSubRefresh.Add(_handlingOptions.SubscriptionRefreshIntervalMilliseconds) > DateTimeOffset.UtcNow)
+            return;
+
+        await SendCommandAsync(CurrentSubscription, ct).ConfigureAwait(false);
+        Interlocked.Exchange(ref _lastSubscriptionRefresh, DateTimeOffset.UtcNow.Ticks);
+        _logger.LogTrace("Subscription refreshed.");
     }
 
     /// <summary>
