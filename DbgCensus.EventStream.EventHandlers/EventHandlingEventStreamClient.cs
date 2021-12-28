@@ -1,4 +1,5 @@
 ﻿using DbgCensus.EventStream.Abstractions.Objects;
+using DbgCensus.EventStream.Abstractions.Objects.Commands;
 using DbgCensus.EventStream.Abstractions.Objects.Control;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
@@ -37,7 +38,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// <summary>
     /// Gets the current subscription of this client.
     /// </summary>
-    public ISubscription? CurrentSubscription { get; private set; }
+    public ISubscribe? CurrentSubscription { get; private set; }
 
     /// <summary>
     /// Initialises a new instance of the <see cref="EventHandlingEventStreamClient"/> class.
@@ -98,6 +99,14 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         _dispatchCts.Dispose();
     }
 
+    public override Task SendCommandAsync<T>(T command, CancellationToken ct = default)
+    {
+        if (command is ISubscribe subscribeCommand)
+            CurrentSubscription = subscribeCommand;
+
+        return base.SendCommandAsync(command, ct);
+    }
+
     /// <inheritdoc />
     protected override async Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct)
     {
@@ -145,9 +154,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                     return;
                 }
 
-                object? currentSub = DeserializeAndDispatchPayload(typeMap.Value.AbstractType, typeMap.Value.ImplementingType, subscriptionElement, _dispatchCts.Token);
-                if (currentSub is not null)
-                    CurrentSubscription = (ISubscription)currentSub;
+                DeserializeAndDispatchPayload(typeMap.Value.AbstractType, typeMap.Value.ImplementingType, subscriptionElement, _dispatchCts.Token);
             }
             else if (jsonResponse.RootElement.TryGetProperty("send this for help", out _))
             {
@@ -228,7 +235,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// <param name="implementingType">The type that implements the payload.</param>
     /// <param name="payload">The payload.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop any handlers associated with this payload.</param>
-    private object? DeserializeAndDispatchPayload
+    private void DeserializeAndDispatchPayload
     (
         Type abstractType,
         Type implementingType,
@@ -242,7 +249,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             if (deserialized is null)
             {
                 _logger.LogError("Could not deserialise websocket payload. Raw response: {raw}", payload.GetRawText());
-                return null;
+                return;
             }
 
             BeginPayloadDispatch
@@ -252,15 +259,11 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                 new PayloadContext(Name),
                 ct
             );
-
-            return deserialized;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Failed to deserialize and dispatch event. An  {nameof(UnknownPayload)} will be dispatched.");
             DispatchUnknownPayload(payload.GetRawText(), ct);
-
-            return null;
         }
     }
 
