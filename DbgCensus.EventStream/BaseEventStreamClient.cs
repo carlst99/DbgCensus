@@ -258,7 +258,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
                 switch (_webSocket.State)
                 {
                     // The streaming API occasionally closes your connection. We'll helpfully restore that.
-                    case WebSocketState.Aborted or WebSocketState.CloseReceived:
+                    case WebSocketState.Aborted or WebSocketState.CloseReceived or WebSocketState.Closed:
                         await ReconnectAsync(ct).ConfigureAwait(false);
                         continue;
                     // Give it a chance to connect
@@ -266,7 +266,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
                         await Task.Delay(10, ct).ConfigureAwait(false);
                         continue;
                     // A graceful close, or request to close on our end, indicates things are wrapping up
-                    case WebSocketState.Closed or WebSocketState.CloseSent:
+                    case WebSocketState.CloseSent:
                         return;
                 }
 
