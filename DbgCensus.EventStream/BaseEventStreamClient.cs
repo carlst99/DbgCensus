@@ -1,5 +1,6 @@
 ﻿using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.Objects.Commands;
+using DbgCensus.EventStream.Objects.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -157,7 +158,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
 
         try
         {
-            JsonSerializer.Serialize(_sendJsonWriter, command, _jsonSerializerOptions);
+            JsonSerializer.Serialize(_sendJsonWriter, command, command.GetType(), _jsonSerializerOptions);
 
             ReadOnlyMemory<byte> data = _sendBuffer.WrittenMemory;
 

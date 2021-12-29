@@ -1,6 +1,5 @@
 ﻿using DbgCensus.EventStream.Abstractions.Objects;
 using DbgCensus.EventStream.Abstractions.Objects.Commands;
-using DbgCensus.EventStream.Abstractions.Objects.Control;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 using DbgCensus.EventStream.EventHandlers.Abstractions.Services;
@@ -177,7 +176,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             await eventStream.DisposeAsync().ConfigureAwait(false);
         }
 
-        await AttemptSubscriptionRefresh(ct).ConfigureAwait(false);
+        AttemptSubscriptionRefresh(ct);
     }
 
     /// <summary>
@@ -185,7 +184,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// </summary>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    private async Task AttemptSubscriptionRefresh(CancellationToken ct)
+    private void AttemptSubscriptionRefresh(CancellationToken ct)
     {
         if (!IsRunning || CurrentSubscription is null)
             return;
@@ -196,7 +195,8 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         if (lastSubRefresh.Add(_handlingOptions.SubscriptionRefreshIntervalMilliseconds) > DateTimeOffset.UtcNow)
             return;
 
-        await SendCommandAsync(CurrentSubscription, ct).ConfigureAwait(false);
+        // A little naughty! We don't need to await this though
+        SendCommandAsync(CurrentSubscription, ct).ConfigureAwait(false);
         Interlocked.Exchange(ref _lastSubscriptionRefresh, DateTimeOffset.UtcNow.Ticks);
         _logger.LogTrace("Subscription refreshed.");
     }
