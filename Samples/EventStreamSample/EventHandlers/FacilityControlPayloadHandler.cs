@@ -17,14 +17,17 @@ public class FacilityControlPayloadHandler : IPayloadHandler<IFacilityControl>
 
     public Task HandleAsync(IFacilityControl payload, CancellationToken ct = default)
     {
-        _logger.LogInformation(
+        _logger.LogInformation
+        (
             "The facility {facilityId} on {world} changed ownership, from {oldFaction} to {newFaction}. It was captured at {captureTime}, in the zone {zone}.",
             payload.FacilityID,
             payload.WorldID,
             payload.OldFactionID,
             payload.NewFactionID,
             payload.Timestamp,
-            payload.ZoneID);
+            payload.ZoneID
+        );
+
         return Task.CompletedTask;
     }
 }

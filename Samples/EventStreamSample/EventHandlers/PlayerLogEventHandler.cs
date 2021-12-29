@@ -17,13 +17,27 @@ public class PlayerLogEventHandler : IPayloadHandler<IPlayerLogin>, IPayloadHand
 
     public Task HandleAsync(IPlayerLogin payload, CancellationToken ct = default)
     {
-        _logger.LogInformation("Player {playerId} logged in on {world} at {timestamp}", payload.CharacterID, payload.WorldID, payload.Timestamp);
+        _logger.LogInformation
+        (
+            "Player {playerId} logged in on {world} at {timestamp}",
+            payload.CharacterID,
+            payload.WorldID,
+            payload.Timestamp
+        );
+
         return Task.CompletedTask;
     }
 
     public Task HandleAsync(IPlayerLogout payload, CancellationToken ct = default)
     {
-        _logger.LogInformation("Player {playerId} logged out on {world} at {timestamp}", payload.CharacterID, payload.WorldID, payload.Timestamp);
+        _logger.LogInformation
+        (
+            "Player {playerId} logged out on {world} at {timestamp}",
+            payload.CharacterID,
+            payload.WorldID,
+            payload.Timestamp
+        );
+
         return Task.CompletedTask;
     }
 }

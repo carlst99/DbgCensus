@@ -12,13 +12,15 @@ namespace EventStreamSample.EventHandlers.ControlPayloads;
 
 /// <summary>
 /// <para>
-/// Utilising something along the lines of this handler in your own project is NEAR MANDATORY.
-/// You will need to resend your subscription every time the websocket drops your connection.
-/// And unfortunately, that can happen fairly frequently.
+/// Utilising something along the lines of this handler in your own project is near mandatory.
+/// It lets you send your subscription immediately upon making an initial connection, and everytime
+/// thereafter when Census decides to drop your connection.
 /// </para>
 /// <para>
-/// It is also highly recommended that you refresh your subscription every 10m or so.
+/// It is also highly recommended that you refresh your subscription every 15m or so.
 /// Otherwise, Census will start dropping off certain events entirely.
+/// The default <see cref="DbgCensus.EventStream.EventHandlers.EventHandlingEventStreamClient"/>
+/// will do this for you.
 /// </para>
 /// </summary>
 public class ConnectionStateChangedPayloadHandler : IPayloadHandler<IConnectionStateChanged>

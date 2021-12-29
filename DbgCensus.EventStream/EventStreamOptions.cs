@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace DbgCensus.EventStream;
+﻿namespace DbgCensus.EventStream;
 
 // Note to developer: If you rename this class, you might break the code of everyone who uses nameof() to retrieve this from their appsettings.
 public class EventStreamOptions

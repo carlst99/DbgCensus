@@ -18,6 +18,7 @@ public class UnknownPayloadHandler : IPayloadHandler<IUnknownPayload>
     public Task HandleAsync(IUnknownPayload censusEvent, CancellationToken ct = default)
     {
         _logger.LogWarning("An unknown event was received from the Census event stream: {eventData}", censusEvent.RawData);
+
         return Task.CompletedTask;
     }
 }

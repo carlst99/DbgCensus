@@ -23,6 +23,7 @@ public class HeartbeatPayloadHandler : IPayloadHandler<IHeartbeat>
             message += $"\t- {element.Key}: {element.Value}\n";
 
         _logger.LogInformation("Received heartbeat:\n{heartbeat}", message);
+
         return Task.CompletedTask;
     }
 }

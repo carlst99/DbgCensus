@@ -17,7 +17,13 @@ public class ServiceStateChangedPayloadHandler : IPayloadHandler<IServiceStateCh
 
     public Task HandleAsync(IServiceStateChanged payload, CancellationToken ct = default)
     {
-        _logger.LogInformation("An event stream endpoint has changed state: {endpoint} is now {state}", payload.Detail, payload.Online ? "online" : "offline");
+        _logger.LogInformation
+        (
+            "An event stream endpoint has changed state: {endpoint} is now {state}",
+            payload.Detail,
+            payload.Online ? "online" : "offline"
+        );
+
         return Task.CompletedTask;
     }
 }
