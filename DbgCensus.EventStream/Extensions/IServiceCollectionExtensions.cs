@@ -1,5 +1,6 @@
 ﻿using DbgCensus.Core.Json;
 using DbgCensus.EventStream.Abstractions;
+using DbgCensus.EventStream.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -27,13 +28,23 @@ public static class IServiceCollectionExtensions
         serviceCollection.Configure<JsonSerializerOptions>
         (
             Constants.JsonDeserializationOptionsName,
-            o => o.AddCensusDeserializationOptions()
+            o =>
+            {
+                o.AddCensusDeserializationOptions();
+                o.Converters.Add(new SubscribeUInt64ListJsonConverter());
+                o.Converters.Add(new SubscribeWorldListJsonConverter());
+            }
         );
 
         serviceCollection.Configure<JsonSerializerOptions>
         (
             Constants.JsonSerializationOptionsName,
-            o => o.PropertyNamingPolicy = new CamelCaseJsonNamingPolicy()
+            o =>
+            {
+                o.PropertyNamingPolicy = new CamelCaseJsonNamingPolicy();
+                o.Converters.Add(new SubscribeUInt64ListJsonConverter());
+                o.Converters.Add(new SubscribeWorldListJsonConverter());
+            }
         );
 
         serviceCollection.TryAddSingleton<RecyclableMemoryStreamManager>();

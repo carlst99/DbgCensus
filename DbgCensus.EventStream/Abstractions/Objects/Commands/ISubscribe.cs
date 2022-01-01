@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using DbgCensus.Core.Objects;
+using OneOf;
+using System.Collections.Generic;
 
 namespace DbgCensus.EventStream.Abstractions.Objects.Commands;
 
@@ -10,7 +12,7 @@ public interface ISubscribe : ICommand
     /// <summary>
     /// Gets the characters to subscribe to.
     /// </summary>
-    IEnumerable<string>? Characters { get; }
+    OneOf<All, IEnumerable<ulong>>? Characters { get; }
 
     /// <summary>
     /// Gets the events to subscribe to.
@@ -25,5 +27,5 @@ public interface ISubscribe : ICommand
     /// <summary>
     /// Gets the worlds to subscribe to.
     /// </summary>
-    IEnumerable<string>? Worlds { get; }
+    OneOf<All, IEnumerable<WorldDefinition>>? Worlds { get; }
 }

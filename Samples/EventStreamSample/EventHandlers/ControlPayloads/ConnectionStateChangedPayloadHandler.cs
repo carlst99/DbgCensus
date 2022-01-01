@@ -1,4 +1,6 @@
-﻿using DbgCensus.EventStream.Abstractions;
+﻿using DbgCensus.Core.Objects;
+using DbgCensus.EventStream.Abstractions;
+using DbgCensus.EventStream.Abstractions.Objects;
 using DbgCensus.EventStream.Abstractions.Objects.Control;
 using DbgCensus.EventStream.Abstractions.Objects.Events;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
@@ -58,9 +60,9 @@ public class ConnectionStateChangedPayloadHandler : IPayloadHandler<IConnectionS
         (
             new Subscribe
             (
-                new string[] { "all" },
+                new All(),
                 new string[] { EventNames.FacilityControl, EventNames.PlayerLogin, EventNames.PlayerLogout },
-                Worlds: new string[] { "all" }
+                Worlds: new WorldDefinition[] { WorldDefinition.Connery, WorldDefinition.Miller, WorldDefinition.Soltech }
             ),
             ct
         ).ConfigureAwait(false);

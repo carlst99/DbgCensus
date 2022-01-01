@@ -1,0 +1,11 @@
+﻿namespace DbgCensus.EventStream.Abstractions.Objects;
+
+/// <summary>
+/// Represents an 'all' value that can be used in a Census Event Stream subscription.
+/// </summary>
+public struct All
+{
+    /// <inheritdoc />
+    public override string ToString()
+        => "all";
+}

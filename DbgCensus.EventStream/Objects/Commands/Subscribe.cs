@@ -1,4 +1,7 @@
-﻿using DbgCensus.EventStream.Abstractions.Objects.Commands;
+﻿using DbgCensus.Core.Objects;
+using DbgCensus.EventStream.Abstractions.Objects;
+using DbgCensus.EventStream.Abstractions.Objects.Commands;
+using OneOf;
 using System.Collections.Generic;
 
 namespace DbgCensus.EventStream.Objects.Commands;
@@ -14,8 +17,8 @@ namespace DbgCensus.EventStream.Objects.Commands;
 /// <param name="Worlds">The worlds to subscribe to.</param>
 public record Subscribe
 (
-    IEnumerable<string>? Characters = default,
+    OneOf<All, IEnumerable<ulong>>? Characters = default,
     IEnumerable<string>? EventNames = default,
     bool LogicalAndCharactersWithWorlds = false,
-    IEnumerable<string>? Worlds = default
+    OneOf<All, IEnumerable<WorldDefinition>>? Worlds = default
 ) : CommandBase("subscribe", "event"), ISubscribe;
