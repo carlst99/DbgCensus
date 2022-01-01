@@ -6,6 +6,10 @@ Date format: DD/MM/YYYY
 
 #### EventStream-vNext
 
+- The `Characters` and `Worlds` properties on the `ISubscribe` command now use a `OneOf<>` object to be stricter about the type of subscription
+you can make. The properties accept either the special `All` value, or a list of their corresponding type. E.g. the `Worlds` property has
+a type of `OneOf<All, IEnumerable<WorldDefinition>>`.
+
 - The way that the `JsonSerializerOptions` used by the `BaseEventStreamClient` are configured has changed. Rather than being properties of the
 `EventStreamOptions` class, with configuration completed in the `BaseEventStreamClient` itself, the `JsonSerializerOptions` are now `Configure`d
 as named options directly to the service collection. The name of these options can be found in the new `Constants` class.

@@ -18,7 +18,5 @@ public class ZoneIdJsonConverter : JsonConverter<ZoneID>
     }
 
     public override void Write(Utf8JsonWriter writer, ZoneID value, JsonSerializerOptions options)
-    {
-        writer.WriteNumber("zone_id", value.CombinedId);
-    }
+        => writer.WriteNumber("zone_id", value.CombinedId);
 }

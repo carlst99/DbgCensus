@@ -10,7 +10,7 @@ public interface ISubscription : IPayload
 {
     /// <summary>
     /// Gets the characters that have been subscribed to.
-    /// Can be a list of character IDs or 'all'.
+    /// Can contain stringified character IDs and/or the 'all' special value.
     /// </summary>
     public IReadOnlyList<string>? Characters { get; }
 
@@ -22,7 +22,7 @@ public interface ISubscription : IPayload
 
     /// <summary>
     /// Gets the events that have been subscribed to.
-    /// Can be a list of event names or 'all'.
+    /// Can contain event names and/or the 'all' special value.
     /// </summary>
     public IReadOnlyList<string> EventNames { get; }
 
@@ -33,7 +33,7 @@ public interface ISubscription : IPayload
 
     /// <summary>
     /// Gets the worlds that have been subscribed to.
-    /// Can be a list of world IDs or 'all'.
+    /// Can contain stringified world IDs and/or the 'all' special value.
     /// </summary>
     public IReadOnlyList<string> Worlds { get; }
 }
