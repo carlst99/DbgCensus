@@ -4,9 +4,9 @@
     <TargetFramework>net6.0</TargetFramework>
     
     <!-- Package info -->
-    <Version>1.1.1</Version>
+    <Version>1.2.0</Version>
     <Description>A wrapper for interacting with the query endpoints of Daybreak Game Company's Census API.</Description>
-    <PackageReleaseNotes>Added default Polly policies (WaitAndRetry, CircuitBreaker). ICensusRestClient and IQueryService are now registered transiently.</PackageReleaseNotes>
+    <PackageReleaseNotes>See CHANGELOG.md for release notes.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

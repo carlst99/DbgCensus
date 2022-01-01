@@ -4,9 +4,9 @@
     <TargetFramework>net6.0</TargetFramework>
 
     <!-- Package info -->
-    <Version>1.0.2</Version>
+    <Version>2.0.0</Version>
     <Description>A library for receiving data from the websocket event stream of Daybreak Game Company's Census API.</Description>
-    <PackageReleaseNotes>Retrieving a client without specifying a name now defaults it to 'unnamed'.</PackageReleaseNotes>
+    <PackageReleaseNotes>See CHANGELOG.md for release notes.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
