@@ -1,5 +1,8 @@
 ﻿namespace DbgCensus.EventStream;
 
+/// <summary>
+/// Defines constants for the EventStream project.
+/// </summary>
 public static class Constants
 {
     /// <summary>

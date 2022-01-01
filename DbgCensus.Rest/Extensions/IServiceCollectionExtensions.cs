@@ -7,6 +7,7 @@ using Polly;
 using Polly.Contrib.WaitAndRetry;
 using System;
 using System.Net.Http;
+using System.Text.Json;
 
 namespace DbgCensus.Rest.Extensions;
 
@@ -19,6 +20,12 @@ public static class IServiceCollectionExtensions
     /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
     public static IServiceCollection AddCensusRestServices(this IServiceCollection serviceCollection)
     {
+        serviceCollection.Configure<JsonSerializerOptions>
+        (
+            Constants.JsonDeserializationOptionsName,
+            o => o.AddCensusDeserializationOptions()
+        );
+
         serviceCollection.AddHttpClient<ICensusRestClient, CensusRestClient>()
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false })
             .AddTransientHttpErrorPolicy

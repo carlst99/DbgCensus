@@ -49,8 +49,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// <param name="services">The service provider.</param>
     /// <param name="baseOptions">The options used to configure the client.</param>
     /// <param name="handlingOptions">The options used to configure the client.</param>
-    /// <param name="deserializationOptions">The JSON serializer options to use when deserializing payloads.</param>
-    /// <param name="serializationOptions">The JSON serializer options to use when serializing payloads.</param>
+    /// <param name="jsonSerializerOptions">The JSON serializer options to use when de/serializing payloads.</param>
     /// <param name="memoryStreamPool">The memory stream pool.</param>
     /// <param name="handlerTypeRepository">The payload handler type repository.</param>
     /// <param name="payloadTypeRepository">The payload type repository types.</param>
@@ -61,13 +60,12 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         IServiceProvider services,
         IOptions<EventStreamOptions> baseOptions,
         IOptions<EventHandlingClientOptions> handlingOptions,
-        IOptionsMonitor<JsonSerializerOptions> deserializationOptions,
-        IOptionsMonitor<JsonSerializerOptions> serializationOptions,
+        IOptionsMonitor<JsonSerializerOptions> jsonSerializerOptions,
         RecyclableMemoryStreamManager memoryStreamPool,
         IPayloadHandlerTypeRepository handlerTypeRepository,
         IPayloadTypeRepository payloadTypeRepository
     )
-        : base(name, logger, services, baseOptions, deserializationOptions, serializationOptions, memoryStreamPool)
+        : base(name, logger, services, baseOptions, jsonSerializerOptions, memoryStreamPool)
     {
         _logger = logger;
         _handlingOptions = handlingOptions.Value;

@@ -1,6 +1,5 @@
 ﻿using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.Objects.Commands;
-using DbgCensus.EventStream.Objects.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -66,8 +65,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
     /// <param name="logger">The logging interface to use.</param>
     /// <param name="services">The service provider, used to retrieve <see cref="ClientWebSocket"/> instances.</param>
     /// <param name="options">The options used to configure the client.</param>
-    /// <param name="deserializationOptions">The JSON serializer options to use when deserializing payloads.</param>
-    /// <param name="serializationOptions">The JSON serializer options to use when serializing payloads.</param>
+    /// <param name="jsonSerializerOptions">The JSON serializer options to use when de/serializing payloads.</param>
     /// <param name="memoryStreamPool">The memory stream pool.</param>
     protected BaseEventStreamClient
     (
@@ -75,8 +73,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
         ILogger<BaseEventStreamClient> logger,
         IServiceProvider services,
         IOptions<EventStreamOptions> options,
-        IOptionsMonitor<JsonSerializerOptions> deserializationOptions,
-        IOptionsMonitor<JsonSerializerOptions> serializationOptions,
+        IOptionsMonitor<JsonSerializerOptions> jsonSerializerOptions,
         RecyclableMemoryStreamManager memoryStreamPool
     )
     {
@@ -109,8 +106,8 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
             new JsonWriterOptions { SkipValidation = true } // The JSON Serializer should handle everything correctly
         );
 
-        _jsonDeserializerOptions = deserializationOptions.Get(Constants.JsonDeserializationOptionsName);
-        _jsonSerializerOptions = serializationOptions.Get(Constants.JsonSerializationOptionsName);
+        _jsonDeserializerOptions = jsonSerializerOptions.Get(Constants.JsonDeserializationOptionsName);
+        _jsonSerializerOptions = jsonSerializerOptions.Get(Constants.JsonSerializationOptionsName);
 
         UriBuilder builder = new(_options.RootEndpoint);
         builder.Path = "streaming";

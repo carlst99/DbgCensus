@@ -37,6 +37,7 @@ public class CensusRestClient : ICensusRestClient
         ILogger<CensusRestClient> logger,
         HttpClient client,
         IOptions<CensusQueryOptions> options,
+        IOptionsMonitor<JsonSerializerOptions> jsonSerializerOptions,
         IQueryBuilderFactory queryFactory
     )
     {
@@ -44,7 +45,7 @@ public class CensusRestClient : ICensusRestClient
         _client = client;
         _queryOptions = options.Value;
         _queryFactory = queryFactory;
-        _jsonOptions = _queryOptions.DeserializationOptions;
+        _jsonOptions = jsonSerializerOptions.Get(Constants.JsonDeserializationOptionsName);
     }
 
     /// <inheritdoc />
