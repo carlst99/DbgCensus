@@ -2,6 +2,13 @@
 
 Date format: DD/MM/YYYY
 
+## 21/01/2022
+
+#### EventStream-v2.0.1, EventStream.EventHandlers-v2.0.1
+
+- Fix reconnection flow and improve start/stop logic
+- Improve disposable implementation.
+
 ## 02/01/2022
 
 #### EventStream-v2.0.0
