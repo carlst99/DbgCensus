@@ -18,7 +18,7 @@ namespace DbgCensus.EventStream;
 /// <inheritdoc cref="IEventStreamClient"/>
 /// Reconnection in the case of a failure is handled automatically.
 /// </summary>
-public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposable
+public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, IAsyncDisposable
 {
     /// <summary>
     /// Gets the size of the buffer used to send and receive data in chunks.
@@ -26,9 +26,9 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
     protected const int SOCKET_BUFFER_SIZE = 4096;
 
     /// <summary>
-    /// The keep-alive interval for the websocket.
+    /// Gets the keep-alive interval for the websocket.
     /// </summary>
-    protected const int KEEPALIVE_INTERVAL_SEC = 20;
+    protected static readonly TimeSpan KeepAliveInterval = TimeSpan.FromSeconds(20);
 
     private readonly ILogger<BaseEventStreamClient> _logger;
     private readonly SemaphoreSlim _sendSemaphore;
@@ -120,29 +120,44 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
     {
         DoDisposeChecks();
 
-        if (IsRunning || _webSocket.State is WebSocketState.Open or WebSocketState.Connecting)
-            throw new InvalidOperationException("Client has already been started.");
+        if (IsRunning)
+            return;
 
-        await ConnectWebsocket(ct).ConfigureAwait(false);
-        IsRunning = true;
+        try
+        {
+            await ConnectWebsocket(ct).ConfigureAwait(false);
 
-        _logger.LogInformation("Listening for events...");
-        await StartListeningAsync(ct).ConfigureAwait(false);
+            IsRunning = true;
+            _logger.LogInformation("Listening for events...");
+
+            await StartListeningAsync(ct).ConfigureAwait(false);
+        }
+        catch
+        {
+            await StopAsync();
+            throw;
+        }
     }
 
     /// <inheritdoc />
     public virtual async Task StopAsync()
     {
         DoDisposeChecks();
-
-        if (!IsRunning)
-            throw new InvalidOperationException("Client has already been stopped.");
-
         IsRunning = false;
 
-        await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None).ConfigureAwait(false);
-        _logger.LogInformation("Disconnected from the event stream websocket.");
+        try
+        {
+            if (_webSocket.State is WebSocketState.Open)
+                await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to gracefully close websocket connection.");
+        }
+
         _webSocket.Dispose();
+
+        _logger.LogInformation("Disconnected from the event stream websocket.");
     }
 
     /// <inheritdoc />
@@ -200,10 +215,12 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
     {
         DoDisposeChecks();
 
-        _logger.LogWarning(
+        _logger.LogWarning
+        (
             "Websocket was closed with status {code} and description {description}. Will attempt reconnection after cooldown...",
             _webSocket.CloseStatus,
-            _webSocket.CloseStatusDescription);
+            _webSocket.CloseStatusDescription
+        );
 
         _webSocket.Dispose();
 
@@ -214,25 +231,18 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
     }
 
     /// <inheritdoc />
-    public virtual async ValueTask DisposeAsync()
+    public void Dispose()
     {
-        if (!IsDisposed)
-        {
-            _sendSemaphore.Dispose();
-            await _sendJsonWriter.DisposeAsync().ConfigureAwait(false);
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-            try
-            {
-                _webSocket.Dispose();
-            }
-            catch (ObjectDisposedException)
-            {
-                // This is fine, we dispose websockets when reconnecting or stopping
-            }
-
-            GC.SuppressFinalize(this);
-            IsDisposed = true;
-        }
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        await DisposeAsyncCore().ConfigureAwait(false);
+        Dispose(false);
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -274,7 +284,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
                     result = await _webSocket.ReceiveAsync(buffer.Memory, ct).ConfigureAwait(false);
 
                     // The streaming API occasionally closes your connection. We'll helpfully restore that.
-                    if (result.MessageType == WebSocketMessageType.Close)
+                    if (result.MessageType is WebSocketMessageType.Close)
                     {
                         if (IsRunning)
                         {
@@ -307,7 +317,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
     protected virtual async Task ConnectWebsocket(CancellationToken ct)
     {
         _webSocket = _services.GetRequiredService<ClientWebSocket>();
-        _webSocket.Options.KeepAliveInterval = TimeSpan.FromSeconds(KEEPALIVE_INTERVAL_SEC);
+        _webSocket.Options.KeepAliveInterval = KeepAliveInterval;
         await _webSocket.ConnectAsync(_endpoint, ct).ConfigureAwait(false);
 
         _logger.LogInformation("Connected to event stream websocket.");
@@ -329,5 +339,40 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IAsyncDisposab
     {
         if (IsDisposed)
             throw new ObjectDisposedException(nameof(BaseEventStreamClient));
+    }
+
+    /// <summary>
+    /// Disposes of managed and unmanaged resources.
+    /// </summary>
+    /// <param name="disposeManaged">A value indicating whether or not to dispose of managed resources.</param>
+    protected virtual void Dispose(bool disposeManaged)
+    {
+        if (IsDisposed)
+            return;
+
+        if (disposeManaged)
+        {
+            _sendJsonWriter.Dispose();
+            _sendSemaphore.Dispose();
+            _webSocket.Dispose();
+        }
+
+        IsDisposed = true;
+    }
+
+    /// <summary>
+    /// Asynchronously disposes of managed resources.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    protected virtual async ValueTask DisposeAsyncCore()
+    {
+        if (IsDisposed)
+            return;
+
+        await _sendJsonWriter.DisposeAsync().ConfigureAwait(false);
+        _sendSemaphore.Dispose();
+        _webSocket.Dispose();
+
+        IsDisposed = true;
     }
 }

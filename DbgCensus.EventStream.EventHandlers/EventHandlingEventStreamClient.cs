@@ -87,7 +87,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
 
     /// <summary>
     /// <inheritdoc />
-    /// Furthermore, finalises any event handlers that have not yet finished processing.
+    /// Furthermore, cancels and finalises any event handlers that have not yet finished processing.
     /// </summary>
     /// <inheritdoc />
     public override async Task StopAsync()
@@ -175,6 +175,30 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         }
 
         AttemptSubscriptionRefresh(ct);
+    }
+
+    /// <inheritdoc />
+    protected override void Dispose(bool disposeManaged)
+    {
+        if (IsDisposed)
+            return;
+
+        _dispatchCts.Dispose();
+        _dispatchedPayloadHandlerQueue.Clear();
+
+        base.Dispose(disposeManaged);
+    }
+
+    /// <inheritdoc />
+    protected override ValueTask DisposeAsyncCore()
+    {
+        if (IsDisposed)
+            return ValueTask.CompletedTask;
+
+        _dispatchCts.Dispose();
+        _dispatchedPayloadHandlerQueue.Clear();
+
+        return base.DisposeAsyncCore();
     }
 
     /// <summary>
