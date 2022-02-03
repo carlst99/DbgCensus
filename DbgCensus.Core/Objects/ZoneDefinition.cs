@@ -22,6 +22,7 @@ public enum ZoneDefinition : ushort
     VRTrainingNC = 96,
     VRTrainingTR = 97,
     VRTrainingVS = 98,
+    Oshur = 344,
     Desolation = 361,
     Sanctuary = 362,
 
