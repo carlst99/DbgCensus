@@ -2,6 +2,12 @@
 
 Date format: DD/MM/YYYY
 
+## 03/02/2022
+
+#### Core-v1.1.0, EventStream-v2.0.2, EventStream.EventHandlers-v2.0.2, Rest-v1.2.1
+
+- Added Oshur zone and metagame event (meltdown only) definitions.
+
 ## 21/01/2022
 
 #### EventStream-v2.0.1, EventStream.EventHandlers-v2.0.1

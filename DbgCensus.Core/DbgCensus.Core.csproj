@@ -6,7 +6,7 @@
     <!-- Package info -->
     <Version>1.1.0</Version>
     <Description>Contains core data types and utilities for the DbgCensus.* libraries - wrappers for interacting with Daybreak Game Company's Census API.</Description>
-    <PackageReleaseNotes>Added Oshur zone and metagame event (meltdown only) definitions.</PackageReleaseNotes>
+    <PackageReleaseNotes>See CHANGELOG.md for release notes.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
