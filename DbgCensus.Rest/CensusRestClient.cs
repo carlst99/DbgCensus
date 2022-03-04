@@ -81,7 +81,7 @@ public class CensusRestClient : ICensusRestClient
         JsonElement collectionElement = GetCollectionArrayElement(data.RootElement, collectionName);
 
         if (collectionElement[0].TryGetProperty(fieldName, out JsonElement fieldElement))
-            fieldElement.Deserialize<List<T>>(_jsonOptions);
+            return fieldElement.Deserialize<List<T>>(_jsonOptions);
 
         string rawJson = data.RootElement.GetRawText();
 
