@@ -32,6 +32,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     private readonly IPayloadHandlerTypeRepository _handlerTypeRepository;
     private readonly IPayloadTypeRepository _payloadTypeRepository;
     private readonly ConcurrentQueue<Task> _dispatchedPayloadHandlerQueue;
+    private readonly Type _myType;
     private readonly Dictionary<Type, MethodInfo> _dispatchMethods;
 
     private CancellationTokenSource _dispatchCts;
@@ -72,6 +73,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         _handlingOptions = handlingOptions.Value;
         _handlerTypeRepository = handlerTypeRepository;
         _payloadTypeRepository = payloadTypeRepository;
+        _myType = typeof(EventHandlingEventStreamClient);
         _dispatchMethods = new Dictionary<Type, MethodInfo>();
 
         _dispatchedPayloadHandlerQueue = new ConcurrentQueue<Task>();
@@ -361,7 +363,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         if (_dispatchMethods.ContainsKey(abstractType))
             return _dispatchMethods[abstractType];
 
-        MethodInfo? dispatchMethod = GetType().GetMethod(nameof(DispatchPayloadAsync), BindingFlags.NonPublic | BindingFlags.Instance);
+        MethodInfo? dispatchMethod = _myType.GetMethod(nameof(DispatchPayloadAsync), BindingFlags.NonPublic | BindingFlags.Instance);
         if (dispatchMethod is null)
         {
             MissingMethodException ex = new(nameof(EventHandlingEventStreamClient), nameof(DispatchPayloadAsync));
@@ -377,8 +379,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     }
 
     /// <summary>
-    /// Dispatches an event to all appropriate payload handlers. DO NOT call this directly.
-    /// Use <see cref="CreateDispatchMethod(Type)"/> instead to ensure handlers do not block the receive queue.
+    /// Dispatches an event to all appropriate payload handlers.
     /// </summary>
     /// <typeparam name="T">The abstract type of the payload.</typeparam>
     /// <param name="payload">The payload to dispatch.</param>
