@@ -2,6 +2,12 @@
 
 Date format: DD/MM/YYYY
 
+## 04/03/2022
+
+#### EventStream.EventHandlers-v2.0.3
+
+- Significant performance improvement to event dispatch by caching the retrieved `MethodInfo`.
+
 ## 03/02/2022
 
 #### Core-v1.1.0, EventStream-v2.0.2, EventStream.EventHandlers-v2.0.2, Rest-v1.2.1
