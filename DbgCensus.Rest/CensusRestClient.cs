@@ -31,6 +31,7 @@ public class CensusRestClient : ICensusRestClient
     /// <param name="logger">The logging interface to use.</param>
     /// <param name="client">The <see cref="HttpClient"/> to send requests with.</param>
     /// <param name="options">The query options to conform to.</param>
+    /// <param name="jsonSerializerOptions">The JSON serializer options.</param>
     /// <param name="queryFactory">The query factory.</param>
     public CensusRestClient
     (
