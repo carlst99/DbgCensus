@@ -32,6 +32,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     private readonly IPayloadHandlerTypeRepository _handlerTypeRepository;
     private readonly IPayloadTypeRepository _payloadTypeRepository;
     private readonly ConcurrentQueue<Task> _dispatchedPayloadHandlerQueue;
+    private readonly Dictionary<Type, MethodInfo> _dispatchMethods;
 
     private CancellationTokenSource _dispatchCts;
     private long _lastSubscriptionRefresh;
@@ -71,6 +72,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         _handlingOptions = handlingOptions.Value;
         _handlerTypeRepository = handlerTypeRepository;
         _payloadTypeRepository = payloadTypeRepository;
+        _dispatchMethods = new Dictionary<Type, MethodInfo>();
 
         _dispatchedPayloadHandlerQueue = new ConcurrentQueue<Task>();
         _dispatchCts = new CancellationTokenSource();
@@ -153,7 +155,11 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             {
                 if (!_payloadTypeRepository.TryGet("subscription", out (Type AbstractType, Type ImplementingType)? typeMap))
                 {
-                    _logger.LogError("Types for the 'subscription' payload have not been registerd to the payload type repository. This is an internal library error.");
+                    _logger.LogError
+                    (
+                        "Types for the 'subscription' payload have not been registerd to the payload type repository. This is an internal library error"
+                    );
+
                     return;
                 }
 
@@ -220,7 +226,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         // A little naughty! We don't need to await this though
         SendCommandAsync(CurrentSubscription, ct).ConfigureAwait(false);
         Interlocked.Exchange(ref _lastSubscriptionRefresh, DateTimeOffset.UtcNow.Ticks);
-        _logger.LogTrace("Subscription refreshed.");
+        _logger.LogTrace("Subscription refreshed");
     }
 
     /// <summary>
@@ -233,7 +239,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         // Attempt to get the payload element
         if (!element.TryGetProperty("payload", out JsonElement payloadElement))
         {
-            _logger.LogWarning("A service message was received that did not contain a payload. An unknown event will be dispatched.");
+            _logger.LogWarning("A service message was received that did not contain a payload. An unknown event will be dispatched");
             DispatchUnknownPayload(element.GetRawText(), ct);
             return;
         }
@@ -241,7 +247,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         // Attempt to get the event name element
         if (!payloadElement.TryGetProperty("event_name", out JsonElement eventNameElement))
         {
-            _logger.LogWarning("A service message was received with a malformed payload (Missing 'event_name'). An unknown event will be dispatched.");
+            _logger.LogWarning("A service message was received with a malformed payload (Missing 'event_name'). An unknown event will be dispatched");
             DispatchUnknownPayload(element.GetRawText(), ct);
             return;
         }
@@ -250,7 +256,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         string? eventName = eventNameElement.GetString();
         if (eventName is null)
         {
-            _logger.LogWarning("A service message was received with a malformed payload (NULL 'event_name'). An unknown event will be dispatched.");
+            _logger.LogWarning("A service message was received with a malformed payload (NULL 'event_name'). An unknown event will be dispatched");
             DispatchUnknownPayload(element.GetRawText(), ct);
             return;
         }
@@ -258,7 +264,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         // Attempt to get the type of service message that represents this event
         if (!_payloadTypeRepository.TryGet(eventName, out (Type AbstractType, Type ImplementingType)? typeMap))
         {
-            _logger.LogWarning("Types for the received {event} event have not been registered to the payload type repository.", eventName);
+            _logger.LogWarning("Types for the received {Event} event have not been registered to the payload type repository", eventName);
             return;
         }
 
@@ -299,7 +305,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             object? deserialized = payload.Deserialize(implementingType, _jsonDeserializerOptions);
             if (deserialized is null)
             {
-                _logger.LogError("Could not deserialise websocket payload. Raw response: {raw}", payload.GetRawText());
+                _logger.LogError("Could not deserialise websocket payload. Raw response: {Raw}", payload.GetRawText());
                 return;
             }
 
@@ -334,11 +340,11 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     )
     {
         MethodInfo dispatchMethod = CreateDispatchMethod(abstractType);
-        Task? dispatchTask = (Task?)dispatchMethod.Invoke(this, new object[] { eventObject, context, ct });
+        Task? dispatchTask = (Task?)dispatchMethod.Invoke(this, new[] { eventObject, context, ct });
 
         if (dispatchTask is null)
         {
-            _logger.LogError("Failed to dispatch an event.");
+            _logger.LogError("Failed to dispatch an event");
             return;
         }
 
@@ -352,15 +358,22 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// <returns>The method info.</returns>
     private MethodInfo CreateDispatchMethod(Type abstractType)
     {
+        if (_dispatchMethods.ContainsKey(abstractType))
+            return _dispatchMethods[abstractType];
+
         MethodInfo? dispatchMethod = GetType().GetMethod(nameof(DispatchPayloadAsync), BindingFlags.NonPublic | BindingFlags.Instance);
         if (dispatchMethod is null)
         {
             MissingMethodException ex = new(nameof(EventHandlingEventStreamClient), nameof(DispatchPayloadAsync));
-            _logger.LogCritical(ex, "Failed to get the event dispatch method.");
+            _logger.LogCritical(ex, "Failed to get the event dispatch method");
+
             throw ex;
         }
 
-        return dispatchMethod.MakeGenericMethod(abstractType);
+        dispatchMethod = dispatchMethod.MakeGenericMethod(abstractType);
+        _dispatchMethods[abstractType] = dispatchMethod;
+
+        return dispatchMethod;
     }
 
     /// <summary>
