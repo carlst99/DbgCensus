@@ -19,7 +19,6 @@ public class CensusRestClient : ICensusRestClient
 {
     protected readonly ILogger<CensusRestClient> _logger;
     protected readonly HttpClient _client;
-    protected readonly CensusQueryOptions _queryOptions;
     protected readonly IQueryBuilderFactory _queryFactory;
     protected readonly JsonSerializerOptions _jsonOptions;
 
@@ -30,21 +29,18 @@ public class CensusRestClient : ICensusRestClient
     /// </summary>
     /// <param name="logger">The logging interface to use.</param>
     /// <param name="client">The <see cref="HttpClient"/> to send requests with.</param>
-    /// <param name="options">The query options to conform to.</param>
     /// <param name="jsonSerializerOptions">The JSON serializer options.</param>
     /// <param name="queryFactory">The query factory.</param>
     public CensusRestClient
     (
         ILogger<CensusRestClient> logger,
         HttpClient client,
-        IOptions<CensusQueryOptions> options,
         IOptionsMonitor<JsonSerializerOptions> jsonSerializerOptions,
         IQueryBuilderFactory queryFactory
     )
     {
         _logger = logger;
         _client = client;
-        _queryOptions = options.Value;
         _queryFactory = queryFactory;
         _jsonOptions = jsonSerializerOptions.Get(Constants.JsonDeserializationOptionsName);
     }
@@ -56,7 +52,7 @@ public class CensusRestClient : ICensusRestClient
     /// <inheritdoc />
     public virtual async Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default)
     {
-        _logger.LogTrace("Performing Census GET request with query: {query}", query);
+        _logger.LogTrace("Performing Census GET request with query: {Query}", query);
 
         using HttpResponseMessage response = await PerformQueryAsync(query, ct).ConfigureAwait(false);
 
@@ -84,15 +80,13 @@ public class CensusRestClient : ICensusRestClient
         using JsonDocument data = await InitialParseAsync(response.Content, ct).ConfigureAwait(false);
         JsonElement collectionElement = GetCollectionArrayElement(data.RootElement, collectionName);
 
-        if (!collectionElement[0].TryGetProperty(fieldName, out JsonElement fieldElement))
-        {
-            string rawJson = data.RootElement.GetRawText();
+        if (collectionElement[0].TryGetProperty(fieldName, out JsonElement fieldElement))
+            fieldElement.Deserialize<List<T>>(_jsonOptions);
 
-            _logger.LogWarning("Returned data was not in the expected format for a distinct query", rawJson);
-            throw new CensusInvalidDataException("Returned data was not in the expected format for a distinct query.", rawJson);
-        }
+        string rawJson = data.RootElement.GetRawText();
 
-        return fieldElement.Deserialize<List<T>>(_jsonOptions);
+        _logger.LogWarning("Returned data was not in the expected format for a distinct query: {RawJson}", rawJson);
+        throw new CensusInvalidDataException("Returned data was not in the expected format for a distinct query.", rawJson);
     }
 
     /// <inheritdoc />
@@ -112,19 +106,24 @@ public class CensusRestClient : ICensusRestClient
         }
     }
 
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
     protected virtual async Task<HttpResponseMessage> PerformQueryAsync(string query, CancellationToken ct)
     {
-        _logger.LogTrace("Performing GET request with query: {query}", query);
+        _logger.LogTrace("Performing GET request with query: {Query}", query);
 
         HttpResponseMessage response = await _client.GetAsync(query, ct).ConfigureAwait(false);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogError("Census GET request failed with status code {status} and reason {reason}", response.StatusCode, response.ReasonPhrase);
-            throw new CensusServiceUnavailableException();
-        }
+        if (response.IsSuccessStatusCode)
+            return response;
 
-        return response;
+        _logger.LogError("Census GET request failed with status code {Status} and reason {Reason}", response.StatusCode, response.ReasonPhrase);
+        throw new CensusServiceUnavailableException();
     }
 
     /// <summary>
@@ -138,9 +137,7 @@ public class CensusRestClient : ICensusRestClient
     protected virtual async Task<T?> DeserializeResponseContentAsync<T>(HttpContent content, string? collectionName, CancellationToken ct)
     {
         using JsonDocument data = await InitialParseAsync(content, ct).ConfigureAwait(false);
-
-        if (collectionName is null)
-            collectionName = "datatype";
+        collectionName ??= "datatype";
 
         if (data.RootElement.TryGetProperty("count", out JsonElement countElement))
             return countElement.Deserialize<T>(_jsonOptions);
@@ -151,12 +148,13 @@ public class CensusRestClient : ICensusRestClient
             return collectionElement.Deserialize<T>(_jsonOptions);
 
         int length = collectionElement.GetArrayLength();
-        if (length > 1)
-            throw new JsonException("You are trying to deserialise to a single object, but the Census data contained more than one entity.");
-        else if (length == 0)
-            return default;
-        else
-            return collectionElement[0].Deserialize<T>(_jsonOptions);
+
+        return length switch
+        {
+            > 1 => throw new JsonException("You are trying to deserialise to a single object, but the Census data contained more than one entity."),
+            0 => default,
+            _ => collectionElement[0].Deserialize<T>(_jsonOptions)
+        };
     }
 
     /// <summary>
@@ -182,14 +180,12 @@ public class CensusRestClient : ICensusRestClient
 
             if (errorValueText == "service_unavailable")
             {
-                _logger.LogWarning("Census service unavailable.");
+                _logger.LogWarning("Census service unavailable");
                 throw new CensusServiceUnavailableException();
             }
-            else
-            {
-                _logger.LogError("Census query failed with an error: {error}", errorValueText);
-                throw new CensusQueryErrorException(errorValueText);
-            }
+
+            _logger.LogError("Census query failed with an error: {Error}", errorValueText);
+            throw new CensusQueryErrorException(errorValueText);
         }
 
         if (data.RootElement.TryGetProperty("errorCode", out JsonElement errorCode))
@@ -200,7 +196,7 @@ public class CensusRestClient : ICensusRestClient
             if (data.RootElement.TryGetProperty("errorMessage", out errorValue))
                 errorValueText = errorValue.GetRawText();
 
-            _logger.LogError("Census query failed with error code {code} and message {message}", errorCodeText, errorValueText);
+            _logger.LogError("Census query failed with error code {Code} and message {Message}", errorCodeText, errorValueText);
 
             throw new CensusQueryErrorException(errorValueText, errorCodeText);
         }
@@ -214,7 +210,7 @@ public class CensusRestClient : ICensusRestClient
         {
             string rawJson = rootElement.GetRawText();
 
-            _logger.LogWarning("Returned data was not in the expected format: {data}", rawJson);
+            _logger.LogWarning("Returned data was not in the expected format: {Data}", rawJson);
             throw new CensusInvalidDataException("Returned data was not in the expected format.", rawJson);
         }
 
@@ -224,23 +220,18 @@ public class CensusRestClient : ICensusRestClient
         return collectionElement;
     }
 
+    /// <summary>
+    /// Disposes managed and unmanaged resources.
+    /// </summary>
+    /// <param name="disposing">A value indicating whether or not to dispose managed resources.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!IsDisposed)
-        {
-            if (disposing)
-            {
-                _client.Dispose();
-            }
+        if (IsDisposed)
+            return;
 
-            IsDisposed = true;
-        }
-    }
+        if (disposing)
+            _client.Dispose();
 
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        IsDisposed = true;
     }
 }
