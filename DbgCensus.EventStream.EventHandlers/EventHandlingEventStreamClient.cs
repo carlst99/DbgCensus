@@ -8,9 +8,11 @@ using DbgCensus.EventStream.EventHandlers.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IO;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
@@ -50,6 +52,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// <param name="baseOptions">The options used to configure the client.</param>
     /// <param name="handlingOptions">The options used to configure the client.</param>
     /// <param name="jsonSerializerOptions">The JSON serializer options to use when de/serializing payloads.</param>
+    /// <param name="memoryStreamPool">The memory stream pool.</param>
     /// <param name="handlerTypeRepository">The payload handler type repository.</param>
     /// <param name="payloadTypeRepository">The payload type repository types.</param>
     public EventHandlingEventStreamClient
@@ -60,10 +63,11 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         IOptions<EventStreamOptions> baseOptions,
         IOptions<EventHandlingClientOptions> handlingOptions,
         IOptionsMonitor<JsonSerializerOptions> jsonSerializerOptions,
+        RecyclableMemoryStreamManager memoryStreamPool,
         IPayloadHandlerTypeRepository handlerTypeRepository,
         IPayloadTypeRepository payloadTypeRepository
     )
-        : base(name, logger, services, baseOptions, jsonSerializerOptions)
+        : base(name, logger, services, baseOptions, jsonSerializerOptions, memoryStreamPool)
     {
         _logger = logger;
         _handlingOptions = handlingOptions.Value;
@@ -111,7 +115,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     }
 
     /// <inheritdoc />
-    protected override async Task HandlePayloadAsync(ReadOnlyMemory<byte> eventData, CancellationToken ct)
+    protected override async Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct)
     {
         // Attempt to finalise one payload handler
         if (_dispatchedPayloadHandlerQueue.TryDequeue(out Task? handlerTask))
@@ -122,7 +126,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                 _dispatchedPayloadHandlerQueue.Enqueue(handlerTask);
         }
 
-        using JsonDocument jsonResponse = JsonDocument.Parse(eventData);
+        using JsonDocument jsonResponse = await JsonDocument.ParseAsync(eventStream, cancellationToken: ct).ConfigureAwait(false);
 
         if (jsonResponse.RootElement.TryGetProperty("type", out JsonElement typeElement))
         {

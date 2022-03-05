@@ -47,6 +47,7 @@ public static class IServiceCollectionExtensions
                 o,
                 s.GetRequiredService<IOptions<EventHandlingClientOptions>>(),
                 s.GetRequiredService<IOptionsMonitor<JsonSerializerOptions>>(),
+                s.GetRequiredService<RecyclableMemoryStreamManager>(),
                 s.GetRequiredService<IPayloadHandlerTypeRepository>(),
                 s.GetRequiredService<IPayloadTypeRepository>()
             )
