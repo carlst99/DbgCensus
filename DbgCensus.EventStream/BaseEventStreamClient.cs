@@ -51,7 +51,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     protected ClientWebSocket _webSocket;
 
     /// <inheritdoc />
-    public string Name { get; protected set; }
+    public string Name { get; }
 
     /// <inheritdoc />
     public bool IsDisposed { get; protected set; }
@@ -275,7 +275,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
                         return;
                 }
 
-                MemoryStream stream = _memoryStreamPool.GetStream();
+                await using MemoryStream stream = _memoryStreamPool.GetStream();
                 ValueWebSocketReceiveResult result;
 
                 do
@@ -298,7 +298,6 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
 
                 stream.Seek(0, SeekOrigin.Begin);
                 await HandlePayloadAsync(stream, ct).ConfigureAwait(false);
-                await stream.DisposeAsync().ConfigureAwait(false);
             }
         }
         finally
