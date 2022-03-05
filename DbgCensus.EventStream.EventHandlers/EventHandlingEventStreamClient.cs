@@ -117,69 +117,62 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// <inheritdoc />
     protected override async Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct)
     {
-        try
+        // Attempt to finalise one payload handler
+        if (_dispatchedPayloadHandlerQueue.TryDequeue(out Task? handlerTask))
         {
-            // Attempt to finalise one payload handler
-            if (_dispatchedPayloadHandlerQueue.TryDequeue(out Task? handlerTask))
+            if (handlerTask.IsCompleted)
+                await FinaliseDispatchedPayloadHandler(handlerTask).ConfigureAwait(false);
+            else
+                _dispatchedPayloadHandlerQueue.Enqueue(handlerTask);
+        }
+
+        using JsonDocument jsonResponse = await JsonDocument.ParseAsync(eventStream, cancellationToken: ct).ConfigureAwait(false);
+
+        if (jsonResponse.RootElement.TryGetProperty("type", out JsonElement typeElement))
+        {
+            string? censusType = typeElement.GetString();
+
+            if (censusType is null)
             {
-                if (handlerTask.IsCompleted)
-                    await FinaliseDispatchedPayloadHandler(handlerTask).ConfigureAwait(false);
-                else
-                    _dispatchedPayloadHandlerQueue.Enqueue(handlerTask);
+                _logger.LogWarning($"A payload with a null type has been received. An {nameof(UnknownPayload)} will be dispatched.");
+                DispatchUnknownPayload(jsonResponse.RootElement.GetRawText(), _dispatchCts.Token);
             }
-
-            using JsonDocument jsonResponse = await JsonDocument.ParseAsync(eventStream, cancellationToken: ct).ConfigureAwait(false);
-
-            if (jsonResponse.RootElement.TryGetProperty("type", out JsonElement typeElement))
+            else if (censusType == "serviceMessage") // Further parsing is need to dispatch the encapsulated event payload
             {
-                string? censusType = typeElement.GetString();
-
-                if (censusType is null)
-                {
-                    _logger.LogWarning($"A payload with a null type has been received. An {nameof(UnknownPayload)} will be dispatched.");
-                    DispatchUnknownPayload(jsonResponse.RootElement.GetRawText(), _dispatchCts.Token);
-                }
-                else if (censusType == "serviceMessage") // Further parsing is need to dispatch the encapsulated event payload
-                {
-                    DispatchServiceMessage(jsonResponse.RootElement, _dispatchCts.Token);
-                }
-                else if (_payloadTypeRepository.TryGet(censusType, out (Type AbstractType, Type ImplementingType)? typeMap))
-                {
-                    DeserializeAndDispatchPayload(typeMap.Value.AbstractType, typeMap.Value.ImplementingType, jsonResponse.RootElement, _dispatchCts.Token);
-                }
-                else
-                {
-                    _logger.LogWarning($"A payload with an unknown type has been received. An {nameof(UnknownPayload)} will be dispatched.");
-                    DispatchUnknownPayload(jsonResponse.RootElement.GetRawText(), _dispatchCts.Token);
-                }
+                DispatchServiceMessage(jsonResponse.RootElement, _dispatchCts.Token);
             }
-            else if (jsonResponse.RootElement.TryGetProperty("subscription", out JsonElement subscriptionElement))
+            else if (_payloadTypeRepository.TryGet(censusType, out (Type AbstractType, Type ImplementingType)? typeMap))
             {
-                if (!_payloadTypeRepository.TryGet("subscription", out (Type AbstractType, Type ImplementingType)? typeMap))
-                {
-                    _logger.LogError
-                    (
-                        "Types for the 'subscription' payload have not been registered to the payload type repository. This is an internal library error"
-                    );
-
-                    return;
-                }
-
-                DeserializeAndDispatchPayload(typeMap.Value.AbstractType, typeMap.Value.ImplementingType, subscriptionElement, _dispatchCts.Token);
-            }
-            else if (jsonResponse.RootElement.TryGetProperty("send this for help", out _))
-            {
-                // No need to process this
+                DeserializeAndDispatchPayload(typeMap.Value.AbstractType, typeMap.Value.ImplementingType, jsonResponse.RootElement, _dispatchCts.Token);
             }
             else
             {
-                _logger.LogWarning($"An unknown payload has been received. An {nameof(UnknownPayload)} will be dispatched.");
+                _logger.LogWarning($"A payload with an unknown type has been received. An {nameof(UnknownPayload)} will be dispatched.");
                 DispatchUnknownPayload(jsonResponse.RootElement.GetRawText(), _dispatchCts.Token);
             }
         }
-        finally
+        else if (jsonResponse.RootElement.TryGetProperty("subscription", out JsonElement subscriptionElement))
         {
-            await eventStream.DisposeAsync().ConfigureAwait(false);
+            if (!_payloadTypeRepository.TryGet("subscription", out (Type AbstractType, Type ImplementingType)? typeMap))
+            {
+                _logger.LogError
+                (
+                    "Types for the 'subscription' payload have not been registered to the payload type repository. This is an internal library error"
+                );
+
+                return;
+            }
+
+            DeserializeAndDispatchPayload(typeMap.Value.AbstractType, typeMap.Value.ImplementingType, subscriptionElement, _dispatchCts.Token);
+        }
+        else if (jsonResponse.RootElement.TryGetProperty("send this for help", out _))
+        {
+            // No need to process this
+        }
+        else
+        {
+            _logger.LogWarning($"An unknown payload has been received. An {nameof(UnknownPayload)} will be dispatched.");
+            DispatchUnknownPayload(jsonResponse.RootElement.GetRawText(), _dispatchCts.Token);
         }
 
         AttemptSubscriptionRefresh(ct);

@@ -8,6 +8,7 @@ using System;
 using System.Buffers;
 using System.IO;
 using System.Net.WebSockets;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -252,14 +253,12 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     protected virtual async Task StartListeningAsync(CancellationToken ct)
     {
         IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent(SOCKET_BUFFER_SIZE);
-        ValueWebSocketReceiveResult result;
 
         try
         {
-            while (IsRunning && !IsDisposed)
+            while (IsRunning && !ct.IsCancellationRequested)
             {
-                if (ct.IsCancellationRequested)
-                    throw new TaskCanceledException();
+                DoDisposeChecks();
 
                 switch (_webSocket.State)
                 {
@@ -277,6 +276,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
                 }
 
                 MemoryStream stream = _memoryStreamPool.GetStream();
+                ValueWebSocketReceiveResult result;
 
                 do
                 {
@@ -285,15 +285,12 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
                     // The streaming API occasionally closes your connection. We'll helpfully restore that.
                     if (result.MessageType is WebSocketMessageType.Close)
                     {
-                        if (IsRunning)
-                        {
-                            await ReconnectAsync(ct).ConfigureAwait(false);
-                            continue;
-                        }
-                        else
-                        {
+                        // Perhaps we've shutdown
+                        if (!IsRunning)
                             return;
-                        }
+
+                        await ReconnectAsync(ct).ConfigureAwait(false);
+                        continue;
                     }
 
                     await stream.WriteAsync(buffer.Memory[..result.Count], ct).ConfigureAwait(false);
@@ -301,6 +298,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
 
                 stream.Seek(0, SeekOrigin.Begin);
                 await HandlePayloadAsync(stream, ct).ConfigureAwait(false);
+                await stream.DisposeAsync().ConfigureAwait(false);
             }
         }
         finally
@@ -310,10 +308,10 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     }
 
     /// <summary>
-    /// Gets a new <see cref="ClientWebSocket"/> instance and connects it to the <see cref="_endpoint"/>, along with sending an initial subscription if specified.
+    /// Gets a new <see cref="ClientWebSocket"/> instance and connects it to the <see cref="_endpoint"/>.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    protected virtual async Task ConnectWebsocket(CancellationToken ct)
+    protected async Task ConnectWebsocket(CancellationToken ct)
     {
         _webSocket = _services.GetRequiredService<ClientWebSocket>();
         _webSocket.Options.KeepAliveInterval = KeepAliveInterval;
@@ -325,7 +323,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     /// <summary>
     /// Called when an event is received.
     /// </summary>
-    /// <param name="eventStream">The event data. You must dispose of this stream when you are finished with it.</param>
+    /// <param name="eventStream">The event data. This stream will be disposed by the <see cref="BaseEventStreamClient"/>.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected abstract Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct);
@@ -334,6 +332,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     /// Checks if this object has been disposed.
     /// </summary>
     /// <exception cref="ObjectDisposedException">Thrown if the object has been disposed.</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void DoDisposeChecks()
     {
         if (IsDisposed)
