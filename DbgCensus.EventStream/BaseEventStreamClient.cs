@@ -78,7 +78,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     )
     {
         if (string.IsNullOrEmpty(options.Value.ServiceId))
-            throw new ArgumentNullException(nameof(options), "The provided service ID cannot be null or empty.");
+            throw new ArgumentNullException(nameof(options), "The provided service ID cannot be null or empty");
 
         if (options.Value.ReconnectionDelayMilliseconds < 1)
         {
@@ -86,7 +86,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
             (
                 nameof(options),
                 options.Value.ReconnectionDelayMilliseconds,
-                "Reconnection delay cannot be less than one millisecond."
+                "Reconnection delay cannot be less than one millisecond"
             );
         }
 
@@ -109,9 +109,12 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
         _jsonDeserializerOptions = jsonSerializerOptions.Get(Constants.JsonDeserializationOptionsName);
         _jsonSerializerOptions = jsonSerializerOptions.Get(Constants.JsonSerializationOptionsName);
 
-        UriBuilder builder = new(_options.RootEndpoint);
-        builder.Path = "streaming";
-        builder.Query = $"environment={_options.Environment}&service-id=s:{_options.ServiceId}";
+        UriBuilder builder = new(_options.RootEndpoint)
+        {
+            Path = "streaming",
+            Query = $"environment={_options.Environment}&service-id=s:{_options.ServiceId}"
+        };
+
         _endpoint = builder.Uri;
     }
 
@@ -152,12 +155,12 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to gracefully close websocket connection.");
+            _logger.LogError(ex, "Failed to gracefully close websocket connection");
         }
 
         _webSocket.Dispose();
 
-        _logger.LogInformation("Disconnected from the event stream websocket.");
+        _logger.LogInformation("Disconnected from the event stream websocket");
     }
 
     /// <inheritdoc />
@@ -165,7 +168,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     {
         DoDisposeChecks();
 
-        if (_webSocket?.State is not WebSocketState.Open)
+        if (_webSocket.State is not WebSocketState.Open)
             throw new InvalidOperationException("Websocket connection is not open.");
 
         try
@@ -198,10 +201,6 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
                 _sendJsonWriter.Reset(_sendBuffer);
             }
         }
-        catch
-        {
-            throw;
-        }
         finally
         {
             _sendSemaphore.Release();
@@ -217,7 +216,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
 
         _logger.LogWarning
         (
-            "Websocket was closed with status {code} and description {description}. Will attempt reconnection after cooldown...",
+            "Websocket was closed with status {Code} and description {Description}. Will attempt reconnection after cooldown...",
             _webSocket.CloseStatus,
             _webSocket.CloseStatusDescription
         );
@@ -226,7 +225,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
 
         await Task.Delay(_options.ReconnectionDelayMilliseconds, ct).ConfigureAwait(false);
 
-        _logger.LogInformation("Attempting to reconnect websocket.");
+        _logger.LogInformation("Attempting to reconnect websocket");
         await ConnectWebsocket(ct).ConfigureAwait(false);
     }
 
@@ -320,7 +319,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
         _webSocket.Options.KeepAliveInterval = KeepAliveInterval;
         await _webSocket.ConnectAsync(_endpoint, ct).ConfigureAwait(false);
 
-        _logger.LogInformation("Connected to event stream websocket.");
+        _logger.LogInformation("Connected to event stream websocket");
     }
 
     /// <summary>

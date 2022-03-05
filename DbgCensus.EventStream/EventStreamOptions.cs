@@ -1,6 +1,6 @@
 ﻿namespace DbgCensus.EventStream;
 
-// Note to developer: If you rename this class, you might break the code of everyone who uses nameof() to retrieve this from their appsettings.
+// Note to developer: If you rename this class, you will break the code of everyone who uses nameof() to retrieve this from their appsettings.
 public class EventStreamOptions
 {
     /// <summary>
@@ -19,7 +19,8 @@ public class EventStreamOptions
     public string Environment { get; set; }
 
     /// <summary>
-    /// Gets or sets the amount of time to wait before attemping a reconnection when the streaming API drops out.
+    /// Gets or sets the amount of time to wait before attempting to
+    /// reconnect when the event stream session is closed erroneously.
     /// </summary>
     public int ReconnectionDelayMilliseconds { get; set; }
 
