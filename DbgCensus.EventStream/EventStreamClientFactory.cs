@@ -37,8 +37,7 @@ public class EventStreamClientFactory : IEventStreamClientFactory, IAsyncDisposa
     /// <inheritdoc />
     public IEventStreamClient GetClient(string name = IEventStreamClientFactory.DefaultClientName, EventStreamOptions? options = null)
     {
-        if (options is null)
-            options = _options.Value;
+        options ??= _options.Value;
 
         if (!_repository.ContainsKey(name) || _repository[name].IsDisposed)
             _repository[name] = _clientFactory.Invoke(_services, Options.Create(options), name);
@@ -48,7 +47,7 @@ public class EventStreamClientFactory : IEventStreamClientFactory, IAsyncDisposa
 
     /// <inheritdoc />
     public IEventStreamClient GetClient<TConsumer>(EventStreamOptions? options = null)
-        => GetClient(nameof(TConsumer), options);
+        => GetClient(typeof(TConsumer).FullName ?? typeof(TConsumer).Name, options);
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()

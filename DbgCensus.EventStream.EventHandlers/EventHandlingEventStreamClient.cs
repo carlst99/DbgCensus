@@ -159,7 +159,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                 {
                     _logger.LogError
                     (
-                        "Types for the 'subscription' payload have not been registerd to the payload type repository. This is an internal library error"
+                        "Types for the 'subscription' payload have not been registered to the payload type repository. This is an internal library error"
                     );
 
                     return;
