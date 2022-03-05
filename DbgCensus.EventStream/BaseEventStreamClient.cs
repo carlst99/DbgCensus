@@ -3,10 +3,8 @@ using DbgCensus.EventStream.Abstractions.Objects.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IO;
 using System;
 using System.Buffers;
-using System.IO;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -33,11 +31,11 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
 
     private readonly ILogger<BaseEventStreamClient> _logger;
     private readonly SemaphoreSlim _sendSemaphore;
+    private readonly ArrayBufferWriter<byte> _receiveWriter;
     private readonly Utf8JsonWriter _sendJsonWriter;
 
     protected readonly IServiceProvider _services;
     protected readonly EventStreamOptions _options;
-    protected readonly RecyclableMemoryStreamManager _memoryStreamPool;
     protected readonly JsonSerializerOptions _jsonDeserializerOptions;
     protected readonly JsonSerializerOptions _jsonSerializerOptions;
 
@@ -67,15 +65,13 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     /// <param name="services">The service provider, used to retrieve <see cref="ClientWebSocket"/> instances.</param>
     /// <param name="options">The options used to configure the client.</param>
     /// <param name="jsonSerializerOptions">The JSON serializer options to use when de/serializing payloads.</param>
-    /// <param name="memoryStreamPool">The memory stream pool.</param>
     protected BaseEventStreamClient
     (
         string name,
         ILogger<BaseEventStreamClient> logger,
         IServiceProvider services,
         IOptions<EventStreamOptions> options,
-        IOptionsMonitor<JsonSerializerOptions> jsonSerializerOptions,
-        RecyclableMemoryStreamManager memoryStreamPool
+        IOptionsMonitor<JsonSerializerOptions> jsonSerializerOptions
     )
     {
         if (string.IsNullOrEmpty(options.Value.ServiceId))
@@ -94,9 +90,9 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
         Name = name;
         _logger = logger;
         _services = services;
-        _memoryStreamPool = memoryStreamPool;
         _options = options.Value;
         _webSocket = services.GetRequiredService<ClientWebSocket>();
+        _receiveWriter = new ArrayBufferWriter<byte>(SOCKET_BUFFER_SIZE);
 
         _sendSemaphore = new SemaphoreSlim(1, 1);
         _sendBuffer = new ArrayBufferWriter<byte>(SOCKET_BUFFER_SIZE);
@@ -175,7 +171,6 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
         try
         {
             JsonSerializer.Serialize(_sendJsonWriter, command, command.GetType(), _jsonSerializerOptions);
-
             ReadOnlyMemory<byte> data = _sendBuffer.WrittenMemory;
 
             bool entered = await _sendSemaphore.WaitAsync(1000, ct).ConfigureAwait(false);
@@ -252,57 +247,47 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected virtual async Task StartListeningAsync(CancellationToken ct)
     {
-        IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent(SOCKET_BUFFER_SIZE);
-
-        try
+        while (IsRunning && !ct.IsCancellationRequested)
         {
-            while (IsRunning && !ct.IsCancellationRequested)
-            {
-                DoDisposeChecks();
+            DoDisposeChecks();
 
-                switch (_webSocket.State)
+            switch (_webSocket.State)
+            {
+                // The streaming API occasionally closes your connection. We'll helpfully restore that.
+                case WebSocketState.Aborted or WebSocketState.CloseReceived or WebSocketState.Closed:
+                    await ReconnectAsync(ct).ConfigureAwait(false);
+                    continue;
+                // Give it a chance to connect
+                case WebSocketState.Connecting:
+                    await Task.Delay(10, ct).ConfigureAwait(false);
+                    continue;
+                // A graceful close, or request to close on our end, indicates things are wrapping up
+                case WebSocketState.CloseSent:
+                    return;
+            }
+
+            ValueWebSocketReceiveResult result;
+            do
+            {
+                Memory<byte> buffer = _receiveWriter.GetMemory(SOCKET_BUFFER_SIZE);
+                result = await _webSocket.ReceiveAsync(buffer, ct).ConfigureAwait(false);
+
+                // The streaming API occasionally closes your connection. We'll helpfully restore that.
+                if (result.MessageType is WebSocketMessageType.Close)
                 {
-                    // The streaming API occasionally closes your connection. We'll helpfully restore that.
-                    case WebSocketState.Aborted or WebSocketState.CloseReceived or WebSocketState.Closed:
-                        await ReconnectAsync(ct).ConfigureAwait(false);
-                        continue;
-                    // Give it a chance to connect
-                    case WebSocketState.Connecting:
-                        await Task.Delay(10, ct).ConfigureAwait(false);
-                        continue;
-                    // A graceful close, or request to close on our end, indicates things are wrapping up
-                    case WebSocketState.CloseSent:
+                    // Perhaps we've shutdown
+                    if (!IsRunning)
                         return;
+
+                    await ReconnectAsync(ct).ConfigureAwait(false);
+                    continue;
                 }
 
-                await using MemoryStream stream = _memoryStreamPool.GetStream();
-                ValueWebSocketReceiveResult result;
+                _receiveWriter.Advance(result.Count);
+            } while (!result.EndOfMessage);
 
-                do
-                {
-                    result = await _webSocket.ReceiveAsync(buffer.Memory, ct).ConfigureAwait(false);
-
-                    // The streaming API occasionally closes your connection. We'll helpfully restore that.
-                    if (result.MessageType is WebSocketMessageType.Close)
-                    {
-                        // Perhaps we've shutdown
-                        if (!IsRunning)
-                            return;
-
-                        await ReconnectAsync(ct).ConfigureAwait(false);
-                        continue;
-                    }
-
-                    await stream.WriteAsync(buffer.Memory[..result.Count], ct).ConfigureAwait(false);
-                } while (!result.EndOfMessage);
-
-                stream.Seek(0, SeekOrigin.Begin);
-                await HandlePayloadAsync(stream, ct).ConfigureAwait(false);
-            }
-        }
-        finally
-        {
-            buffer.Dispose();
+            await HandlePayloadAsync(_receiveWriter.WrittenMemory, ct).ConfigureAwait(false);
+            _receiveWriter.Clear();
         }
     }
 
@@ -322,10 +307,10 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     /// <summary>
     /// Called when an event is received.
     /// </summary>
-    /// <param name="eventStream">The event data. This stream will be disposed by the <see cref="BaseEventStreamClient"/>.</param>
+    /// <param name="eventData">The UTF-8 event data..</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    protected abstract Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct);
+    protected abstract Task HandlePayloadAsync(ReadOnlyMemory<byte> eventData, CancellationToken ct);
 
     /// <summary>
     /// Checks if this object has been disposed.
