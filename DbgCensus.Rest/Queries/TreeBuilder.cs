@@ -6,7 +6,7 @@ namespace DbgCensus.Rest.Queries;
 /// <summary>
 /// Provides functions to build a tree command for the Census REST API.
 /// </summary>
-public class TreeBuilder : ITreeBuilder
+public sealed class TreeBuilder : ITreeBuilder
 {
     private readonly SingleQueryCommandFormatter<string> _onField;
     private readonly SingleQueryCommandFormatter<char?> _isList; // No value by default, defaults to '0' in Census
@@ -28,7 +28,7 @@ public class TreeBuilder : ITreeBuilder
     }
 
     /// <inheritdoc />
-    public virtual ITreeBuilder IsList()
+    public ITreeBuilder IsList()
     {
         _isList.SetArgument('1');
 
@@ -36,7 +36,7 @@ public class TreeBuilder : ITreeBuilder
     }
 
     /// <inheritdoc />
-    public virtual ITreeBuilder OnField(string fieldName)
+    public ITreeBuilder OnField(string fieldName)
     {
         _onField.SetArgument(fieldName);
 
@@ -44,7 +44,7 @@ public class TreeBuilder : ITreeBuilder
     }
 
     /// <inheritdoc />
-    public virtual ITreeBuilder StartOn(string fieldName)
+    public ITreeBuilder StartOn(string fieldName)
     {
         _startOn.SetArgument(fieldName);
 
@@ -52,7 +52,7 @@ public class TreeBuilder : ITreeBuilder
     }
 
     /// <inheritdoc />
-    public virtual ITreeBuilder WithPrefix(string prefix)
+    public ITreeBuilder WithPrefix(string prefix)
     {
         _prefix.SetArgument(prefix);
 

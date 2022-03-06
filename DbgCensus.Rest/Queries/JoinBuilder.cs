@@ -8,7 +8,7 @@ namespace DbgCensus.Rest.Queries;
 /// <summary>
 /// Provides functions to build a join command for the Census REST API.
 /// </summary>
-public class JoinBuilder : IJoinBuilder
+public sealed class JoinBuilder : IJoinBuilder
 {
     private readonly List<IJoinBuilder> _nestedJoins;
 
@@ -45,7 +45,7 @@ public class JoinBuilder : IJoinBuilder
     }
 
     /// <inheritdoc/>
-    public virtual IJoinBuilder ToCollection(string collectionName)
+    public IJoinBuilder ToCollection(string collectionName)
     {
         _toCollection.SetArgument(collectionName);
 
@@ -53,7 +53,7 @@ public class JoinBuilder : IJoinBuilder
     }
 
     /// <inheritdoc />
-    public virtual IJoinBuilder ShowFields(params string[] fieldNames)
+    public IJoinBuilder ShowFields(params string[] fieldNames)
     {
         // Show and hide are incompatible
         if (!_isShowingFields)
@@ -66,7 +66,7 @@ public class JoinBuilder : IJoinBuilder
     }
 
     /// <inheritdoc />
-    public virtual IJoinBuilder HideFields(params string[] fieldNames)
+    public IJoinBuilder HideFields(params string[] fieldNames)
     {
         // Show and hide are incompatible
         if (_isShowingFields)
@@ -79,7 +79,7 @@ public class JoinBuilder : IJoinBuilder
     }
 
     /// <inheritdoc />
-    public virtual IJoinBuilder InjectAt(string name)
+    public IJoinBuilder InjectAt(string name)
     {
         _injectAt.SetArgument(name);
 
@@ -87,7 +87,7 @@ public class JoinBuilder : IJoinBuilder
     }
 
     /// <inheritdoc />
-    public virtual IJoinBuilder IsList()
+    public IJoinBuilder IsList()
     {
         _isList.SetArgument('1');
 
@@ -95,7 +95,7 @@ public class JoinBuilder : IJoinBuilder
     }
 
     /// <inheritdoc />
-    public virtual IJoinBuilder IsInnerJoin()
+    public IJoinBuilder IsInnerJoin()
     {
         _isOuter.SetArgument('0');
 
@@ -103,7 +103,7 @@ public class JoinBuilder : IJoinBuilder
     }
 
     /// <inheritdoc />
-    public virtual IJoinBuilder OnField(string fieldName)
+    public IJoinBuilder OnField(string fieldName)
     {
         _onField.SetArgument(fieldName);
 
@@ -111,7 +111,7 @@ public class JoinBuilder : IJoinBuilder
     }
 
     /// <inheritdoc />
-    public virtual IJoinBuilder ToField(string fieldName)
+    public IJoinBuilder ToField(string fieldName)
     {
         _toField.SetArgument(fieldName);
 
@@ -119,7 +119,7 @@ public class JoinBuilder : IJoinBuilder
     }
 
     /// <inheritdoc />
-    public virtual IJoinBuilder Where<T>(string field, SearchModifier modifier, T filterValue) where T : notnull
+    public IJoinBuilder Where<T>(string field, SearchModifier modifier, T filterValue) where T : notnull
     {
         switch (modifier)
         {
@@ -146,7 +146,7 @@ public class JoinBuilder : IJoinBuilder
     }
 
     /// <inheritdoc/>
-    public virtual IJoinBuilder AddNestedJoin(string toCollection)
+    public IJoinBuilder AddNestedJoin(string toCollection)
     {
         JoinBuilder nested = new(toCollection);
         _nestedJoins.Add(nested);
@@ -155,7 +155,7 @@ public class JoinBuilder : IJoinBuilder
     }
 
     /// <inheritdoc />
-    public virtual IJoinBuilder AddNestedJoin(string toCollection, Action<IJoinBuilder> configureJoin)
+    public IJoinBuilder AddNestedJoin(string toCollection, Action<IJoinBuilder> configureJoin)
     {
         JoinBuilder nested = new(toCollection);
         configureJoin(nested);

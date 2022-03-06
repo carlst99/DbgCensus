@@ -9,7 +9,7 @@ namespace DbgCensus.Rest.Queries;
 /// <summary>
 /// Provides functions to build a query URI for the Census REST API.
 /// </summary>
-public class QueryBuilder : IQueryBuilder
+public sealed class QueryBuilder : IQueryBuilder
 {
     private readonly string _rootEndpoint;
     private readonly List<QueryFilter> _filters;
@@ -35,7 +35,7 @@ public class QueryBuilder : IQueryBuilder
     private MultiQueryCommandFormatter<string> _showHideFields;
     private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
 
-    public string? CollectionName { get; protected set; }
+    public string? CollectionName { get; private set; }
 
     /// <summary>
     /// Provides functions to build a query string for the Census REST API.
@@ -88,7 +88,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual Uri ConstructEndpoint()
+    public Uri ConstructEndpoint()
     {
         UriBuilder builder = new(_rootEndpoint)
         {
@@ -140,14 +140,14 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder OfQueryType(QueryType type)
+    public IQueryBuilder OfQueryType(QueryType type)
     {
         _verb = type;
         return this;
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder OnCollection(string collection)
+    public IQueryBuilder OnCollection(string collection)
     {
         if (string.IsNullOrEmpty(collection))
             throw new ArgumentNullException(nameof(collection));
@@ -157,7 +157,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WithLimit(uint limit)
+    public IQueryBuilder WithLimit(uint limit)
     {
         _limit.SetArgument(limit);
 
@@ -165,7 +165,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WithLimitPerDatabase(uint limit)
+    public IQueryBuilder WithLimitPerDatabase(uint limit)
     {
         _limitPerDb.SetArgument(limit);
 
@@ -173,7 +173,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WithStartIndex(uint index)
+    public IQueryBuilder WithStartIndex(uint index)
     {
         _startIndex.SetArgument(index);
 
@@ -181,7 +181,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder Where<T>(string field, SearchModifier modifier, T value) where T : notnull
+    public IQueryBuilder Where<T>(string field, SearchModifier modifier, T value) where T : notnull
     {
         _filters.Add(new QueryFilter(field, modifier, StringUtils.SafeToString(value)));
 
@@ -189,7 +189,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WhereAll<T>(string field, SearchModifier modifier, IEnumerable<T> filterValues) where T : notnull
+    public IQueryBuilder WhereAll<T>(string field, SearchModifier modifier, IEnumerable<T> filterValues) where T : notnull
     {
         List<string> values = filterValues.Select(StringUtils.SafeToString).ToList();
 
@@ -202,7 +202,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WithSortOrder(string fieldName, SortOrder order = SortOrder.Ascending)
+    public IQueryBuilder WithSortOrder(string fieldName, SortOrder order = SortOrder.Ascending)
     {
         _sortKeys.AddArgument(new QuerySortKey(fieldName, order));
 
@@ -210,7 +210,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WithExactMatchesFirst()
+    public IQueryBuilder WithExactMatchesFirst()
     {
         _exactMatchesFirst.SetArgument(true);
 
@@ -218,7 +218,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IJoinBuilder AddJoin(string toCollection)
+    public IJoinBuilder AddJoin(string toCollection)
     {
         JoinBuilder join = new(toCollection);
         _joins.AddArgument(join);
@@ -227,7 +227,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder AddJoin(string collectionName, Action<IJoinBuilder> configureJoin)
+    public IQueryBuilder AddJoin(string collectionName, Action<IJoinBuilder> configureJoin)
     {
         JoinBuilder join = new(collectionName);
         configureJoin(join);
@@ -237,7 +237,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual ITreeBuilder WithTree(string onField)
+    public ITreeBuilder WithTree(string onField)
     {
         TreeBuilder tree = new(onField);
         _tree.SetArgument(tree);
@@ -246,7 +246,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WithTree(string onField, Action<ITreeBuilder> configureTree)
+    public IQueryBuilder WithTree(string onField, Action<ITreeBuilder> configureTree)
     {
         TreeBuilder tree = new(onField);
         configureTree(tree);
@@ -256,7 +256,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder AddResolve(string resolveTo, params string[] showFields)
+    public IQueryBuilder AddResolve(string resolveTo, params string[] showFields)
     {
         _resolves.AddArgument(new QueryResolve(resolveTo, showFields));
 
@@ -264,7 +264,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder ShowFields(params string[] fieldNames)
+    public IQueryBuilder ShowFields(params string[] fieldNames)
     {
         // Show and hide are incompatible
         if (!_isShowingFields)
@@ -277,7 +277,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder HideFields(params string[] fieldNames)
+    public IQueryBuilder HideFields(params string[] fieldNames)
     {
         // Show and hide are incompatible
         if (_isShowingFields)
@@ -290,7 +290,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder HasFields(params string[] fieldNames)
+    public IQueryBuilder HasFields(params string[] fieldNames)
     {
         _hasFields.AddArgumentRange(fieldNames);
 
@@ -298,7 +298,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WithLanguage(string languageCode)
+    public IQueryBuilder WithLanguage(string languageCode)
     {
         _language.SetArgument(languageCode);
 
@@ -306,7 +306,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder IsCaseInsensitive()
+    public IQueryBuilder IsCaseInsensitive()
     {
         _isCaseSensitive.SetArgument(false);
 
@@ -314,7 +314,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WithNullFields()
+    public IQueryBuilder WithNullFields()
     {
         _withNullFields.SetArgument(true);
 
@@ -322,7 +322,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WithTimings()
+    public IQueryBuilder WithTimings()
     {
         _withTimings.SetArgument(true);
 
@@ -330,7 +330,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WithoutOneTimeRetry()
+    public IQueryBuilder WithoutOneTimeRetry()
     {
         _retry.SetArgument(false);
 
@@ -338,7 +338,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WithDistinctFieldValues(string fieldName)
+    public IQueryBuilder WithDistinctFieldValues(string fieldName)
     {
         if (string.IsNullOrEmpty(CollectionName))
             throw new InvalidOperationException("This operation can only be performed on a Census collection.");
@@ -349,7 +349,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder WithServiceId(string serviceId)
+    public IQueryBuilder WithServiceId(string serviceId)
     {
         _serviceId = serviceId;
 
@@ -357,7 +357,7 @@ public class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public virtual IQueryBuilder OnNamespace(string censusNamespace)
+    public IQueryBuilder OnNamespace(string censusNamespace)
     {
         _queryNamespace = censusNamespace;
 
