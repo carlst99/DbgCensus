@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace DbgCensus.Rest.Abstractions.Queries;
 
@@ -36,14 +35,16 @@ public interface IJoinBuilder
     IJoinBuilder IsList();
 
     /// <summary>
-    /// Only includes the provided fields in the result. This method is incompatible with <see cref="HideFields(string[])"/>.
+    /// Only includes the provided fields in the result.
+    /// This method is incompatible with <see cref="HideFields(string[])"/>.
     /// </summary>
     /// <param name="fieldNames">The names of the fields that should be shown in the result.</param>
     /// <returns>The <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
     IJoinBuilder ShowFields(params string[] fieldNames);
 
     /// <summary>
-    /// Includes all but the provided fields in the result. This method is incompatible with <see cref="ShowFields(string[])"/>.
+    /// Includes all but the provided fields in the result.
+    /// This method is incompatible with <see cref="ShowFields(string[])"/>.
     /// </summary>
     /// <param name="fieldNames">The names of the fields that should be hidden from the result.</param>
     /// <returns>The <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>/
@@ -67,7 +68,12 @@ public interface IJoinBuilder
     IJoinBuilder Where<T>(string field, SearchModifier modifier, T filterValue) where T : notnull;
 
     /// <summary>
-    /// By default, all queries are treated as an 'outer' join. As in SQL, this means that results will be included for joins that do not match the criteria defined via terms. You can set a query to use 'inner' join behaviour, which allows filtering of a parent join via a term defined for its child if both are using 'inner' join behaviour.
+    /// By default, all queries are treated as an 'outer' join.
+    /// As in SQL, this means that results will be included for
+    /// joins that do not match the criteria defined via terms.
+    /// You can set a query to use 'inner' join behaviour, which
+    /// allows filtering of a parent join via a term defined for
+    /// its child if both are using 'inner' join behaviour.
     /// </summary>
     /// <returns>The <see cref="IJoinBuilder"/> instance so that calls may be chained.</returns>
     IJoinBuilder IsInnerJoin();

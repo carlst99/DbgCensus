@@ -32,11 +32,10 @@ internal class QuerySortKey
         Order = order;
     }
 
-    public static implicit operator string(QuerySortKey qsk) => qsk.ToString();
-
     /// <summary>
     /// Constructs a well-formed sort string, without the sort command (c:sort=).
     /// </summary>
     /// <returns>A well-formed sort string.</returns>
-    public override string ToString() => $"{FieldName}:{(int)Order}";
+    public override string ToString()
+        => $"{FieldName}:{(int)Order}";
 }

@@ -117,7 +117,7 @@ public interface IQueryBuilder
     ITreeBuilder WithTree(string onField);
 
     /// <summary>
-    /// Reformats the returned data by placing it into groups based on a given field.
+    /// Re-formats the returned data by placing it into groups based on a given field.
     /// </summary>
     /// <param name="onField">Sets the field to group data by. Will be removed from the data source.</param>
     /// <param name="configureTree">A delegate to configure the tree with.</param>
@@ -137,14 +137,16 @@ public interface IQueryBuilder
     IQueryBuilder AddResolve(string resolveTo, params string[] showFields);
 
     /// <summary>
-    /// Only includes the provided fields in the result. This method is incompatible with <see cref="HideFields(string[])"/>.
+    /// Only includes the provided fields in the result.
+    /// This method is incompatible with <see cref="HideFields(string[])"/>.
     /// </summary>
     /// <param name="fieldNames">The names of the fields that should be shown in the result.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
     IQueryBuilder ShowFields(params string[] fieldNames);
 
     /// <summary>
-    /// Includes all but the provided fields in the result. This method is incompatible with <see cref="ShowFields(string[])"/>.
+    /// Includes all but the provided fields in the result.
+    /// This method is incompatible with <see cref="ShowFields(string[])"/>.
     /// </summary>
     /// <param name="fieldNames">The names of the fields that should be hidden from the result.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>

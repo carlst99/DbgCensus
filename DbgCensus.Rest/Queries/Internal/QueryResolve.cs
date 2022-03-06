@@ -35,8 +35,6 @@ internal class QueryResolve
         _showFields = showFields;
     }
 
-    public static implicit operator string(QueryResolve r) => r.ToString();
-
     /// <summary>
     /// Constructs a well-formed resolve string, without the query command (c:resolve=).
     /// </summary>

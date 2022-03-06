@@ -121,14 +121,28 @@ public class JoinBuilder : IJoinBuilder
     /// <inheritdoc />
     public virtual IJoinBuilder Where<T>(string field, SearchModifier modifier, T filterValue) where T : notnull
     {
-        if (modifier is SearchModifier.StartsWith)
-            throw new ArgumentException($"The modifier { SearchModifier.StartsWith } cannot be used on a join filter.", nameof(modifier));
-        if (modifier is SearchModifier.Contains)
-            throw new ArgumentException($"The modifier { SearchModifier.Contains } cannot be used on a join filter.", nameof(modifier));
+        switch (modifier)
+        {
+            case SearchModifier.StartsWith:
+                throw new ArgumentException
+                (
+                    $"The modifier { SearchModifier.StartsWith } cannot be used on a join filter.",
+                    nameof(modifier)
+                );
+            case SearchModifier.Contains:
+                throw new ArgumentException
+                (
+                    $"The modifier { SearchModifier.Contains } cannot be used on a join filter.",
+                    nameof(modifier)
+                );
+            default:
+                _filterTerms.AddArgument
+                (
+                    new QueryFilter(field, modifier, StringUtils.SafeToString(filterValue))
+                );
 
-        _filterTerms.AddArgument(new QueryFilter(field, modifier, StringUtils.SafeToString(filterValue)));
-
-        return this;
+                return this;
+        }
     }
 
     /// <inheritdoc/>
@@ -156,7 +170,18 @@ public class JoinBuilder : IJoinBuilder
     /// <returns>A well-formed join string.</returns>
     public override string ToString()
     {
-        string join = StringUtils.JoinWithoutNullOrEmptyValues('^', _toCollection, _onField, _toField, _isList, _showHideFields, _injectAt, _filterTerms, _isOuter);
+        string join = StringUtils.JoinWithoutNullOrEmptyValues
+        (
+            '^',
+            _toCollection,
+            _onField,
+            _toField,
+            _isList,
+            _showHideFields,
+            _injectAt,
+            _filterTerms,
+            _isOuter
+        );
 
         if (_nestedJoins.Count > 0)
             join += $"({ string.Join(',', _nestedJoins) })";
@@ -164,9 +189,12 @@ public class JoinBuilder : IJoinBuilder
         return join;
     }
 
-    public static implicit operator string(JoinBuilder j) => j.ToString();
+    public static implicit operator string(JoinBuilder j)
+        => j.ToString();
 
-    private static MultiQueryCommandFormatter<T> GetMultiQCF<T>(string command) => new(command, ':', '\'');
+    private static MultiQueryCommandFormatter<T> GetMultiQCF<T>(string command)
+        => new(command, ':', '\'');
 
-    private static SingleQueryCommandFormatter<T> GetSingleQCF<T>(string command) => new(command, ':');
+    private static SingleQueryCommandFormatter<T> GetSingleQCF<T>(string command)
+        => new(command, ':');
 }

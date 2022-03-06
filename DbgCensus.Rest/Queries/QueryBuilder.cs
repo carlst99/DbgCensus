@@ -2,6 +2,7 @@
 using DbgCensus.Rest.Abstractions.Queries;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DbgCensus.Rest.Queries;
 
@@ -89,9 +90,11 @@ public class QueryBuilder : IQueryBuilder
     /// <inheritdoc />
     public virtual Uri ConstructEndpoint()
     {
-        UriBuilder builder = new(_rootEndpoint);
+        UriBuilder builder = new(_rootEndpoint)
+        {
+            Path = $"s:{_serviceId}/{_verb.Value}/{_queryNamespace}"
+        };
 
-        builder.Path = $"s:{_serviceId}/{_verb.Value}/{_queryNamespace}";
         if (CollectionName is not null)
             builder.Path += $"/{CollectionName}";
 
@@ -108,14 +111,29 @@ public class QueryBuilder : IQueryBuilder
 
         // Add filters
         foreach (QueryFilter filter in _filters)
-            builder.Query += filter.ToString() + "&";
+            builder.Query += $"{filter}&";
 
-        builder.Query += StringUtils.JoinWithoutNullOrEmptyValues('&', _hasFields, _showHideFields, _resolves, _joins, _sortKeys, _startIndex, _language, _exactMatchesFirst, _isCaseSensitive, _withNullFields, _withTimings, _retry);
+        builder.Query += StringUtils.JoinWithoutNullOrEmptyValues
+        (
+            '&',
+            _hasFields,
+            _showHideFields,
+            _resolves,
+            _joins,
+            _sortKeys,
+            _startIndex,
+            _language,
+            _exactMatchesFirst,
+            _isCaseSensitive,
+            _withNullFields,
+            _withTimings,
+            _retry
+        );
 
         // Add relevant limit command
         if (_limitPerDb.HasArgument)
             builder.Query += '&' + _limitPerDb;
-        else if (_limit is not null)
+        else if (_limit.Argument is not null)
             builder.Query += '&' + _limit;
 
         return builder.Uri;
@@ -173,11 +191,12 @@ public class QueryBuilder : IQueryBuilder
     /// <inheritdoc />
     public virtual IQueryBuilder WhereAll<T>(string field, SearchModifier modifier, IEnumerable<T> filterValues) where T : notnull
     {
-        List<string> values = new();
-        foreach (T value in filterValues)
-            values.Add(StringUtils.SafeToString(value));
+        List<string> values = filterValues.Select(StringUtils.SafeToString).ToList();
 
-        _filters.Add(new QueryFilter(field, modifier, string.Join(',', filterValues)));
+        _filters.Add
+        (
+            new QueryFilter(field, modifier, string.Join(',', values))
+        );
 
         return this;
     }

@@ -13,7 +13,8 @@ public interface ITreeBuilder
     ITreeBuilder OnField(string fieldName);
 
     /// <summary>
-    /// Indicates that the field being grouped on is a list, allowing multiple results to be included in each group.
+    /// Indicates that the field being grouped on is a list,
+    /// allowing multiple results to be included in each group.
     /// </summary>
     /// <returns>An <see cref="ITreeBuilder"/> instance so that calls may be chained.</returns>
     ITreeBuilder IsList();
@@ -26,7 +27,8 @@ public interface ITreeBuilder
     ITreeBuilder WithPrefix(string prefix);
 
     /// <summary>
-    /// Sets the field within the result (including joins and resolves) at which to start the tree, rather than performing the operation on the original query.
+    /// Sets the field within the result (including joins and resolves) at which
+    /// to start the tree, rather than performing the operation on the original query.
     /// </summary>
     /// <param name="fieldName">The name of the field.</param>
     /// <returns>An <see cref="ITreeBuilder"/> instance so that calls may be chained.</returns>

@@ -62,11 +62,13 @@ internal class QueryFilter
         Value = StringUtils.JoinWithoutNullOrEmptyValues(',', filterValues);
     }
 
-    public static implicit operator string(QueryFilter f) => f.ToString();
-
     /// <summary>
     /// Constructs a value that can be used to perform a search within a Census query.
     /// </summary>
     /// <returns>A well-formed filter string.</returns>
-    public override string ToString() => Field + "=" + (Modifier != SearchModifier.Equals ? (char)Modifier : string.Empty) + Value;
+    public override string ToString()
+        => Field +
+           "=" +
+           (Modifier != SearchModifier.Equals ? (char)Modifier : string.Empty) +
+           Value;
 }

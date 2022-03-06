@@ -59,9 +59,19 @@ public class TreeBuilder : ITreeBuilder
         return this;
     }
 
-    public override string ToString() => StringUtils.JoinWithoutNullOrEmptyValues('^', _onField, _isList, _prefix, _startOn);
+    public override string ToString()
+        => StringUtils.JoinWithoutNullOrEmptyValues
+        (
+            '^',
+            _onField,
+            _isList,
+            _prefix,
+            _startOn
+        );
 
-    public static implicit operator string(TreeBuilder t) => t.ToString();
+    public static implicit operator string(TreeBuilder t)
+        => t.ToString();
 
-    private static SingleQueryCommandFormatter<T> GetSingleQCF<T>(string command) => new(command, ':');
+    private static SingleQueryCommandFormatter<T> GetSingleQCF<T>(string command)
+        => new(command, ':');
 }

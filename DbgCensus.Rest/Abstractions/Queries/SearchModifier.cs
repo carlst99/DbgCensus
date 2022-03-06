@@ -3,7 +3,7 @@
 /// <summary>
 /// Modifiers used to filter searches in the Census REST API.
 /// </summary>
-public enum SearchModifier : byte
+public enum SearchModifier : short
 {
     /// <summary>
     /// Returns values that are equal to the value of the filter.
@@ -13,35 +13,35 @@ public enum SearchModifier : byte
     /// <summary>
     /// Returns values that are not equal to the value of the filter.
     /// </summary>
-    NotEquals = (byte)'!',
+    NotEquals = (short)'!',
 
     /// <summary>
     /// Returns values that contain the value of the filter.
     /// </summary>
-    Contains = (byte)'*',
+    Contains = (short)'*',
 
     /// <summary>
     /// Returns values that are less than the value of the filter.
     /// </summary>
-    LessThan = (byte)'<',
+    LessThan = (short)'<',
 
     /// <summary>
     /// Returns values that are greater than the value of the filter.
     /// </summary>
-    GreaterThan = (byte)'>',
+    GreaterThan = (short)'>',
 
     /// <summary>
     /// Returns values that are less than or equal to the value of the filter.
     /// </summary>
-    LessThanOrEqual = (byte)'[',
+    LessThanOrEqual = (short)'[',
 
     /// <summary>
     /// Returns values that are greater than or equal to the value of the filter.
     /// </summary>
-    GreaterThanOrEqual = (byte)']',
+    GreaterThanOrEqual = (short)']',
 
     /// <summary>
     /// Returns values that start with the value of the filter.
     /// </summary>
-    StartsWith = (byte)'^'
+    StartsWith = (short)'^'
 }
