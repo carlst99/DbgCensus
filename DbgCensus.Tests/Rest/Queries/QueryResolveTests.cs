@@ -7,7 +7,7 @@ namespace DbgCensus.Tests.Rest.Queries;
 public class QueryResolveTests
 {
     private const string RESOLVE_TO = "resolve";
-    private static readonly string[] SHOW_FIELDS = new string[] { "show1", "show2" };
+    private static readonly string[] SHOW_FIELDS = { "show1", "show2" };
 
     [Fact]
     public void TestConstructor()
@@ -24,6 +24,5 @@ public class QueryResolveTests
     {
         QueryResolve resolve = new(RESOLVE_TO, SHOW_FIELDS);
         Assert.Equal($"{RESOLVE_TO}({string.Join(',', SHOW_FIELDS)})", resolve.ToString());
-        Assert.Equal(resolve.ToString(), resolve); // Test implicit casting
     }
 }

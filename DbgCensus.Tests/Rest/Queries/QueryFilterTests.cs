@@ -25,8 +25,7 @@ public class QueryFilterTests
     [Fact]
     public void TestToString()
     {
-        QueryFilter filter = new(FIELD_NAME, MODIFIER, new string[] { FILTER_VALUE, FILTER_VALUE });
+        QueryFilter filter = new(FIELD_NAME, MODIFIER, new[] { FILTER_VALUE, FILTER_VALUE });
         Assert.Equal($"{FIELD_NAME}={(char)MODIFIER}{FILTER_VALUE},{FILTER_VALUE}", filter.ToString());
-        Assert.Equal(filter.ToString(), filter); // Test implicit casting
     }
 }
