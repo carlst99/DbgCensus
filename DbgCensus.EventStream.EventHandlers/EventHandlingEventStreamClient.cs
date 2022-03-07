@@ -22,10 +22,10 @@ using System.Threading.Tasks;
 namespace DbgCensus.EventStream.EventHandlers;
 
 /// <summary>
-/// <inheritdoc />
+/// <inheritdoc cref="BaseEventStreamClient" />
 /// Events are dispatched to registered instances of <see cref="IPayloadHandler{TEvent}"/>.
 /// </summary>
-public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
+public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPayloadDispatchService
 {
     private readonly ILogger<EventHandlingEventStreamClient> _logger;
     private readonly EventHandlingClientOptions _handlingOptions;
@@ -79,6 +79,50 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         _dispatchedPayloadHandlerQueue = new ConcurrentQueue<Task>();
         _dispatchCts = new CancellationTokenSource();
         _lastSubscriptionRefresh = DateTimeOffset.UtcNow.Ticks;
+    }
+
+    /// <summary>
+    /// Dispatches an event to all appropriate payload handlers.
+    /// </summary>
+    /// <typeparam name="T">The abstract type of the payload.</typeparam>
+    /// <param name="payload">The payload to dispatch.</param>
+    /// <param name="context">The context to inject.</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the handlers.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task DispatchPayloadAsync<T>
+    (
+        T payload,
+        IPayloadContext context,
+        CancellationToken ct
+    ) where T : IPayload
+    {
+        IReadOnlyList<Type> handlerTypes = _handlerTypeRepository.GetHandlerTypes<T>();
+        if (handlerTypes.Count == 0)
+            return;
+
+        await Task.WhenAll
+        (
+            handlerTypes.Select
+            (
+                async h =>
+                {
+                    await using AsyncServiceScope scope = _services.CreateAsyncScope();
+
+                    scope.ServiceProvider.GetRequiredService<PayloadContextInjectionService>().Context = context;
+                    IPayloadHandler<T> handler = (IPayloadHandler<T>)scope.ServiceProvider.GetRequiredService(h);
+
+                    try
+                    {
+                        await handler.HandleAsync(payload, ct).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to execute event handler");
+                        throw;
+                    }
+                }
+            )
+        ).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -369,50 +413,6 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         _dispatchMethods[abstractType] = dispatchMethod;
 
         return dispatchMethod;
-    }
-
-    /// <summary>
-    /// Dispatches an event to all appropriate payload handlers.
-    /// </summary>
-    /// <typeparam name="T">The abstract type of the payload.</typeparam>
-    /// <param name="payload">The payload to dispatch.</param>
-    /// <param name="context">The context to inject.</param>
-    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the handlers.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    private async Task DispatchPayloadAsync<T>
-    (
-        T payload,
-        IPayloadContext context,
-        CancellationToken ct
-    ) where T : IPayload
-    {
-        IReadOnlyList<Type> handlerTypes = _handlerTypeRepository.GetHandlerTypes<T>();
-        if (handlerTypes.Count == 0)
-            return;
-
-        await Task.WhenAll
-        (
-            handlerTypes.Select
-            (
-                async h =>
-                {
-                    await using AsyncServiceScope scope = _services.CreateAsyncScope();
-
-                    scope.ServiceProvider.GetRequiredService<PayloadContextInjectionService>().Context = context;
-                    IPayloadHandler<T> handler = (IPayloadHandler<T>)scope.ServiceProvider.GetRequiredService(h);
-
-                    try
-                    {
-                        await handler.HandleAsync(payload, ct).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to execute event handler");
-                        throw;
-                    }
-                }
-            )
-        ).ConfigureAwait(false);
     }
 
     /// <summary>
