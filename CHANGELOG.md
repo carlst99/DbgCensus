@@ -2,6 +2,16 @@
 
 Date format: DD/MM/YYYY
 
+## 08/03/2022
+
+#### Core-v1.2.0
+
+- Converted `ZoneId` to a readonly struct, using computed properties for the `Instance` and `Definition` properties.
+
+#### EventStream-v2.2.0, EventStream.EventHandlers-v2.3.0
+
+- Updated dependency on DbgCensus.Core to v1.2.0
+
 ## 07/03/2022
 
 #### EventStream.EventHandlers-v2.2.0
