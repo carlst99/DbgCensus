@@ -2,6 +2,20 @@
 
 Date format: DD/MM/YYYY
 
+## 07/03/2022
+
+#### EventStream-v2.1.0, EventStream.EventHandlers-v2.1.0
+
+- Fixed `IEventStreamClientFactory#GetClient` when retrieving a client for a dedicated generic consumer.
+- The `BaseEventStreamClient` now disposes of the data stream passed to `HandlePayloadAsync`.
+- `BaseEventStreamClient#Name` is now a readonly-property.
+
+#### Rest-v2.0.0
+
+- The `JoinBuilder`, `TreeBuilder` and `QueryBuilder` types are now sealed.
+- The `SearchModifier` enumeration is now a `short` data type.
+- `StringUtils#SafeToString` now expects a generically-typed object, rather than an `object` parameter.
+
 ## 04/03/2022
 
 #### EventStream.EventHandlers-v2.0.3
