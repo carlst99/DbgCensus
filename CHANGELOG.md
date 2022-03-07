@@ -4,6 +4,10 @@ Date format: DD/MM/YYYY
 
 ## 07/03/2022
 
+#### EventStream.EventHandlers-v2.2.0
+
+- Added the IPayloadDispatchService interface, and implemented it in the EventHandlingEventStreamClient. This allows custom payloads to be dispatched.
+
 #### EventStream-v2.1.0, EventStream.EventHandlers-v2.1.0
 
 - Fixed `IEventStreamClientFactory#GetClient` when retrieving a client for a dedicated generic consumer.
