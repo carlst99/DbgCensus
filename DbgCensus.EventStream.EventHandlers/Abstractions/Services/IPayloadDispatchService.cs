@@ -22,6 +22,6 @@ public interface IPayloadDispatchService
     (
         T payload,
         IPayloadContext context,
-        CancellationToken ct
+        CancellationToken ct = default
     ) where T : IPayload;
 }

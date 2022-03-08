@@ -93,7 +93,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
     (
         T payload,
         IPayloadContext context,
-        CancellationToken ct
+        CancellationToken ct = default
     ) where T : IPayload
     {
         IReadOnlyList<Type> handlerTypes = _handlerTypeRepository.GetHandlerTypes<T>();
