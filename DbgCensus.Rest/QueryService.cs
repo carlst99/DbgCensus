@@ -36,10 +36,22 @@ public class QueryService : IQueryService
         => await _client.CountAsync(collectionName, ct).ConfigureAwait(false);
 
     /// <inheritdoc />
-    public virtual async Task<IReadOnlyList<T>?> DistinctAsync<T>(string collectionName, string fieldName, CancellationToken ct = default)
+    public virtual async Task<IReadOnlyList<T>?> DistinctAsync<T>
+    (
+        string collectionName,
+        string fieldName,
+        CancellationToken ct = default
+    )
         => await _client.DistinctAsync<T>(collectionName, fieldName, ct).ConfigureAwait(false);
 
     /// <inheritdoc />
-    public virtual IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>(IQueryBuilder query, uint pageSize, uint pageCount, uint start = 0, CancellationToken ct = default)
+    public virtual IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>
+    (
+        IQueryBuilder query,
+        int pageSize,
+        int pageCount,
+        int start = 0,
+        CancellationToken ct = default
+    )
         => _client.GetPaginatedAsync<T>(query, pageSize, pageCount, start, ct);
 }

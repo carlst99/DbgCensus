@@ -20,8 +20,20 @@ public interface IQueryService
     Task<ulong> CountAsync(string collectionName, CancellationToken ct = default);
 
     /// <inheritdoc cref="ICensusRestClient.DistinctAsync{T}(string, string, CancellationToken)"/>
-    Task<IReadOnlyList<T>?> DistinctAsync<T>(string collectionName, string fieldName, CancellationToken ct = default);
+    Task<IReadOnlyList<T>?> DistinctAsync<T>
+    (
+        string collectionName,
+        string fieldName,
+        CancellationToken ct = default
+    );
 
-    /// <inheritdoc cref="ICensusRestClient.GetPaginatedAsync{T}(IQueryBuilder, uint, uint, uint, CancellationToken)"/>
-    IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>(IQueryBuilder query, uint pageSize, uint pageCount, uint start = 0, CancellationToken ct = default);
+    /// <inheritdoc cref="ICensusRestClient.GetPaginatedAsync{T}(IQueryBuilder, int, int, int, CancellationToken)"/>
+    IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>
+    (
+        IQueryBuilder query,
+        int pageSize,
+        int pageCount,
+        int start = 0,
+        CancellationToken ct = default
+    );
 }

@@ -103,9 +103,9 @@ public class CensusRestClient : ICensusRestClient, IDisposable
     public virtual async IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>
     (
         IQueryBuilder query,
-        uint pageSize,
-        uint pageCount,
-        uint start = 0,
+        int pageSize,
+        int pageCount,
+        int start = 0,
         [EnumeratorCancellation] CancellationToken ct = default
     )
     {

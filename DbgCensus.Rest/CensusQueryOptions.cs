@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace DbgCensus.Rest;
+﻿namespace DbgCensus.Rest;
 
 public class CensusQueryOptions
 {
@@ -27,7 +25,7 @@ public class CensusQueryOptions
     /// <summary>
     /// Optionally set a default limit for each query.
     /// </summary>
-    public uint? Limit { get; set; }
+    public int? Limit { get; set; }
 
     public CensusQueryOptions()
     {

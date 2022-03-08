@@ -18,8 +18,8 @@ public sealed class QueryBuilder : IQueryBuilder
     private readonly MultiQueryCommandFormatter<QuerySortKey> _sortKeys;
     private readonly MultiQueryCommandFormatter<IJoinBuilder> _joins;
     private readonly SingleQueryCommandFormatter<ITreeBuilder> _tree;
-    private readonly SingleQueryCommandFormatter<uint?> _limit;
-    private readonly SingleQueryCommandFormatter<uint?> _limitPerDb;
+    private readonly SingleQueryCommandFormatter<int?> _limit;
+    private readonly SingleQueryCommandFormatter<int?> _limitPerDb;
     private readonly SingleQueryCommandFormatter<bool?> _exactMatchesFirst; // False by default
     private readonly SingleQueryCommandFormatter<string> _language;
     private readonly SingleQueryCommandFormatter<bool?> _isCaseSensitive; // True by default
@@ -27,7 +27,7 @@ public sealed class QueryBuilder : IQueryBuilder
     private readonly SingleQueryCommandFormatter<bool?> _withTimings; // False by default
     private readonly SingleQueryCommandFormatter<bool?> _retry; // True by default
     private readonly SingleQueryCommandFormatter<string> _distinctField;
-    private readonly SingleQueryCommandFormatter<uint?> _startIndex;
+    private readonly SingleQueryCommandFormatter<int?> _startIndex;
 
     private string _serviceId;
     private string _queryNamespace;
@@ -55,8 +55,8 @@ public sealed class QueryBuilder : IQueryBuilder
         _sortKeys = GetMultiQCF<QuerySortKey>("c:sort");
         _joins = GetMultiQCF<IJoinBuilder>("c:join");
         _tree = GetSingleQCF<ITreeBuilder>("c:tree");
-        _limit = GetSingleQCF<uint?>("c:limit");
-        _limitPerDb = GetSingleQCF<uint?>("c:limitPerDB");
+        _limit = GetSingleQCF<int?>("c:limit");
+        _limitPerDb = GetSingleQCF<int?>("c:limitPerDB");
         _exactMatchesFirst = GetSingleQCF<bool?>("c:exactMatchFirst");
         _language = GetSingleQCF<string>("c:lang");
         _isCaseSensitive = GetSingleQCF<bool?>("c:case");
@@ -64,7 +64,7 @@ public sealed class QueryBuilder : IQueryBuilder
         _withTimings = GetSingleQCF<bool?>("c:timing");
         _retry = GetSingleQCF<bool?>("c:retry");
         _distinctField = GetSingleQCF<string>("c:distinct");
-        _startIndex = GetSingleQCF<uint?>("c:start");
+        _startIndex = GetSingleQCF<int?>("c:start");
 
         CollectionName = null;
         _verb = QueryType.Get;
@@ -84,7 +84,7 @@ public sealed class QueryBuilder : IQueryBuilder
             WithLanguage(options.LanguageCode);
 
         if (options.Limit is not null)
-            WithLimit((uint)options.Limit);
+            WithLimit((int)options.Limit);
     }
 
     /// <inheritdoc />
@@ -157,7 +157,7 @@ public sealed class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public IQueryBuilder WithLimit(uint limit)
+    public IQueryBuilder WithLimit(int limit)
     {
         _limit.SetArgument(limit);
 
@@ -165,7 +165,7 @@ public sealed class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public IQueryBuilder WithLimitPerDatabase(uint limit)
+    public IQueryBuilder WithLimitPerDatabase(int limit)
     {
         _limitPerDb.SetArgument(limit);
 
@@ -173,7 +173,7 @@ public sealed class QueryBuilder : IQueryBuilder
     }
 
     /// <inheritdoc />
-    public IQueryBuilder WithStartIndex(uint index)
+    public IQueryBuilder WithStartIndex(int index)
     {
         _startIndex.SetArgument(index);
 

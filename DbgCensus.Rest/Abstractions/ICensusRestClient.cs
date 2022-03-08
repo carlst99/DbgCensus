@@ -1,5 +1,4 @@
 ﻿using DbgCensus.Rest.Abstractions.Queries;
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +27,12 @@ public interface ICensusRestClient
     /// <param name="collectionName">The collection that the query will be performed on.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>The deserialised response, or null if no value was returned.</returns>
-    Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default);
+    Task<T?> GetAsync<T>
+    (
+        string query,
+        string? collectionName,
+        CancellationToken ct = default
+    );
 
     /// <summary>
     /// Performs a query using the COUNT verb to retrieve the number of elements in the given collection.
@@ -46,7 +50,12 @@ public interface ICensusRestClient
     /// <param name="fieldName">The field.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
     /// <returns>A list of all the distinct values.</returns>
-    Task<IReadOnlyList<T>?> DistinctAsync<T>(string collectionName, string fieldName, CancellationToken ct = default);
+    Task<IReadOnlyList<T>?> DistinctAsync<T>
+    (
+        string collectionName,
+        string fieldName,
+        CancellationToken ct = default
+    );
 
     /// <summary>
     /// Performs a query on the Census REST API, returning the results in pages.
@@ -58,5 +67,12 @@ public interface ICensusRestClient
     /// <param name="start">The index at which to start getting objects from.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>An <see cref="IAsyncEnumerable{T}"/> that yields enumerables for each page.</returns>
-    IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>(IQueryBuilder query, uint pageSize, uint pageCount, uint start = 0, CancellationToken ct = default);
+    IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>
+    (
+        IQueryBuilder query,
+        int pageSize,
+        int pageCount,
+        int start = 0,
+        CancellationToken ct = default
+    );
 }

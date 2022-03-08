@@ -37,16 +37,16 @@ public interface IQueryBuilder
     /// </summary>
     /// <param name="limit">The maximum number of items.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
-    IQueryBuilder WithLimit(uint limit);
+    IQueryBuilder WithLimit(int limit);
 
     /// <summary>
     /// Limits the number of items returned from each database.
-    /// More predictable than <see cref="WithLimit(uint)"/> for collections
-    /// that arespread across multiple databases, such as ps2/character.
+    /// More predictable than <see cref="WithLimit(int)"/> for collections
+    /// that are spread across multiple databases, such as ps2/character.
     /// </summary>
     /// <param name="limit">The number of items to return per database.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
-    IQueryBuilder WithLimitPerDatabase(uint limit);
+    IQueryBuilder WithLimitPerDatabase(int limit);
 
     /// <summary>
     /// Return items starting at the Nth index of the internal query.
@@ -58,7 +58,7 @@ public interface IQueryBuilder
     /// </remarks>
     /// <param name="index">The index to return items from.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
-    IQueryBuilder WithStartIndex(uint index);
+    IQueryBuilder WithStartIndex(int index);
 
     /// <summary>
     /// Applies a filter to the query.
@@ -110,7 +110,7 @@ public interface IQueryBuilder
     IQueryBuilder AddJoin(string toCollection, Action<IJoinBuilder> configureJoin);
 
     /// <summary>
-    /// Reformats the returned data by placing it into groups based on a given field.
+    /// Re-formats the returned data by placing it into groups based on a given field.
     /// </summary>
     /// <param name="onField">Sets the field to group data by. Will be removed from the data source.</param>
     /// <returns>The <see cref="ITreeBuilder"/> instance to configure the tree.</returns>
