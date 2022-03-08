@@ -16,9 +16,8 @@ public interface IPreDispatchHandler
     /// <param name="payload">The payload.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
     /// <returns>
-    /// A tuple value containing an indicator on whether the payload should be
-    /// prevented from being dispatched, and the potentially modified payload.
+    /// A value indicating whether or not to prevent the payload from being dispatched.
     /// </returns>
-    ValueTask<(bool PreventDispatch, T Payload)> HandlePayloadAsync<T>(T payload, CancellationToken ct = default)
+    ValueTask<bool> HandlePayloadAsync<T>(T payload, CancellationToken ct = default)
         where T : IPayload;
 }

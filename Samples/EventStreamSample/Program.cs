@@ -2,6 +2,7 @@ using DbgCensus.EventStream;
 using DbgCensus.EventStream.EventHandlers.Extensions;
 using EventStreamSample.EventHandlers;
 using EventStreamSample.EventHandlers.ControlPayloads;
+using EventStreamSample.EventHandlers.PreDispatch;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -24,6 +25,7 @@ public static class Program
                 services.Configure<EventStreamOptions>(hostContext.Configuration.GetSection(nameof(EventStreamOptions)));
 
                 services.AddCensusEventHandlingServices()
+                        .RegisterPreDispatchHandler<DuplicatePreventionPreDispatchHandler>()
                         .AddPayloadHandler<ConnectionStateChangedPayloadHandler>()
                         .AddPayloadHandler<HeartbeatPayloadHandler>()
                         .AddPayloadHandler<ServiceStateChangedPayloadHandler>()

@@ -113,8 +113,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
 
                 try
                 {
-                    (bool prevent, payload) = await preDispatchHandler.HandlePayloadAsync(payload, ct);
-                    if (prevent)
+                    if(await preDispatchHandler.HandlePayloadAsync(payload, ct))
                         return;
                 }
                 catch (Exception ex)
