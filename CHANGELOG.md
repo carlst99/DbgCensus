@@ -4,6 +4,18 @@ Date format: DD/MM/YYYY
 
 ## 08/03/2022
 
+#### EventStream-v2.3.0
+
+- Added the `InstanceID` and `MetagameEventStateName` properties to `IMetagameEvent`.
+- Added `EventNames#GetExperienceEventName` as a util to retrieve a valid event name for a given experience event ID.
+- `BaseEventStreamClient#HandlePayloadAsync` now returns a ValueTask.
+
+#### EventStream.EventHandlers-v2.3.1
+
+- Updated dependency on DbgCensus.EventStream to v2.3.0
+
+---
+
 #### Core-v1.2.0
 
 - Converted `ZoneId` to a readonly struct, using computed properties for the `Instance` and `Definition` properties.
