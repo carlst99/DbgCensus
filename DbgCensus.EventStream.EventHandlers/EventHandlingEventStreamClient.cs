@@ -159,7 +159,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
     }
 
     /// <inheritdoc />
-    protected override async Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct)
+    protected override async ValueTask HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct)
     {
         // Attempt to finalise one payload handler
         if (_dispatchedPayloadHandlerQueue.TryDequeue(out Task? handlerTask))

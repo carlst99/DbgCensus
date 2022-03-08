@@ -325,7 +325,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     /// <param name="eventStream">The event data. This stream will be disposed by the <see cref="BaseEventStreamClient"/>.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    protected abstract Task HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct);
+    protected abstract ValueTask HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct);
 
     /// <summary>
     /// Checks if this object has been disposed.
