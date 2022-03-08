@@ -2,6 +2,13 @@
 
 Date format: DD/MM/YYYY
 
+## XX/03/2022
+
+#### Rest-v2.1.0
+
+- `ICensusRestClient` no longer inherits from `IDisposable`.
+- `CensusRestClient` now directly implements `IDisposable`.
+
 ## 08/03/2022
 
 #### EventStream.EventHandlers-v2.4.0

@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace DbgCensus.Rest;
 
 /// <inheritdoc cref="ICensusRestClient" />
-public class CensusRestClient : ICensusRestClient
+public class CensusRestClient : ICensusRestClient, IDisposable
 {
     protected readonly ILogger<CensusRestClient> _logger;
     protected readonly HttpClient _client;
@@ -50,7 +50,12 @@ public class CensusRestClient : ICensusRestClient
         => await GetAsync<T>(query.ConstructEndpoint().AbsoluteUri, query.CollectionName, ct).ConfigureAwait(false);
 
     /// <inheritdoc />
-    public virtual async Task<T?> GetAsync<T>(string query, string? collectionName, CancellationToken ct = default)
+    public virtual async Task<T?> GetAsync<T>
+    (
+        string query,
+        string? collectionName,
+        CancellationToken ct = default
+    )
     {
         _logger.LogTrace("Performing Census GET request with query: {Query}", query);
 
@@ -70,7 +75,12 @@ public class CensusRestClient : ICensusRestClient
     }
 
     /// <inheritdoc />
-    public virtual async Task<IReadOnlyList<T>?> DistinctAsync<T>(string collectionName, string fieldName, CancellationToken ct = default)
+    public virtual async Task<IReadOnlyList<T>?> DistinctAsync<T>
+    (
+        string collectionName,
+        string fieldName,
+        CancellationToken ct = default
+    )
     {
         IQueryBuilder query = _queryFactory.Get()
             .OnCollection(collectionName)
@@ -90,7 +100,14 @@ public class CensusRestClient : ICensusRestClient
     }
 
     /// <inheritdoc />
-    public virtual async IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>(IQueryBuilder query, uint pageSize, uint pageCount, uint start = 0, [EnumeratorCancellation] CancellationToken ct = default)
+    public virtual async IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>
+    (
+        IQueryBuilder query,
+        uint pageSize,
+        uint pageCount,
+        uint start = 0,
+        [EnumeratorCancellation] CancellationToken ct = default
+    )
     {
         for (int i = 0; i < pageCount; i++)
         {
@@ -134,7 +151,12 @@ public class CensusRestClient : ICensusRestClient
     /// <param name="collectionName">The name of the collection that was queried.</param>
     /// <param name="ct">A token which can be used to cancel asynchronous logic.</param>
     /// <returns></returns>
-    protected virtual async Task<T?> DeserializeResponseContentAsync<T>(HttpContent content, string? collectionName, CancellationToken ct)
+    protected virtual async Task<T?> DeserializeResponseContentAsync<T>
+    (
+        HttpContent content,
+        string? collectionName,
+        CancellationToken ct
+    )
     {
         using JsonDocument data = await InitialParseAsync(content, ct).ConfigureAwait(false);
         collectionName ??= "datatype";

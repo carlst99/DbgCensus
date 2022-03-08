@@ -9,7 +9,7 @@ namespace DbgCensus.Rest.Abstractions;
 /// <summary>
 /// Provides functions to perform queries on the Census REST API, and deserialise the responses.
 /// </summary>
-public interface ICensusRestClient : IDisposable
+public interface ICensusRestClient
 {
     /// <summary>
     /// Performs a query on the Census REST API.
