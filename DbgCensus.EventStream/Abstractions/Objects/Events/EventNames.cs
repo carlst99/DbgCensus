@@ -19,4 +19,14 @@ public static class EventNames
     public const string ContinentUnlock = "ContinentUnlock";
     public const string FacilityControl = "FacilityControl";
     public const string MetagameEvent = "MetagameEvent";
+
+    /// <summary>
+    /// Gets an event name for a particular experience event.
+    /// Experience event IDs can be found in the <c>event</c>
+    /// collection of the Census REST API.
+    /// </summary>
+    /// <param name="expEventID">The ID of the experience event.</param>
+    /// <returns>A valid event name.</returns>
+    public static string GetExperienceEventName(int expEventID)
+        => $"GainExperience_experience_id_{expEventID}";
 }

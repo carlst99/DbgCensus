@@ -47,7 +47,7 @@ public class ConnectionStateChangedPayloadHandler : IPayloadHandler<IConnectionS
     {
         _logger.LogWarning
         (
-            "Event stream connection state changed for the client {clientName}: we are now {state}!",
+            "Event stream connection state changed for the client {ClientName}: we are now {State}!",
             _context.DispatchingClientName,
             payload.Connected ? "connected" : "disconnected"
         );
@@ -61,8 +61,8 @@ public class ConnectionStateChangedPayloadHandler : IPayloadHandler<IConnectionS
             new Subscribe
             (
                 new All(),
-                new string[] { EventNames.FacilityControl, EventNames.PlayerLogin, EventNames.PlayerLogout },
-                Worlds: new WorldDefinition[] { WorldDefinition.Connery, WorldDefinition.Miller, WorldDefinition.Soltech }
+                new[] { EventNames.FacilityControl, EventNames.PlayerLogin, EventNames.PlayerLogout },
+                Worlds: new[] { WorldDefinition.Connery, WorldDefinition.Miller, WorldDefinition.Soltech }
             ),
             ct
         ).ConfigureAwait(false);

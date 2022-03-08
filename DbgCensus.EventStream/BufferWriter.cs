@@ -92,7 +92,7 @@ public class BufferWriter<T> : IBufferWriter<T>
     /// </summary>
     /// <param name="amount">The amount to advance.</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown if the <seealso cref="amount"/> is invalid.
+    /// Thrown if the <paramref name="amount"/> is invalid.
     /// </exception>
     public void Advance(int amount)
     {

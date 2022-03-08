@@ -11,10 +11,11 @@ public class DateTimeOffsetJsonConverter : JsonConverter<DateTimeOffset>
     {
         if (ulong.TryParse(reader.GetString(), out ulong timestamp))
             return new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero).AddSeconds(timestamp);
-        else if (DateTimeOffset.TryParse(reader.GetString(), null, DateTimeStyles.AssumeUniversal, out DateTimeOffset time))
+
+        if (DateTimeOffset.TryParse(reader.GetString(), null, DateTimeStyles.AssumeUniversal, out DateTimeOffset time))
             return time;
-        else
-            return DateTimeOffset.MinValue;
+
+        return DateTimeOffset.MinValue;
     }
 
     public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
