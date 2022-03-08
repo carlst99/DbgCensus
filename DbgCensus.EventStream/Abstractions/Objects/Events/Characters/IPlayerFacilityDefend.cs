@@ -16,7 +16,8 @@ public interface IPlayerFacilityDefend : IZoneEvent
     public uint FacilityID { get; }
 
     /// <summary>
-    /// Gets the ID of the outfit that the <see cref="CharacterID"/> belongs to.
+    /// Gets the ID of the outfit that the <see cref="CharacterID"/>
+    /// belongs to, or zero if they are not in an outfit.
     /// </summary>
     public ulong OutfitID { get; }
 }

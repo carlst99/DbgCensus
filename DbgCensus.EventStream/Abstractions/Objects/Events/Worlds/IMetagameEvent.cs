@@ -13,19 +13,24 @@ public interface IMetagameEvent : IZoneEvent
     double ExperienceBonus { get; }
 
     /// <summary>
-    /// Gets the amount of territory held by the NC at the time of this event.
+    /// Gets the percentage of territory held by the NC at the time of this event.
     /// </summary>
     double FactionNC { get; }
 
     /// <summary>
-    /// Gets the amount of territory held by the TR at the time of this event.
+    /// Gets the percentage of territory held by the TR at the time of this event.
     /// </summary>
     double FactionTR { get; }
 
     /// <summary>
-    /// Gets the amount of territory held by the VS at the time of this event.
+    /// Gets the percentage of territory held by the VS at the time of this event.
     /// </summary>
     double FactionVS { get; }
+
+    /// <summary>
+    /// Gets the instance number of this event.
+    /// </summary>
+    uint InstanceID { get; }
 
     /// <summary>
     /// Gets the ID of this metagame event.
@@ -36,4 +41,9 @@ public interface IMetagameEvent : IZoneEvent
     /// Gets the state of this event.
     /// </summary>
     MetagameEventState MetagameEventState { get; }
+
+    /// <summary>
+    /// Gets the string representation of the <see cref="MetagameEventState"/>.
+    /// </summary>
+    string MetagameEventStateName { get; }
 }
