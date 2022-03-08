@@ -31,6 +31,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
     private readonly EventHandlingClientOptions _handlingOptions;
     private readonly IPayloadHandlerTypeRepository _handlerTypeRepository;
     private readonly IPayloadTypeRepository _payloadTypeRepository;
+    private readonly IPreDispatchHandlerTypeRepository _preDispatchHandlerTypeRepository;
     private readonly ConcurrentQueue<Task> _dispatchedPayloadHandlerQueue;
     private readonly Type _myType;
     private readonly Dictionary<Type, MethodInfo> _dispatchMethods;
@@ -54,7 +55,8 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
     /// <param name="jsonSerializerOptions">The JSON serializer options to use when de/serializing payloads.</param>
     /// <param name="memoryStreamPool">The memory stream pool.</param>
     /// <param name="handlerTypeRepository">The payload handler type repository.</param>
-    /// <param name="payloadTypeRepository">The payload type repository types.</param>
+    /// <param name="payloadTypeRepository">The payload type repository.</param>
+    /// <param name="preDispatchHandlerTypeRepository">The pre-dispatch handler type repository.</param>
     public EventHandlingEventStreamClient
     (
         string name,
@@ -65,7 +67,8 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
         IOptionsMonitor<JsonSerializerOptions> jsonSerializerOptions,
         RecyclableMemoryStreamManager memoryStreamPool,
         IPayloadHandlerTypeRepository handlerTypeRepository,
-        IPayloadTypeRepository payloadTypeRepository
+        IPayloadTypeRepository payloadTypeRepository,
+        IPreDispatchHandlerTypeRepository preDispatchHandlerTypeRepository
     )
         : base(name, logger, services, baseOptions, jsonSerializerOptions, memoryStreamPool)
     {
@@ -73,6 +76,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
         _handlingOptions = handlingOptions.Value;
         _handlerTypeRepository = handlerTypeRepository;
         _payloadTypeRepository = payloadTypeRepository;
+        _preDispatchHandlerTypeRepository = preDispatchHandlerTypeRepository;
         _myType = typeof(EventHandlingEventStreamClient);
         _dispatchMethods = new Dictionary<Type, MethodInfo>();
 
@@ -96,33 +100,59 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
         CancellationToken ct = default
     ) where T : IPayload
     {
-        IReadOnlyList<Type> handlerTypes = _handlerTypeRepository.GetHandlerTypes<T>();
-        if (handlerTypes.Count == 0)
-            return;
+        AsyncServiceScope scope = _services.CreateAsyncScope();
 
-        await Task.WhenAll
-        (
-            handlerTypes.Select
-            (
-                async h =>
+        try
+        {
+            scope.ServiceProvider.GetRequiredService<PayloadContextInjectionService>().Context = context;
+
+            IReadOnlyList<Type> preDispatchHandlerTypes = _preDispatchHandlerTypeRepository.GetAll();
+            foreach (Type preDType in preDispatchHandlerTypes)
+            {
+                IPreDispatchHandler preDispatchHandler = (IPreDispatchHandler)scope.ServiceProvider.GetRequiredService(preDType);
+
+                try
                 {
-                    await using AsyncServiceScope scope = _services.CreateAsyncScope();
-
-                    scope.ServiceProvider.GetRequiredService<PayloadContextInjectionService>().Context = context;
-                    IPayloadHandler<T> handler = (IPayloadHandler<T>)scope.ServiceProvider.GetRequiredService(h);
-
-                    try
-                    {
-                        await handler.HandleAsync(payload, ct).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to execute event handler");
-                        throw;
-                    }
+                    (bool prevent, payload) = await preDispatchHandler.HandlePayloadAsync(payload, ct);
+                    if (prevent)
+                        return;
                 }
-            )
-        ).ConfigureAwait(false);
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to execute pre-dispatch handler");
+                    throw;
+                }
+            }
+
+            IReadOnlyList<Type> handlerTypes = _handlerTypeRepository.GetHandlerTypes<T>();
+            if (handlerTypes.Count == 0)
+                return;
+
+            await Task.WhenAll
+            (
+                handlerTypes.Select
+                (
+                    async h =>
+                    {
+                        IPayloadHandler<T> handler = (IPayloadHandler<T>)scope.ServiceProvider.GetRequiredService(h);
+
+                        try
+                        {
+                            await handler.HandleAsync(payload, ct);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to execute event handler");
+                            throw;
+                        }
+                    }
+                )
+            );
+        }
+        finally
+        {
+            await scope.DisposeAsync();
+        }
     }
 
     /// <inheritdoc />
@@ -400,7 +430,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
         if (_dispatchMethods.ContainsKey(abstractType))
             return _dispatchMethods[abstractType];
 
-        MethodInfo? dispatchMethod = _myType.GetMethod(nameof(DispatchPayloadAsync), BindingFlags.NonPublic | BindingFlags.Instance);
+        MethodInfo? dispatchMethod = _myType.GetMethod(nameof(DispatchPayloadAsync), BindingFlags.Public | BindingFlags.Instance);
         if (dispatchMethod is null)
         {
             MissingMethodException ex = new(nameof(EventHandlingEventStreamClient), nameof(DispatchPayloadAsync));

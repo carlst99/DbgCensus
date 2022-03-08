@@ -31,7 +31,16 @@ public static class IServiceCollectionExtensions
     /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
     public static IServiceCollection AddCensusEventHandlingServices(this IServiceCollection serviceCollection)
     {
-        serviceCollection.TryAddSingleton<IPayloadHandlerTypeRepository>(s => s.GetRequiredService<IOptions<PayloadHandlerTypeRepository>>().Value);
+        serviceCollection.TryAddSingleton<IPayloadHandlerTypeRepository>
+        (
+            s => s.GetRequiredService<IOptions<PayloadHandlerTypeRepository>>().Value
+        );
+
+        serviceCollection.TryAddSingleton<IPreDispatchHandlerTypeRepository>
+        (
+            s => s.GetRequiredService<IOptions<PreDispatchHandlerTypeRepository>>().Value
+        );
+
         serviceCollection.TryAddSingleton<IPayloadTypeRepository>(s => s.GetRequiredService<IOptions<PayloadTypeRepository>>().Value);
 
         serviceCollection.TryAddScoped<PayloadContextInjectionService>();
@@ -49,7 +58,8 @@ public static class IServiceCollectionExtensions
                 s.GetRequiredService<IOptionsMonitor<JsonSerializerOptions>>(),
                 s.GetRequiredService<RecyclableMemoryStreamManager>(),
                 s.GetRequiredService<IPayloadHandlerTypeRepository>(),
-                s.GetRequiredService<IPayloadTypeRepository>()
+                s.GetRequiredService<IPayloadTypeRepository>(),
+                s.GetRequiredService<IPreDispatchHandlerTypeRepository>()
             )
         );
 
@@ -92,7 +102,8 @@ public static class IServiceCollectionExtensions
     /// <typeparam name="THandler">The handler type.</typeparam>
     /// <param name="serviceCollection">The service collection.</param>
     /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
-    public static IServiceCollection AddPayloadHandler<THandler>(this IServiceCollection serviceCollection) where THandler : IPayloadHandler
+    public static IServiceCollection AddPayloadHandler<THandler>(this IServiceCollection serviceCollection)
+        where THandler : IPayloadHandler
     {
         Type handlerType = typeof(THandler);
 
@@ -107,7 +118,24 @@ public static class IServiceCollectionExtensions
 
         serviceCollection.AddScoped(handlerType);
 
-        serviceCollection.Configure<PayloadHandlerTypeRepository>(e => e.RegisterHandler<THandler>());
+        serviceCollection.Configure<PayloadHandlerTypeRepository>(r => r.RegisterHandler<THandler>());
+
+        return serviceCollection;
+    }
+
+    /// <summary>
+    /// Adds an <see cref="IPreDispatchHandler"/> to the service collection.
+    /// </summary>
+    /// <typeparam name="THandler">The handler type.</typeparam>
+    /// <param name="serviceCollection">The service collection.</param>
+    /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
+    public static IServiceCollection RegisterPreDispatchHandler<THandler>(this IServiceCollection serviceCollection)
+        where THandler : IPreDispatchHandler
+    {
+        Type handlerType = typeof(THandler);
+
+        serviceCollection.AddScoped(handlerType);
+        serviceCollection.Configure<PreDispatchHandlerTypeRepository>(r => r.Register<THandler>());
 
         return serviceCollection;
     }

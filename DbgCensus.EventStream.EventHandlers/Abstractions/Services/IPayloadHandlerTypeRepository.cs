@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace DbgCensus.EventStream.EventHandlers.Abstractions.Services;
 
 /// <summary>
-/// Represents an interface for mapping types that implement <see cref="IPayloadHandler{T}"/>.
+/// Represents an interface for storing types that implement <see cref="IPayloadHandler{T}"/>.
 /// </summary>
 public interface IPayloadHandlerTypeRepository
 {
