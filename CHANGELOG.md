@@ -4,6 +4,13 @@ Date format: DD/MM/YYYY
 
 ## 08/03/2022
 
+#### EventStream.EventHandlers-v2.4.0
+
+- Fixed event dispatching!
+- Added pre-dispatch event handlers.
+
+---
+
 #### EventStream-v2.3.0
 
 - Added the `InstanceID` and `MetagameEventStateName` properties to `IMetagameEvent`.
