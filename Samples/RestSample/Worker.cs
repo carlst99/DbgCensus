@@ -46,13 +46,13 @@ public class Worker : BackgroundService
             Character? character = await _queryService.GetAsync<Character>(query, ct).ConfigureAwait(false);
             if (character is null)
             {
-                _logger.LogInformation("That character does not exist.");
+                _logger.LogInformation("That character does not exist");
                 return;
             }
 
             _logger.LogInformation
             (
-                "The character {name} of the {faction} is battle rank {rank}~{asp} with {certs} certs available. They last logged in on {lastLogin}",
+                "The character {Name} of the {Faction} is battle rank {Rank}~{Asp} with {Certs} certs available. They last logged in on {LastLogin}",
                 character.Name.First,
                 character.FactionId,
                 character.BattleRank.Value,
@@ -63,7 +63,7 @@ public class Worker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to retrieve character.");
+            _logger.LogError(ex, "Failed to retrieve character");
         }
     }
 
@@ -75,11 +75,11 @@ public class Worker : BackgroundService
         {
             ulong count = await _queryService.CountAsync("character", ct).ConfigureAwait(false);
 
-            _logger.LogInformation("There are {count} elements in the character collection", count);
+            _logger.LogInformation("There are {Count} elements in the character collection", count);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to retrieve character collection count.");
+            _logger.LogError(ex, "Failed to retrieve character collection count");
         }
     }
 
@@ -96,11 +96,11 @@ public class Worker : BackgroundService
                 return;
             }
 
-            _logger.LogInformation("Values: {values}", string.Join(", ", uniqueStackSizes));
+            _logger.LogInformation("Values: {Values}", string.Join(", ", uniqueStackSizes));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to retrieve distinct values.");
+            _logger.LogError(ex, "Failed to retrieve distinct values");
         }
     }
 
@@ -142,13 +142,13 @@ public class Worker : BackgroundService
             OutfitOnlineMembers? outfit = await _queryService.GetAsync<OutfitOnlineMembers>(query, ct).ConfigureAwait(false);
             if (outfit is null)
             {
-                _logger.LogInformation("That outfit does not exist.");
+                _logger.LogInformation("That outfit does not exist");
                 return;
             }
 
             _logger.LogInformation
             (
-                "The outfit [{alias}] {name} has {onlineCount} members online: {onlineMembers}",
+                "The outfit [{Alias}] {Name} has {OnlineCount} members online: {OnlineMembers}",
                 outfit.OutfitAlias,
                 outfit.OutfitName,
                 outfit.OnlineMembers is null ? "none" : outfit.OnlineMembers.Count,
@@ -157,7 +157,7 @@ public class Worker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to retrieve character.");
+            _logger.LogError(ex, "Failed to retrieve character");
         }
     }
 
@@ -165,13 +165,13 @@ public class Worker : BackgroundService
     {
         const WorldDefinition world = WorldDefinition.Connery;
 
-        IEnumerable<ushort> zones = new ZoneDefinition[]
+        IEnumerable<ushort> zones = new[]
         {
                 ZoneDefinition.Amerish,
                 ZoneDefinition.Esamir,
                 ZoneDefinition.Hossin,
                 ZoneDefinition.Indar,
-                ZoneDefinition.Koltyr
+                ZoneDefinition.Oshur
         }.Cast<ushort>();
 
         IQueryBuilder query = _queryService.CreateQuery()
@@ -200,7 +200,7 @@ public class Worker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to retrieve maps.");
+            _logger.LogError(ex, "Failed to retrieve maps");
         }
     }
 }
