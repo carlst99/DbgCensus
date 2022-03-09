@@ -26,11 +26,11 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        await GetMapStatus(ct).ConfigureAwait(false);
-        await GetCharacter(ct).ConfigureAwait(false);
-        await GetCharacterCollectionCount(ct).ConfigureAwait(false);
-        await GetItemMaxStackSizeDistinctValues(ct).ConfigureAwait(false);
-        await GetOnlineOutfitMembers(ct).ConfigureAwait(false);
+        await GetMapStatus(ct);
+        await GetCharacter(ct);
+        await GetCharacterCollectionCount(ct);
+        await GetItemMaxStackSizeDistinctValues(ct);
+        await GetOnlineOutfitMembers(ct);
     }
 
     private async Task GetCharacter(CancellationToken ct = default)
@@ -43,7 +43,7 @@ public class Worker : BackgroundService
 
         try
         {
-            Character? character = await _queryService.GetAsync<Character>(query, ct).ConfigureAwait(false);
+            Character? character = await _queryService.GetAsync<Character>(query, ct);
             if (character is null)
             {
                 _logger.LogInformation("That character does not exist");
@@ -73,7 +73,7 @@ public class Worker : BackgroundService
 
         try
         {
-            ulong count = await _queryService.CountAsync("character", ct).ConfigureAwait(false);
+            ulong count = await _queryService.CountAsync("character", ct);
 
             _logger.LogInformation("There are {Count} elements in the character collection", count);
         }
@@ -89,7 +89,7 @@ public class Worker : BackgroundService
 
         try
         {
-            IReadOnlyList<int>? uniqueStackSizes = await _queryService.DistinctAsync<int>("item", "max_stack_size", ct).ConfigureAwait(false);
+            IReadOnlyList<int>? uniqueStackSizes = await _queryService.DistinctAsync<int>("item", "max_stack_size", ct);
             if (uniqueStackSizes is null)
             {
                 _logger.LogInformation("Census returned no data!");
@@ -139,7 +139,7 @@ public class Worker : BackgroundService
 
         try
         {
-            OutfitOnlineMembers? outfit = await _queryService.GetAsync<OutfitOnlineMembers>(query, ct).ConfigureAwait(false);
+            OutfitOnlineMembers? outfit = await _queryService.GetAsync<OutfitOnlineMembers>(query, ct);
             if (outfit is null)
             {
                 _logger.LogInformation("That outfit does not exist");
@@ -181,7 +181,7 @@ public class Worker : BackgroundService
 
         try
         {
-            List<Map>? maps = await _queryService.GetAsync<List<Map>>(query, ct).ConfigureAwait(false);
+            List<Map>? maps = await _queryService.GetAsync<List<Map>>(query, ct);
             if (maps is null)
                 throw new CensusException("Census returned no data");
 
