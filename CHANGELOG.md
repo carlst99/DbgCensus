@@ -10,6 +10,7 @@ Date format: DD/MM/YYYY
   - A Census response containing no elements returns the `default` type.
   - A Census response containing only one element returns the deserialized value of that element.
   - A Census response containing multiple elements returns the deserialized value of the entire element array.
+- Converted many `uint` parameters on query interfaces to `int`s.
 
 ---
 
