@@ -4,6 +4,15 @@ Date format: DD/MM/YYYY
 
 ## 09/03/2022
 
+#### Rest-v2.2.0
+
+- An exception is no longer thrown when deserializing multiple query elements to a non-enumerable type. The new behaviour is as follows:
+  - A Census response containing no elements returns the `default` type.
+  - A Census response containing only one element returns the deserialized value of that element.
+  - A Census response containing multiple elements returns the deserialized value of the entire element array.
+
+---
+
 #### EventStream.EventHandlers-v3.0.0
 
 - Added the `DefaultPayloadDispatchService`, which implements the required logic for payload dispatching. This service is registered as a singleton and can be retrieved by injecting an `IPayloadDispatchService` instance.
