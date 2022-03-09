@@ -1,11 +1,8 @@
-﻿using DbgCensus.EventStream.Abstractions.Objects;
-using DbgCensus.EventStream.Abstractions.Objects.Commands;
+﻿using DbgCensus.EventStream.Abstractions.Objects.Commands;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
 using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 using DbgCensus.EventStream.EventHandlers.Abstractions.Services;
 using DbgCensus.EventStream.EventHandlers.Objects;
-using DbgCensus.EventStream.EventHandlers.Services;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IO;
@@ -13,7 +10,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
@@ -23,17 +19,16 @@ namespace DbgCensus.EventStream.EventHandlers;
 
 /// <summary>
 /// <inheritdoc cref="BaseEventStreamClient" />
-/// Events are dispatched to registered instances of <see cref="IPayloadHandler{TEvent}"/>.
+/// Events are dispatched to registered instances of <see cref="IPayloadHandler{TPayload}"/>.
 /// </summary>
-public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPayloadDispatchService
+public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
 {
     private readonly ILogger<EventHandlingEventStreamClient> _logger;
     private readonly EventHandlingClientOptions _handlingOptions;
-    private readonly IPayloadHandlerTypeRepository _handlerTypeRepository;
     private readonly IPayloadTypeRepository _payloadTypeRepository;
-    private readonly IPreDispatchHandlerTypeRepository _preDispatchHandlerTypeRepository;
+    private readonly IPayloadDispatchService _dispatchService;
     private readonly ConcurrentQueue<Task> _dispatchedPayloadHandlerQueue;
-    private readonly Type _myType;
+    private readonly Type _dispatchType;
     private readonly Dictionary<Type, MethodInfo> _dispatchMethods;
 
     private CancellationTokenSource _dispatchCts;
@@ -54,9 +49,8 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
     /// <param name="handlingOptions">The options used to configure the client.</param>
     /// <param name="jsonSerializerOptions">The JSON serializer options to use when de/serializing payloads.</param>
     /// <param name="memoryStreamPool">The memory stream pool.</param>
-    /// <param name="handlerTypeRepository">The payload handler type repository.</param>
     /// <param name="payloadTypeRepository">The payload type repository.</param>
-    /// <param name="preDispatchHandlerTypeRepository">The pre-dispatch handler type repository.</param>
+    /// <param name="dispatchService">The payload dispatch service.</param>
     public EventHandlingEventStreamClient
     (
         string name,
@@ -66,92 +60,21 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
         IOptions<EventHandlingClientOptions> handlingOptions,
         IOptionsMonitor<JsonSerializerOptions> jsonSerializerOptions,
         RecyclableMemoryStreamManager memoryStreamPool,
-        IPayloadHandlerTypeRepository handlerTypeRepository,
         IPayloadTypeRepository payloadTypeRepository,
-        IPreDispatchHandlerTypeRepository preDispatchHandlerTypeRepository
+        IPayloadDispatchService dispatchService
     )
         : base(name, logger, services, baseOptions, jsonSerializerOptions, memoryStreamPool)
     {
         _logger = logger;
         _handlingOptions = handlingOptions.Value;
-        _handlerTypeRepository = handlerTypeRepository;
         _payloadTypeRepository = payloadTypeRepository;
-        _preDispatchHandlerTypeRepository = preDispatchHandlerTypeRepository;
-        _myType = typeof(EventHandlingEventStreamClient);
+        _dispatchService = dispatchService;
+        _dispatchType = _dispatchService.GetType();
         _dispatchMethods = new Dictionary<Type, MethodInfo>();
 
         _dispatchedPayloadHandlerQueue = new ConcurrentQueue<Task>();
         _dispatchCts = new CancellationTokenSource();
         _lastSubscriptionRefresh = DateTimeOffset.UtcNow.Ticks;
-    }
-
-    /// <summary>
-    /// Dispatches an event to all appropriate payload handlers.
-    /// </summary>
-    /// <typeparam name="T">The abstract type of the payload.</typeparam>
-    /// <param name="payload">The payload to dispatch.</param>
-    /// <param name="context">The context to inject.</param>
-    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the handlers.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task DispatchPayloadAsync<T>
-    (
-        T payload,
-        IPayloadContext context,
-        CancellationToken ct = default
-    ) where T : IPayload
-    {
-        AsyncServiceScope scope = _services.CreateAsyncScope();
-
-        try
-        {
-            scope.ServiceProvider.GetRequiredService<PayloadContextInjectionService>().Context = context;
-
-            IReadOnlyList<Type> preDispatchHandlerTypes = _preDispatchHandlerTypeRepository.GetAll();
-            foreach (Type preDType in preDispatchHandlerTypes)
-            {
-                IPreDispatchHandler preDispatchHandler = (IPreDispatchHandler)scope.ServiceProvider.GetRequiredService(preDType);
-
-                try
-                {
-                    if(await preDispatchHandler.HandlePayloadAsync(payload, ct))
-                        return;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to execute pre-dispatch handler");
-                    throw;
-                }
-            }
-
-            IReadOnlyList<Type> handlerTypes = _handlerTypeRepository.GetHandlerTypes<T>();
-            if (handlerTypes.Count == 0)
-                return;
-
-            await Task.WhenAll
-            (
-                handlerTypes.Select
-                (
-                    async h =>
-                    {
-                        IPayloadHandler<T> handler = (IPayloadHandler<T>)scope.ServiceProvider.GetRequiredService(h);
-
-                        try
-                        {
-                            await handler.HandleAsync(payload, ct);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Failed to execute event handler");
-                            throw;
-                        }
-                    }
-                )
-            );
-        }
-        finally
-        {
-            await scope.DisposeAsync();
-        }
     }
 
     /// <inheritdoc />
@@ -393,7 +316,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="DispatchPayloadAsync{T}(T, IPayloadContext, CancellationToken)"/> and dispatches an event.
+    /// Dispatches a payload.
     /// </summary>
     /// <param name="abstractType">The abstract type used by payload handlers.</param>
     /// <param name="eventObject">The event object to dispatch.</param>
@@ -408,7 +331,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
     )
     {
         MethodInfo dispatchMethod = CreateDispatchMethod(abstractType);
-        Task? dispatchTask = (Task?)dispatchMethod.Invoke(this, new[] { eventObject, context, ct });
+        Task? dispatchTask = (Task?)dispatchMethod.Invoke(_dispatchService, new[] { eventObject, context, ct });
 
         if (dispatchTask is null)
         {
@@ -420,7 +343,8 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
     }
 
     /// <summary>
-    /// Constructs a <see cref="MethodInfo"/> instance of the <see cref="DispatchPayloadAsync{T}(T, IPayloadContext, CancellationToken)"/> method.
+    /// Constructs a <see cref="MethodInfo"/> instance of the
+    /// <see cref="IPayloadDispatchService.DispatchPayloadAsync{T}(T, IPayloadContext, CancellationToken)"/> method.
     /// </summary>
     /// <param name="abstractType">The abstract type used by payload handlers.</param>
     /// <returns>The method info.</returns>
@@ -429,10 +353,15 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient, IPay
         if (_dispatchMethods.ContainsKey(abstractType))
             return _dispatchMethods[abstractType];
 
-        MethodInfo? dispatchMethod = _myType.GetMethod(nameof(DispatchPayloadAsync), BindingFlags.Public | BindingFlags.Instance);
+        MethodInfo? dispatchMethod = _dispatchType.GetMethod
+        (
+            nameof(IPayloadDispatchService.DispatchPayloadAsync),
+            BindingFlags.Public | BindingFlags.Instance
+        );
+
         if (dispatchMethod is null)
         {
-            MissingMethodException ex = new(nameof(EventHandlingEventStreamClient), nameof(DispatchPayloadAsync));
+            MissingMethodException ex = new(nameof(EventHandlingEventStreamClient), nameof(IPayloadDispatchService.DispatchPayloadAsync));
             _logger.LogCritical(ex, "Failed to get the event dispatch method");
 
             throw ex;

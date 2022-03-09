@@ -41,8 +41,8 @@ public static class IServiceCollectionExtensions
             s => s.GetRequiredService<IOptions<PreDispatchHandlerTypeRepository>>().Value
         );
 
+        serviceCollection.TryAddSingleton<IPayloadDispatchService, DefaultPayloadDispatchService>();
         serviceCollection.TryAddSingleton<IPayloadTypeRepository>(s => s.GetRequiredService<IOptions<PayloadTypeRepository>>().Value);
-
         serviceCollection.TryAddScoped<PayloadContextInjectionService>();
         serviceCollection.TryAddTransient<IPayloadContext>(s => s.GetRequiredService<PayloadContextInjectionService>().Context);
 
@@ -57,9 +57,8 @@ public static class IServiceCollectionExtensions
                 s.GetRequiredService<IOptions<EventHandlingClientOptions>>(),
                 s.GetRequiredService<IOptionsMonitor<JsonSerializerOptions>>(),
                 s.GetRequiredService<RecyclableMemoryStreamManager>(),
-                s.GetRequiredService<IPayloadHandlerTypeRepository>(),
                 s.GetRequiredService<IPayloadTypeRepository>(),
-                s.GetRequiredService<IPreDispatchHandlerTypeRepository>()
+                s.GetRequiredService<IPayloadDispatchService>()
             )
         );
 
