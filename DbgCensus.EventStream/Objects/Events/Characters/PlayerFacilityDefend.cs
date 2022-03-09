@@ -23,4 +23,4 @@ public record PlayerFacilityDefend
     DateTimeOffset Timestamp,
     WorldDefinition WorldID,
     ZoneID ZoneID
-) : IPlayerFacilityCapture;
+) : IPlayerFacilityDefend;
