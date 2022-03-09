@@ -16,7 +16,7 @@ public class SnakeCaseJsonNamingPolicy : JsonNamingPolicy
 
         char? previousLetter = null;
         int lastAddedBoundary = 0;
-        for (var i = 0; i < name.Length; i++)
+        for (int i = 0; i < name.Length; i++)
         {
             char letter = name[i];
 

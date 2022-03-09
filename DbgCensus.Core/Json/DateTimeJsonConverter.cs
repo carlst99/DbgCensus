@@ -11,10 +11,10 @@ public class DateTimeJsonConverter : JsonConverter<DateTime>
     {
         if (ulong.TryParse(reader.GetString(), out ulong timestamp))
             return new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(timestamp);
-        else if (DateTime.TryParse(reader.GetString(), null, DateTimeStyles.AssumeUniversal, out DateTime time))
-            return time;
-        else
-            return DateTime.MinValue;
+
+        return DateTime.TryParse(reader.GetString(), null, DateTimeStyles.AssumeUniversal, out DateTime time)
+            ? time
+            : DateTime.MinValue;
     }
 
     public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
