@@ -31,7 +31,7 @@ public class DefaultPayloadDispatchService : IPayloadDispatchService
     private readonly IServiceProvider _services;
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="EventHandlingEventStreamClient"/> class.
+    /// Initialises a new instance of the <see cref="DefaultPayloadDispatchService"/> class.
     /// </summary>
     /// <param name="logger">The logging interface to use.</param>
     /// <param name="services">The service provider.</param>
