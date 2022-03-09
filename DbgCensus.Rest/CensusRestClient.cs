@@ -165,17 +165,13 @@ public class CensusRestClient : ICensusRestClient, IDisposable
             return countElement.Deserialize<T>(_jsonOptions);
 
         JsonElement collectionElement = GetCollectionArrayElement(data.RootElement, collectionName);
-
-        if (typeof(T).IsAssignableTo(typeof(System.Collections.IEnumerable)))
-            return collectionElement.Deserialize<T>(_jsonOptions);
-
         int length = collectionElement.GetArrayLength();
 
         return length switch
         {
-            > 1 => throw new JsonException("You are trying to deserialise to a single object, but the Census data contained more than one entity."),
             0 => default,
-            _ => collectionElement[0].Deserialize<T>(_jsonOptions)
+            1 => collectionElement[0].Deserialize<T>(_jsonOptions),
+            _ => collectionElement.Deserialize<T>(_jsonOptions)
         };
     }
 
@@ -193,7 +189,7 @@ public class CensusRestClient : ICensusRestClient, IDisposable
         ).ConfigureAwait(false);
 
         JsonValueKind dataKind = data.RootElement.ValueKind;
-        if (dataKind == JsonValueKind.Null || dataKind == JsonValueKind.Undefined)
+        if (dataKind is JsonValueKind.Null or JsonValueKind.Undefined)
             throw new CensusInvalidDataException("No data was returned.", null);
 
         if (data.RootElement.TryGetProperty("error", out JsonElement errorValue))
