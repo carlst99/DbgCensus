@@ -4,6 +4,12 @@ Date format: DD/MM/YYYY
 
 ## 09/03/2022
 
+#### EventStream-v2.3.1, EventStream.EventHandlers-v3.0.1
+
+- Fixed `PlayerFacilityDefend` inheriting from the wrong interface
+
+---
+
 #### Rest-v2.2.0
 
 - An exception is no longer thrown when deserializing multiple query elements to a non-enumerable type. The new behaviour is as follows:
