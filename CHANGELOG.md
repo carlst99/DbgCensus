@@ -4,6 +4,11 @@ Date format: DD/MM/YYYY
 
 ## 09/03/2022
 
+#### EventStream.EventHandlers-v3.0.0
+
+- Added the `DefaultPayloadDispatchService`, which implements the required logic for payload dispatching. This service is registered as a singleton and can be retrieved by injecting an `IPayloadDispatchService` instance.
+- Correspondingly, the `EventHandlingEventStreamClient` no longer implements the `IPayloadDispatchService` interface.
+
 #### Rest-v2.1.0
 
 - `ICensusRestClient` no longer inherits from `IDisposable`.
