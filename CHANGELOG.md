@@ -2,6 +2,16 @@
 
 Date format: DD/MM/YYYY
 
+## 10/03/2022
+
+#### Core-v1.3.0
+
+- Added the `Optional<TValue>` struct, which can be used in Census data models to indicate fields that may be missing (read: optional) in the response.
+
+#### EventStream-v2.3.2, EventStream.EventHandlers-v3.0.2, Rest-v2.2.1
+
+- Updated dependency on `DbgCensus.Core` to v1.3.0.
+
 ## 09/03/2022
 
 #### EventStream-v2.3.1, EventStream.EventHandlers-v3.0.1
