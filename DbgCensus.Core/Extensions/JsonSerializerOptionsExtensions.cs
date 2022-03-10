@@ -13,13 +13,12 @@ public static class JsonSerializerOptionsExtensions
     {
         options.NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals;
 
-        if (options.PropertyNamingPolicy is null)
-            options.PropertyNamingPolicy = new SnakeCaseJsonNamingPolicy();
+        options.PropertyNamingPolicy ??= new SnakeCaseJsonNamingPolicy();
 
         options.Converters.Add(new BooleanJsonConverter());
         options.Converters.Add(new JsonStringEnumConverter());
         options.Converters.Add(new ZoneIdJsonConverter());
-
+        options.Converters.Add(new OptionalJsonConverterFactory());
         options.Converters.Add(new DateTimeJsonConverter());
         options.Converters.Add(new DateTimeOffsetJsonConverter());
     }

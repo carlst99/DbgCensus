@@ -15,7 +15,7 @@ public class ZoneIdJsonConverter : JsonConverter<ZoneID>
         if (reader.TokenType is JsonTokenType.Number && reader.TryGetUInt32(out value))
             return new ZoneID(value);
 
-        return default;
+        throw new JsonException($"Could not convert token to {nameof(ZoneID)}: invalid format");
     }
 
     public override void Write(Utf8JsonWriter writer, ZoneID value, JsonSerializerOptions options)

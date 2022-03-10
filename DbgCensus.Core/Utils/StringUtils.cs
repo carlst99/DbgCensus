@@ -7,11 +7,7 @@ namespace DbgCensus.Core.Utils;
 public static class StringUtils
 {
     public static string JoinWithoutNullOrEmptyValues(char separator, params string?[] values)
-        => string.Join
-        (
-            separator,
-            values.Where(str => !string.IsNullOrEmpty(str))
-        );
+        => JoinWithoutNullOrEmptyValues(separator, (IEnumerable<string?>)values);
 
     public static string JoinWithoutNullOrEmptyValues(char separator, IEnumerable<string?> values)
         => string.Join
