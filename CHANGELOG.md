@@ -4,6 +4,12 @@ Date format: DD/MM/YYYY
 
 ## 12/03/2022
 
+#### Rest-v2.2.3
+
+- `CensusRestClient#GetPaginatedAsync` now breaks when the results count is less than the page size.
+
+---
+
 #### Core-v1.3.1
 
 - Fixed the `OptionalJsonConverter` for cases where the `Optional<T>` contained no value.

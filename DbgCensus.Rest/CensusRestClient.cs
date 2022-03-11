@@ -117,7 +117,11 @@ public class CensusRestClient : ICensusRestClient, IDisposable
             query.WithStartIndex(start);
             query.WithLimit(pageSize);
 
-            yield return await GetAsync<List<T>>(query, ct).ConfigureAwait(false);
+            List<T>? results = await GetAsync<List<T>>(query, ct).ConfigureAwait(false);
+            yield return results;
+
+            if (results is null || results.Count < pageSize)
+                break;
 
             start += pageSize;
         }
