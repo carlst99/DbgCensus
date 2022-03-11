@@ -2,6 +2,16 @@
 
 Date format: DD/MM/YYYY
 
+## 12/03/2022
+
+#### Core-v1.3.1
+
+- Fixed the `OptionalJsonConverter` for cases where the `Optional<T>` contained no value.
+
+#### EventStream-v2.3.3, EventStream.EventHandlers-v3.0.3, Rest-v2.2.2
+
+- Updated dependency on `DbgCensus.Core` to v1.3.1.
+
 ## 10/03/2022
 
 #### Core-v1.3.0
