@@ -18,6 +18,12 @@ public class OptionalJsonConverter<TValue> : JsonConverter<Optional<TValue?>>
     /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, Optional<TValue?> value, JsonSerializerOptions options)
     {
+        if (!value.HasValue)
+        {
+            writer.WriteNullValue();
+            return;
+        }
+
         if (value.Value is null)
         {
             writer.WriteNullValue();
