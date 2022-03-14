@@ -28,6 +28,6 @@ You will also need to have a good understanding of how the Census API works. I h
 The *Core* library contains common types and extensions. Of these, it is likely you will find the Census types useful (`DbgCensus.Core.Objects`). There are:
 
 - Enumerations of the faction, world, zone and metagame (definition and state) IDs that Census uses.
-- A `ZoneID` record that represents Census' special zone ID format - [see here](https://github.com/cooltrain7/Planetside-2-API-Tracker/wiki/Zone-ID-Tutorial) for more info. JSON converters are registered by default for this type, so you can use it anywhere that you would normally use an integer zone ID in your models.
+- A `ZoneID` struct that represents Census' special zone ID format - [see here](https://github.com/cooltrain7/Planetside-2-API-Tracker/wiki/Zone-ID-Tutorial) for more info. JSON converters are registered by default for this type, so you can use it anywhere that you would normally use an integer zone ID in your models.
 
 There are also converters, extensions and naming policies for `System.Text.Json` that you may find useful should you decide to perform your own JSON deserialisation.

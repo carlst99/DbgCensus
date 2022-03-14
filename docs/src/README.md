@@ -9,6 +9,9 @@ actions:
   - text: Get Started with Querying
     link: /rest/
     type: primary
+  - text: Get Started with Event Streaming
+    link: /realtime/
+    type: primary
 features:
     - title: Modern Design
       details: Fully asynchronous, built around the Microsoft.Extensions frameworks and targeting .NET 6.

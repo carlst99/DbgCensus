@@ -62,7 +62,7 @@ public static class Program
                 (
                     o =>
                     {
-                        o.DeserializationOptions = new JsonSerializerOptions(...);
+                        o.LanguageCode = CensusLanguage.English
                         // Etc.
                     }
                 );

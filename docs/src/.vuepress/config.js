@@ -18,6 +18,10 @@ module.exports = {
         {
           text: 'Making Queries',
           link: '/rest/'
+        },
+        {
+          text: 'Event Streaming',
+          link: '/realtime'
         }
       ]
     },
