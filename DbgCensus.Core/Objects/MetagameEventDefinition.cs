@@ -47,5 +47,6 @@ public enum MetagameEventDefinition : uint
     ConquestKoltyr = 215,
     NCMeltdownOshur = 222,
     TRMeltdownOshur = 223,
-    VSMeltdownOshur = 224
+    VSMeltdownOshur = 224,
+    ConquestOshur = 226
 }
