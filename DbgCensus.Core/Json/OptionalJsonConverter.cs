@@ -5,6 +5,8 @@ using System.Text.Json.Serialization;
 
 namespace DbgCensus.Core.Json;
 
+// TODO: Fix. See BerryBrowser for error repro.
+
 /// <summary>
 /// Converts an <see cref="Optional{TValue}"/> to/from JSON.
 /// </summary>

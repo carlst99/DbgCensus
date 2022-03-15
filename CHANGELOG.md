@@ -2,6 +2,12 @@
 
 Date format: DD/MM/YYYY
 
+## 15/03/2022
+
+#### Core-v1.3.2
+
+- Added the Oshur Conquest alert definition (226).
+
 ## 12/03/2022
 
 #### Rest-v2.2.3
