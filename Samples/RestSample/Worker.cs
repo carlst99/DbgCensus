@@ -17,11 +17,18 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IQueryService _queryService;
+    private readonly IHostApplicationLifetime _lifetime;
 
-    public Worker(ILogger<Worker> logger, IQueryService queryService)
+    public Worker
+    (
+        ILogger<Worker> logger,
+        IQueryService queryService,
+        IHostApplicationLifetime lifetime
+    )
     {
         _logger = logger;
         _queryService = queryService;
+        _lifetime = lifetime;
     }
 
     protected override async Task ExecuteAsync(CancellationToken ct)
@@ -31,6 +38,9 @@ public class Worker : BackgroundService
         await GetCharacterCollectionCount(ct);
         await GetItemMaxStackSizeDistinctValues(ct);
         await GetOnlineOutfitMembers(ct);
+
+        _logger.LogInformation("Done!");
+        _lifetime.StopApplication();
     }
 
     private async Task GetCharacter(CancellationToken ct = default)
