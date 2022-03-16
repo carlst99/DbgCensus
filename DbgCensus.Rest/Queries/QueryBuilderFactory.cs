@@ -8,13 +8,17 @@ namespace DbgCensus.Rest.Queries;
 /// </summary>
 public sealed class QueryBuilderFactory : IQueryBuilderFactory
 {
-    private readonly CensusQueryOptions _defaultOptions;
+    private readonly IOptionsMonitor<CensusQueryOptions> _defaultOptions;
 
-    public QueryBuilderFactory(IOptions<CensusQueryOptions> queryOptions)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="QueryBuilderFactory"/> class.
+    /// </summary>
+    /// <param name="queryOptions">The default query options to use.</param>
+    public QueryBuilderFactory(IOptionsMonitor<CensusQueryOptions> queryOptions)
     {
-        _defaultOptions = queryOptions.Value;
+        _defaultOptions = queryOptions;
     }
 
     /// <inheritdoc />
-    public IQueryBuilder Get(CensusQueryOptions? options = null) => new QueryBuilder(options ?? _defaultOptions);
+    public IQueryBuilder Get(CensusQueryOptions? options = null) => new QueryBuilder(options ?? _defaultOptions.CurrentValue);
 }

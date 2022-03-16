@@ -11,7 +11,7 @@ namespace DbgCensus.Rest.Queries;
 /// </summary>
 public sealed class QueryBuilder : IQueryBuilder
 {
-    private readonly string _rootEndpoint;
+    private readonly CensusQueryOptions _queryOptions;
     private readonly List<QueryFilter> _filters;
     private readonly MultiQueryCommandFormatter<QueryResolve> _resolves;
     private readonly MultiQueryCommandFormatter<string> _hasFields;
@@ -40,14 +40,12 @@ public sealed class QueryBuilder : IQueryBuilder
     /// <summary>
     /// Provides functions to build a query string for the Census REST API.
     /// </summary>
-    /// <param name="serviceId">A Census service ID.</param>
-    /// <param name="censusNamespace">The Census namespace to query.</param>
-    /// <param name="rootEndpoint">The root endpoint of the Census REST API.</param>
-    public QueryBuilder(string serviceId, string censusNamespace, string rootEndpoint = "https://census.daybreakgames.com")
+    /// <param name="queryOptions">The default configuration for the query.</param>
+    public QueryBuilder(CensusQueryOptions queryOptions)
     {
-        _rootEndpoint = rootEndpoint;
-        _serviceId = serviceId;
-        _queryNamespace = censusNamespace;
+        _queryOptions = queryOptions;
+        _serviceId = queryOptions.ServiceId;
+        _queryNamespace = queryOptions.Namespace;
 
         _filters = new List<QueryFilter>();
         _resolves = GetMultiQCF<QueryResolve>("c:resolve");
@@ -70,30 +68,18 @@ public sealed class QueryBuilder : IQueryBuilder
         _verb = QueryType.Get;
         _showHideFields = GetMultiQCF<string>("c:show");
 
-        WithLimit(100);
-    }
+        if (queryOptions.LanguageCode is not null)
+            WithLanguage(queryOptions.LanguageCode);
 
-    /// <summary>
-    /// Provides functions to build a query string for the Census REST API.
-    /// </summary>
-    /// <param name="options">Default configuration for the query.</param>
-    public QueryBuilder(CensusQueryOptions options)
-        : this(options.ServiceId, options.Namespace, options.RootEndpoint)
-    {
-        if (options.LanguageCode is not null)
-            WithLanguage(options.LanguageCode);
-
-        if (options.Limit is not null)
-            WithLimit((int)options.Limit);
+        if (queryOptions.Limit is not null)
+            WithLimit((int)queryOptions.Limit);
     }
 
     /// <inheritdoc />
     public Uri ConstructEndpoint()
     {
-        UriBuilder builder = new(_rootEndpoint)
-        {
-            Path = $"s:{_serviceId}/{_verb.Value}/{_queryNamespace}"
-        };
+        UriBuilder builder = new(_queryOptions.RootEndpoint);
+        builder.Path += $"/s:{_serviceId}/{_verb.Value}/{_queryNamespace}";
 
         if (CollectionName is not null)
             builder.Path += $"/{CollectionName}";
