@@ -1,8 +1,10 @@
 ﻿using DbgCensus.Rest.Abstractions;
 using DbgCensus.Rest.Abstractions.Queries;
+using DbgCensus.Rest.Polly;
 using DbgCensus.Rest.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Contrib.WaitAndRetry;
 using System;
@@ -27,7 +29,7 @@ public static class IServiceCollectionExtensions
         );
 
         serviceCollection.AddHttpClient<ICensusRestClient, CensusRestClient>()
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler {AllowAutoRedirect = false})
             .AddTransientHttpErrorPolicy
             (
                 builder => builder.WaitAndRetryAsync
@@ -38,6 +40,13 @@ public static class IServiceCollectionExtensions
             .AddTransientHttpErrorPolicy
             (
                 builder => builder.CircuitBreakerAsync(4, TimeSpan.FromSeconds(30))
+            )
+            .AddPolicyHandler
+            (
+                (s, b) => new ServiceIDRotationPolicy<HttpResponseMessage>
+                    (
+                        s.GetRequiredService<IOptionsMonitor<CensusQueryOptions>>()
+                    )
             );
 
         serviceCollection.TryAddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();

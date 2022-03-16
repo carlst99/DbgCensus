@@ -1,4 +1,6 @@
-﻿namespace DbgCensus.Rest;
+﻿using System.Collections.Generic;
+
+namespace DbgCensus.Rest;
 
 public class CensusQueryOptions
 {
@@ -11,6 +13,11 @@ public class CensusQueryOptions
     /// The service ID used to authenticate with the Census API.
     /// </summary>
     public string ServiceId { get; set; }
+
+    /// <summary>
+    /// Gets a list of service IDs that can be used to authenticate with the Census API.
+    /// </summary>
+    public List<string> ServiceIDs { get; }
 
     /// <summary>
     /// The Census namespace to retrieve data from.
@@ -31,6 +38,7 @@ public class CensusQueryOptions
     {
         RootEndpoint = "https://census.daybreakgames.com";
         ServiceId = "example";
+        ServiceIDs = new List<string>();
         Namespace = "ps2";
     }
 }

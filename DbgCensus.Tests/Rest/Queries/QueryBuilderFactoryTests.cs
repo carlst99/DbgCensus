@@ -1,5 +1,6 @@
 ﻿using DbgCensus.Rest;
 using DbgCensus.Rest.Abstractions.Queries;
+using DbgCensus.Rest.Objects;
 using DbgCensus.Rest.Queries;
 using Microsoft.Extensions.Options;
 using Xunit;
