@@ -22,9 +22,9 @@ public static class IServiceCollectionExtensions
     /// Adds required services for interacting with the Census REST API.
     /// </summary>
     /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
-    /// <param name="maxRetryAttempts">The maximum number of times a query may be retried on failure.</param>
+    /// <param name="maxRetryAttempts">The maximum number of times that a query may be retried on failure.</param>
     /// <param name="useCircuitBreakerPolicy">
-    /// A value indicating whether or not the circuit breaker policy should be used.
+    /// A value indicating whether or not the circuit breaker policy will be used.
     /// If true, more than <paramref name="maxRetryAttempts"/> failures will cause
     /// all query requests to be blocked for 15s.
     /// </param>
