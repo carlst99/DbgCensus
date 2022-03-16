@@ -2,6 +2,13 @@
 
 Date format: DD/MM/YYYY
 
+## XX/03/2022
+
+#### Rest-v2.3.0
+
+- Shifted the `CensusLanguage` and `CensusNamespace` types to the `DbgCensus.Rest.Objects` namespace.
+- Updated dependency on `DbgCensus.Core` v1.3.2
+
 ## 15/03/2022
 
 #### Core-v1.3.2

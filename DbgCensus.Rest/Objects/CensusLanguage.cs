@@ -1,4 +1,4 @@
-﻿namespace DbgCensus.Rest;
+﻿namespace DbgCensus.Rest.Objects;
 
 /// <summary>
 /// Contains constant fields for the various Census language codes.
