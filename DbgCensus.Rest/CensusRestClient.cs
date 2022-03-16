@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace DbgCensus.Rest;
 
 /// <inheritdoc cref="ICensusRestClient" />
-public class CensusRestClient : ICensusRestClient, IDisposable
+public class CensusRestClient : ICensusRestClient
 {
     protected readonly ILogger<CensusRestClient> _logger;
     protected readonly HttpClient _client;
@@ -79,11 +79,16 @@ public class CensusRestClient : ICensusRestClient, IDisposable
     (
         string collectionName,
         string fieldName,
+        int limit = ICensusRestClient.DistinctLimit,
         CancellationToken ct = default
     )
     {
+        if (limit > ICensusRestClient.DistinctLimit || limit < 0)
+            throw new ArgumentOutOfRangeException(nameof(limit), limit, $"The limit may not be larger than {ICensusRestClient.DistinctLimit} or smaller than 0.");
+
         IQueryBuilder query = _queryFactory.Get()
             .OnCollection(collectionName)
+            .WithLimit(limit)
             .WithDistinctFieldValues(fieldName);
 
         using HttpResponseMessage response = await PerformQueryAsync(query.ConstructEndpoint().AbsoluteUri, ct).ConfigureAwait(false);
@@ -127,13 +132,6 @@ public class CensusRestClient : ICensusRestClient, IDisposable
         }
     }
 
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
     protected virtual async Task<HttpResponseMessage> PerformQueryAsync(string query, CancellationToken ct)
     {
         _logger.LogTrace("Performing GET request with query: {Query}", query);
@@ -150,11 +148,11 @@ public class CensusRestClient : ICensusRestClient, IDisposable
     /// <summary>
     /// Performs checks on the returned data and deserializes it.
     /// </summary>
-    /// <typeparam name="T">The POCO type to deserialize to.</typeparam>
+    /// <typeparam name="T">The type to deserialize to.</typeparam>
     /// <param name="content">The result of the REST request.</param>
     /// <param name="collectionName">The name of the collection that was queried.</param>
     /// <param name="ct">A token which can be used to cancel asynchronous logic.</param>
-    /// <returns></returns>
+    /// <returns>The deserialized value.</returns>
     protected virtual async Task<T?> DeserializeResponseContentAsync<T>
     (
         HttpContent content,
@@ -171,10 +169,13 @@ public class CensusRestClient : ICensusRestClient, IDisposable
         JsonElement collectionElement = GetCollectionArrayElement(data.RootElement, collectionName);
         int length = collectionElement.GetArrayLength();
 
+        if (typeof(T) == typeof(JsonDocument))
+            return collectionElement.Deserialize<T>(_jsonOptions);
+
         return length switch
         {
             0 => default,
-            1 => collectionElement[0].Deserialize<T>(_jsonOptions),
+            1 when !typeof(T).IsAssignableTo(typeof(System.Collections.IEnumerable)) => collectionElement[0].Deserialize<T>(_jsonOptions),
             _ => collectionElement.Deserialize<T>(_jsonOptions)
         };
     }
@@ -226,7 +227,7 @@ public class CensusRestClient : ICensusRestClient, IDisposable
         return data;
     }
 
-    protected virtual JsonElement GetCollectionArrayElement(JsonElement rootElement, string collectionName)
+    protected JsonElement GetCollectionArrayElement(JsonElement rootElement, string collectionName)
     {
         if (!rootElement.TryGetProperty(collectionName + "_list", out JsonElement collectionElement))
         {
@@ -236,24 +237,9 @@ public class CensusRestClient : ICensusRestClient, IDisposable
             throw new CensusInvalidDataException("Returned data was not in the expected format.", rawJson);
         }
 
-        if (collectionElement.ValueKind != JsonValueKind.Array)
+        if (collectionElement.ValueKind is not JsonValueKind.Array)
             throw new CensusInvalidDataException("The Census result was expected to contain an array of data.", rootElement.GetRawText());
 
         return collectionElement;
-    }
-
-    /// <summary>
-    /// Disposes managed and unmanaged resources.
-    /// </summary>
-    /// <param name="disposing">A value indicating whether or not to dispose managed resources.</param>
-    protected virtual void Dispose(bool disposing)
-    {
-        if (IsDisposed)
-            return;
-
-        if (disposing)
-            _client.Dispose();
-
-        IsDisposed = true;
     }
 }

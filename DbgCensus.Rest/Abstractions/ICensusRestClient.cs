@@ -11,6 +11,12 @@ namespace DbgCensus.Rest.Abstractions;
 public interface ICensusRestClient
 {
     /// <summary>
+    /// Gets the maximum number of elements that may be returned in a query
+    /// that uses the c:distinct command. This limit is enforced by Census.
+    /// </summary>
+    protected const int DistinctLimit = 20000;
+
+    /// <summary>
     /// Performs a query on the Census REST API.
     /// </summary>
     /// <typeparam name="T">The type to deserialise the response to.</typeparam>
@@ -43,17 +49,19 @@ public interface ICensusRestClient
     Task<ulong> CountAsync(string collectionName, CancellationToken ct = default);
 
     /// <summary>
-    /// Gets all the distinct values of a collection field. Limited to 20000 results.
+    /// Gets all the distinct values of a collection field. Limited by Census to 20000 results.
     /// </summary>
     /// <typeparam name="T">The type of the field.</typeparam>
     /// <param name="collectionName">The collection.</param>
     /// <param name="fieldName">The field.</param>
+    /// <param name="limit">The maximum number of items to return.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
     /// <returns>A list of all the distinct values.</returns>
     Task<IReadOnlyList<T>?> DistinctAsync<T>
     (
         string collectionName,
         string fieldName,
+        int limit = DistinctLimit,
         CancellationToken ct = default
     );
 

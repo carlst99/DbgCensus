@@ -42,7 +42,7 @@ public class QueryService : IQueryService
         string fieldName,
         CancellationToken ct = default
     )
-        => await _client.DistinctAsync<T>(collectionName, fieldName, ct).ConfigureAwait(false);
+        => await _client.DistinctAsync<T>(collectionName, fieldName, ct: ct).ConfigureAwait(false);
 
     /// <inheritdoc />
     public virtual IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>

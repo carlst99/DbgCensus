@@ -10,19 +10,31 @@ using Polly.Extensions.Http;
 using System;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 
 namespace DbgCensus.Rest.Extensions;
 
 public static class IServiceCollectionExtensions
 {
-    private static int _serviceIDIndex;
+    private static volatile int _serviceIDIndex;
 
     /// <summary>
     /// Adds required services for interacting with the Census REST API.
     /// </summary>
     /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
+    /// <param name="maxRetryAttempts">The maximum number of times a query may be retried on failure.</param>
+    /// <param name="useCircuitBreakerPolicy">
+    /// A value indicating whether or not the circuit breaker policy should be used.
+    /// If true, more than <paramref name="maxRetryAttempts"/> failures will cause
+    /// all query requests to be blocked for 15s.
+    /// </param>
     /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
-    public static IServiceCollection AddCensusRestServices(this IServiceCollection serviceCollection)
+    public static IServiceCollection AddCensusRestServices
+    (
+        this IServiceCollection serviceCollection,
+        int maxRetryAttempts = 4,
+        bool useCircuitBreakerPolicy = true
+    )
     {
         serviceCollection.Configure<JsonSerializerOptions>
         (
@@ -30,35 +42,42 @@ public static class IServiceCollectionExtensions
             o => o.AddCensusDeserializationOptions()
         );
 
-        serviceCollection.AddHttpClient<ICensusRestClient, CensusRestClient>()
+        IHttpClientBuilder httpBuilder = serviceCollection.AddHttpClient<ICensusRestClient, CensusRestClient>()
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false })
             .AddPolicyHandler
             (
                 (services, _) => HttpPolicyExtensions.HandleTransientHttpError()
                     .WaitAndRetryAsync
                     (
-                        Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromSeconds(1), 4),
+                        Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromSeconds(1), maxRetryAttempts),
                         onRetry: (_, _, retryAttempt, _) =>
                         {
-                            if (retryAttempt != 4)
+                            if (retryAttempt != maxRetryAttempts)
                                 return;
 
                             CensusQueryOptions qOptions = services.GetRequiredService<IOptionsMonitor<CensusQueryOptions>>().CurrentValue;
                             if (qOptions.ServiceIDs.Count == 0)
                                 return;
 
-                            _serviceIDIndex++;
-                            if (_serviceIDIndex >= qOptions.ServiceIDs.Count)
-                                _serviceIDIndex = 0;
+                            int serviceIDIndex = Interlocked.Increment(ref _serviceIDIndex);
+                            if (serviceIDIndex >= qOptions.ServiceIDs.Count)
+                            {
+                                Interlocked.Exchange(ref _serviceIDIndex, 0);
+                                serviceIDIndex = 0;
+                            }
 
-                            qOptions.ServiceId = qOptions.ServiceIDs[_serviceIDIndex];
+                            qOptions.ServiceId = qOptions.ServiceIDs[serviceIDIndex];
                         }
                     )
-            )
-            .AddTransientHttpErrorPolicy
+            );
+
+        if (useCircuitBreakerPolicy)
+        {
+            httpBuilder.AddTransientHttpErrorPolicy
             (
                 builder => builder.CircuitBreakerAsync(4, TimeSpan.FromSeconds(15))
             );
+        }
 
         serviceCollection.TryAddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
         serviceCollection.TryAddTransient<IQueryService, QueryService>();

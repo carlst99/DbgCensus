@@ -4,12 +4,16 @@ Date format: DD/MM/YYYY
 
 ## XX/03/2022
 
-#### Rest-v2.3.0
+#### Rest-v3.0.0
 
 - Added a service ID rotation Polly policy. Populate the `CensusQueryOptions.ServiceIDs` array with all service IDs that you want to rotate through, and they will be rotated in order when a Census REST request fails. May be useful if you are seeing a large number of connection resets.
+- Fixed deserialization to enumerable types when only one element was returned by the query.
 - Added support for changing query options at runtime in the QueryBuilderFactory by using IOptionsMonitor.
-- Removed the `QueryBuilder(string serviceID, string censusNamespace, string rootEndpoint)` constructor.
 - Shifted the `CensusLanguage` and `CensusNamespace` types to the `DbgCensus.Rest.Objects` namespace.
+- Use of Polly policies can now be configured when calling `AddCensusRestServices`.
+- Removed the `QueryBuilder(string serviceID, string censusNamespace, string rootEndpoint)` constructor.
+- The `CensusRestClient` is no longer disposable.
+- Allow a limit to be specified in `ICensusRestClient#DistinctAsync`.
 - Updated dependency on `DbgCensus.Core` v1.3.2
 
 ## 15/03/2022
