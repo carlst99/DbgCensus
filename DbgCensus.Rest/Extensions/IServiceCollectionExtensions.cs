@@ -37,7 +37,7 @@ public static class IServiceCollectionExtensions
             )
             .AddTransientHttpErrorPolicy
             (
-                builder => builder.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30))
+                builder => builder.CircuitBreakerAsync(4, TimeSpan.FromSeconds(30))
             );
 
         serviceCollection.TryAddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
