@@ -79,7 +79,7 @@ public sealed class QueryBuilder : IQueryBuilder
     public Uri ConstructEndpoint()
     {
         UriBuilder builder = new(_queryOptions.RootEndpoint);
-        builder.Path += $"/s:{_serviceId}/{_verb.Value}/{_queryNamespace}";
+        builder.Path += $"s:{_serviceId}/{_verb.Value}/{_queryNamespace}";
 
         if (CollectionName is not null)
             builder.Path += $"/{CollectionName}";

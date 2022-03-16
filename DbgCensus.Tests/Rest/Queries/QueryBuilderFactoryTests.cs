@@ -2,7 +2,7 @@
 using DbgCensus.Rest.Abstractions.Queries;
 using DbgCensus.Rest.Objects;
 using DbgCensus.Rest.Queries;
-using Microsoft.Extensions.Options;
+using DbgCensus.Tests.Helpers;
 using Xunit;
 
 namespace DbgCensus.Tests.Rest.Queries;
@@ -35,7 +35,10 @@ public class QueryBuilderFactoryTests
         Assert.Contains(rootEndpoint, query.ConstructEndpoint().AbsoluteUri.ToLower());
     }
 
-    private static QueryBuilderFactory GetDefaultFactory() => new(Options.Create(GetDefaultOptions()));
+    private static QueryBuilderFactory GetDefaultFactory() => new
+    (
+        new TestableOptionsMonitor<CensusQueryOptions>(GetDefaultOptions())
+    );
 
     private static CensusQueryOptions GetDefaultOptions() => new()
     {
