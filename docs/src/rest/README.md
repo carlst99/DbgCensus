@@ -7,7 +7,7 @@ Check out the [REST Sample](https://github.com/carlst99/DbgCensus/tree/main/Samp
 Note that `DbgCensus.Rest` configures two [Polly](https://github.com/App-vNext/Polly) policies by default. These are:
 
 - Wait and Retry: Performs a jittered exponential backoff up to four times when a query fails.
-- Circuit Breaker: Puts a hold on all queries for 30 seconds if five query attempts fail consecutively.
+- Circuit Breaker: Throws an exception on any queries made in a 15sec window, after having four queries fail consecutively.
 
 ## Setup
 
@@ -162,7 +162,7 @@ query.WhereAll("property", SearchModifier.Equals, values);
 
 ### Retrieving collection counts
 
-Using the `count` verb to retrieve the number of elements in a collection can be done in two ways. Firstly, by using the shortcut on the `ICensusRestClient`, or secondly by making a query as per usual and defining the query type. Just remember to de-serialise to a number type!
+Using the `count` verb to retrieve the number of elements in a collection can be done in two ways. Firstly, by using the shortcut on the `ICensusRestClient`, or secondly by making a query as per usual and defining the query type. Just remember to deserialise to a number type!
 
 ```csharp
 ICensusRestClient client = ...;
