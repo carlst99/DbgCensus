@@ -99,7 +99,7 @@ public class Worker : BackgroundService
 
         try
         {
-            IReadOnlyList<int>? uniqueStackSizes = await _queryService.DistinctAsync<int>("item", "max_stack_size", ct);
+            IReadOnlyList<int>? uniqueStackSizes = await _queryService.DistinctAsync<int>("item", "max_stack_size", ct: ct);
             if (uniqueStackSizes is null)
             {
                 _logger.LogInformation("Census returned no data!");

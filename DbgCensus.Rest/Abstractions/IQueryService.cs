@@ -19,11 +19,12 @@ public interface IQueryService
     /// <inheritdoc cref="ICensusRestClient.CountAsync(string, CancellationToken)"/>
     Task<ulong> CountAsync(string collectionName, CancellationToken ct = default);
 
-    /// <inheritdoc cref="ICensusRestClient.DistinctAsync{T}(string, string, CancellationToken)"/>
+    /// <inheritdoc cref="ICensusRestClient.DistinctAsync{T}(string, string, int, CancellationToken)"/>
     Task<IReadOnlyList<T>?> DistinctAsync<T>
     (
         string collectionName,
         string fieldName,
+        int limit = ICensusRestClient.DistinctLimit,
         CancellationToken ct = default
     );
 

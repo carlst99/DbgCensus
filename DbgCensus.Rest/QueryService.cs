@@ -40,9 +40,10 @@ public class QueryService : IQueryService
     (
         string collectionName,
         string fieldName,
+        int limit = ICensusRestClient.DistinctLimit,
         CancellationToken ct = default
     )
-        => await _client.DistinctAsync<T>(collectionName, fieldName, ct: ct).ConfigureAwait(false);
+        => await _client.DistinctAsync<T>(collectionName, fieldName, limit, ct).ConfigureAwait(false);
 
     /// <inheritdoc />
     public virtual IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>

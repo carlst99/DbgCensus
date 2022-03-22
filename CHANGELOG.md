@@ -7,6 +7,7 @@ Date format: DD/MM/YYYY
 #### Rest-v3.0.1
 
 - Fixed being unable to use the `hide` query command.
+- Added missing `limit` parameter to IQueryService#DistinctAsync.
 
 ## 17/03/2022
 

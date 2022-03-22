@@ -14,7 +14,7 @@ public interface ICensusRestClient
     /// Gets the maximum number of elements that may be returned in a query
     /// that uses the c:distinct command. This limit is enforced by Census.
     /// </summary>
-    protected const int DistinctLimit = 20000;
+    internal const int DistinctLimit = 20000;
 
     /// <summary>
     /// Performs a query on the Census REST API.
