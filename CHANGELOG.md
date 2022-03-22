@@ -2,6 +2,12 @@
 
 Date format: DD/MM/YYYY
 
+## 22/03/2022
+
+#### Rest-v3.0.1
+
+- Fixed being unable to use the `hide` query command.
+
 ## 17/03/2022
 
 #### Rest-v3.0.0
