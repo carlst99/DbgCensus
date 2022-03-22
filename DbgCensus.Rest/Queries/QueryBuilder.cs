@@ -33,7 +33,7 @@ public sealed class QueryBuilder : IQueryBuilder
     private string _queryNamespace;
     private QueryType _verb;
     private MultiQueryCommandFormatter<string> _showHideFields;
-    private bool _isShowingFields; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
+    private bool _isShowingFields = true; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
 
     public string? CollectionName { get; private set; }
 
