@@ -2,6 +2,12 @@
 
 Date format: DD/MM/YYYY
 
+## 23/03/2022
+
+#### EventStream-2.3.4, EventStream.EventHandlers-v3.0.4
+
+- Updated dependency on DbgCensus.Core to v1.3.2
+
 ## 22/03/2022
 
 #### Rest-v3.0.1
