@@ -2,6 +2,12 @@
 
 Date format: DD/MM/YYYY
 
+## 02/04/2022
+
+#### EventStream.EventHandlers-v3.1.0
+
+- Shift all payload dispatch logic to the DefaultPayloadDispatchService.
+
 ## 23/03/2022
 
 #### EventStream-2.3.4, EventStream.EventHandlers-v3.0.4
