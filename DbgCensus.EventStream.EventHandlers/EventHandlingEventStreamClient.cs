@@ -1,16 +1,13 @@
-﻿using DbgCensus.EventStream.Abstractions.Objects.Commands;
+﻿using DbgCensus.EventStream.Abstractions.Objects;
+using DbgCensus.EventStream.Abstractions.Objects.Commands;
 using DbgCensus.EventStream.EventHandlers.Abstractions;
-using DbgCensus.EventStream.EventHandlers.Abstractions.Objects;
 using DbgCensus.EventStream.EventHandlers.Abstractions.Services;
 using DbgCensus.EventStream.EventHandlers.Objects;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IO;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,11 +24,9 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     private readonly EventHandlingClientOptions _handlingOptions;
     private readonly IPayloadTypeRepository _payloadTypeRepository;
     private readonly IPayloadDispatchService _dispatchService;
-    private readonly ConcurrentQueue<Task> _dispatchedPayloadHandlerQueue;
-    private readonly Type _dispatchType;
-    private readonly Dictionary<Type, MethodInfo> _dispatchMethods;
 
     private CancellationTokenSource _dispatchCts;
+    private Task? _dispatchTask;
     private long _lastSubscriptionRefresh;
 
     /// <summary>
@@ -69,37 +64,30 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         _handlingOptions = handlingOptions.Value;
         _payloadTypeRepository = payloadTypeRepository;
         _dispatchService = dispatchService;
-        _dispatchType = _dispatchService.GetType();
-        _dispatchMethods = new Dictionary<Type, MethodInfo>();
 
-        _dispatchedPayloadHandlerQueue = new ConcurrentQueue<Task>();
         _dispatchCts = new CancellationTokenSource();
         _lastSubscriptionRefresh = DateTimeOffset.UtcNow.Ticks;
     }
 
-    /// <inheritdoc />
     public override async Task StartAsync(CancellationToken ct = default)
     {
+        _dispatchCts.Dispose();
         _dispatchCts = new CancellationTokenSource();
+
+        _dispatchTask?.Dispose();
+        _dispatchTask = _dispatchService.RunAsync(_dispatchCts.Token);
 
         await base.StartAsync(ct).ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// <inheritdoc />
-    /// Furthermore, cancels and finalises any event handlers that have not yet finished processing.
-    /// </summary>
-    /// <inheritdoc />
     public override async Task StopAsync()
     {
-        await base.StopAsync().ConfigureAwait(false);
-
         _dispatchCts.Cancel();
 
-        foreach (Task runningEvent in _dispatchedPayloadHandlerQueue)
-            await FinaliseDispatchedPayloadHandler(runningEvent).ConfigureAwait(false);
+        if (_dispatchTask is not null)
+            await _dispatchTask;
 
-        _dispatchCts.Dispose();
+        await base.StopAsync();
     }
 
     public override Task SendCommandAsync<T>(T command, CancellationToken ct = default)
@@ -113,13 +101,20 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// <inheritdoc />
     protected override async ValueTask HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct)
     {
-        // Attempt to finalise one payload handler
-        if (_dispatchedPayloadHandlerQueue.TryDequeue(out Task? handlerTask))
+        // Check the health of the dispatch task
+        if (_dispatchTask!.IsCompleted)
         {
-            if (handlerTask.IsCompleted)
-                await FinaliseDispatchedPayloadHandler(handlerTask).ConfigureAwait(false);
-            else
-                _dispatchedPayloadHandlerQueue.Enqueue(handlerTask);
+            try
+            {
+                await _dispatchTask;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "The dispatch service stopped with an error. Restarting it...");
+            }
+
+            _dispatchTask.Dispose();
+            _dispatchTask = _dispatchService.RunAsync(_dispatchCts.Token);
         }
 
         using JsonDocument jsonResponse = await JsonDocument.ParseAsync(eventStream, cancellationToken: ct).ConfigureAwait(false);
@@ -131,20 +126,20 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             if (censusType is null)
             {
                 _logger.LogWarning($"A payload with a null type has been received. An {nameof(UnknownPayload)} will be dispatched.");
-                DispatchUnknownPayload(jsonResponse.RootElement.GetRawText(), _dispatchCts.Token);
+                await DispatchUnknownPayload(jsonResponse.RootElement.GetRawText(), ct);
             }
             else if (censusType == "serviceMessage") // Further parsing is need to dispatch the encapsulated event payload
             {
-                DispatchServiceMessage(jsonResponse.RootElement, _dispatchCts.Token);
+                await DispatchServiceMessage(jsonResponse.RootElement, ct);
             }
             else if (_payloadTypeRepository.TryGet(censusType, out (Type AbstractType, Type ImplementingType)? typeMap))
             {
-                DeserializeAndDispatchPayload(typeMap.Value.AbstractType, typeMap.Value.ImplementingType, jsonResponse.RootElement, _dispatchCts.Token);
+                await DeserializeAndDispatchPayload(typeMap.Value.ImplementingType, jsonResponse.RootElement, ct);
             }
             else
             {
                 _logger.LogWarning($"A payload with an unknown type has been received. An {nameof(UnknownPayload)} will be dispatched.");
-                DispatchUnknownPayload(jsonResponse.RootElement.GetRawText(), _dispatchCts.Token);
+                await DispatchUnknownPayload(jsonResponse.RootElement.GetRawText(), ct);
             }
         }
         else if (jsonResponse.RootElement.TryGetProperty("subscription", out JsonElement subscriptionElement))
@@ -159,7 +154,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                 return;
             }
 
-            DeserializeAndDispatchPayload(typeMap.Value.AbstractType, typeMap.Value.ImplementingType, subscriptionElement, _dispatchCts.Token);
+            await DeserializeAndDispatchPayload(typeMap.Value.ImplementingType, subscriptionElement, ct);
         }
         else if (jsonResponse.RootElement.TryGetProperty("send this for help", out _))
         {
@@ -168,34 +163,10 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         else
         {
             _logger.LogWarning($"An unknown payload has been received. An {nameof(UnknownPayload)} will be dispatched.");
-            DispatchUnknownPayload(jsonResponse.RootElement.GetRawText(), _dispatchCts.Token);
+            await DispatchUnknownPayload(jsonResponse.RootElement.GetRawText(), ct);
         }
 
         AttemptSubscriptionRefresh(ct);
-    }
-
-    /// <inheritdoc />
-    protected override void Dispose(bool disposeManaged)
-    {
-        if (IsDisposed)
-            return;
-
-        _dispatchCts.Dispose();
-        _dispatchedPayloadHandlerQueue.Clear();
-
-        base.Dispose(disposeManaged);
-    }
-
-    /// <inheritdoc />
-    protected override ValueTask DisposeAsyncCore()
-    {
-        if (IsDisposed)
-            return ValueTask.CompletedTask;
-
-        _dispatchCts.Dispose();
-        _dispatchedPayloadHandlerQueue.Clear();
-
-        return base.DisposeAsyncCore();
     }
 
     /// <summary>
@@ -225,13 +196,13 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// </summary>
     /// <param name="element"></param>
     /// <param name="ct"></param>
-    private void DispatchServiceMessage(JsonElement element, CancellationToken ct)
+    private async ValueTask DispatchServiceMessage(JsonElement element, CancellationToken ct)
     {
         // Attempt to get the payload element
         if (!element.TryGetProperty("payload", out JsonElement payloadElement))
         {
             _logger.LogWarning("A service message was received that did not contain a payload. An unknown event will be dispatched");
-            DispatchUnknownPayload(element.GetRawText(), ct);
+            await DispatchUnknownPayload(element.GetRawText(), ct);
             return;
         }
 
@@ -239,7 +210,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         if (!payloadElement.TryGetProperty("event_name", out JsonElement eventNameElement))
         {
             _logger.LogWarning("A service message was received with a malformed payload (Missing 'event_name'). An unknown event will be dispatched");
-            DispatchUnknownPayload(element.GetRawText(), ct);
+            await DispatchUnknownPayload(element.GetRawText(), ct);
             return;
         }
 
@@ -248,7 +219,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         if (eventName is null)
         {
             _logger.LogWarning("A service message was received with a malformed payload (NULL 'event_name'). An unknown event will be dispatched");
-            DispatchUnknownPayload(element.GetRawText(), ct);
+            await DispatchUnknownPayload(element.GetRawText(), ct);
             return;
         }
 
@@ -259,7 +230,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             return;
         }
 
-        DeserializeAndDispatchPayload(typeMap.Value.AbstractType, typeMap.Value.ImplementingType, payloadElement, ct);
+        await DeserializeAndDispatchPayload(typeMap.Value.ImplementingType, payloadElement, ct);
     }
 
     /// <summary>
@@ -267,10 +238,9 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// </summary>
     /// <param name="rawJson">The raw JSON that was received.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the dispatch handlers.</param>
-    private void DispatchUnknownPayload(string rawJson, CancellationToken ct)
-        => BeginPayloadDispatch
+    private async ValueTask DispatchUnknownPayload(string rawJson, CancellationToken ct)
+        => await _dispatchService.EnqueuePayloadAsync
         (
-            typeof(IUnknownPayload),
             new UnknownPayload(Name, rawJson),
             new PayloadContext(Name),
             ct
@@ -279,13 +249,11 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// <summary>
     /// Deserializes a payload and dispatches it.
     /// </summary>
-    /// <param name="abstractType">The abstract type used by payload handlers.</param>
     /// <param name="implementingType">The type that implements the payload.</param>
     /// <param name="payload">The payload.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop any handlers associated with this payload.</param>
-    private void DeserializeAndDispatchPayload
+    private async ValueTask DeserializeAndDispatchPayload
     (
-        Type abstractType,
         Type implementingType,
         JsonElement payload,
         CancellationToken ct
@@ -300,10 +268,9 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
                 return;
             }
 
-            BeginPayloadDispatch
+            await _dispatchService.EnqueuePayloadAsync
             (
-                abstractType,
-                deserialized,
+                (IPayload)deserialized,
                 new PayloadContext(Name),
                 ct
             );
@@ -311,92 +278,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Failed to deserialize and dispatch event. An  {nameof(UnknownPayload)} will be dispatched.");
-            DispatchUnknownPayload(payload.GetRawText(), ct);
-        }
-    }
-
-    /// <summary>
-    /// Dispatches a payload.
-    /// </summary>
-    /// <param name="abstractType">The abstract type used by payload handlers.</param>
-    /// <param name="eventObject">The event object to dispatch.</param>
-    /// <param name="context">The context to inject.</param>
-    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the entire event chain.</param>
-    private void BeginPayloadDispatch
-    (
-        Type abstractType,
-        object eventObject,
-        IPayloadContext context,
-        CancellationToken ct
-    )
-    {
-        MethodInfo dispatchMethod = CreateDispatchMethod(abstractType);
-        Task? dispatchTask = (Task?)dispatchMethod.Invoke(_dispatchService, new[] { eventObject, context, ct });
-
-        if (dispatchTask is null)
-        {
-            _logger.LogError("Failed to dispatch an event");
-            return;
-        }
-
-        _dispatchedPayloadHandlerQueue.Enqueue(dispatchTask);
-    }
-
-    /// <summary>
-    /// Constructs a <see cref="MethodInfo"/> instance of the
-    /// <see cref="IPayloadDispatchService.DispatchPayloadAsync{T}(T, IPayloadContext, CancellationToken)"/> method.
-    /// </summary>
-    /// <param name="abstractType">The abstract type used by payload handlers.</param>
-    /// <returns>The method info.</returns>
-    private MethodInfo CreateDispatchMethod(Type abstractType)
-    {
-        if (_dispatchMethods.ContainsKey(abstractType))
-            return _dispatchMethods[abstractType];
-
-        MethodInfo? dispatchMethod = _dispatchType.GetMethod
-        (
-            nameof(IPayloadDispatchService.DispatchPayloadAsync),
-            BindingFlags.Public | BindingFlags.Instance
-        );
-
-        if (dispatchMethod is null)
-        {
-            MissingMethodException ex = new(nameof(EventHandlingEventStreamClient), nameof(IPayloadDispatchService.DispatchPayloadAsync));
-            _logger.LogCritical(ex, "Failed to get the event dispatch method");
-
-            throw ex;
-        }
-
-        dispatchMethod = dispatchMethod.MakeGenericMethod(abstractType);
-        _dispatchMethods[abstractType] = dispatchMethod;
-
-        return dispatchMethod;
-    }
-
-    /// <summary>
-    /// Logs any errors that occured while executing the payload handler.
-    /// </summary>
-    /// <param name="payloadTask">The task representing the payload handling operation.</param>
-    /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
-    private async Task FinaliseDispatchedPayloadHandler(Task payloadTask)
-    {
-        try
-        {
-            await payloadTask.ConfigureAwait(false);
-        }
-        catch (AggregateException aex)
-        {
-            foreach (Exception ex in aex.InnerExceptions)
-            {
-                if (ex is TaskCanceledException)
-                    continue;
-
-                _logger.LogError(ex, "An exception occured in a payload handler");
-            }
-        }
-        catch (Exception ex) when (ex is not TaskCanceledException)
-        {
-            _logger.LogError(ex, "An exception occured in a payload handler");
+            await DispatchUnknownPayload(payload.GetRawText(), ct);
         }
     }
 }

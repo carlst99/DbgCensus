@@ -73,3 +73,7 @@ public static class Program
 
 TODO: Retrieve instance from factory.
 Run client task.
+
+TODO: Important information
+- Pre-dispatch handlers
+- Pre-dispatch handlers all run in the same scope per event, whereas payload handlers each have their own scope

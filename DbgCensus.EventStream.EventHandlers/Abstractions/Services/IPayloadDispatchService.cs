@@ -11,17 +11,30 @@ namespace DbgCensus.EventStream.EventHandlers.Abstractions.Services;
 public interface IPayloadDispatchService
 {
     /// <summary>
-    /// Dispatches an event to all appropriate payload handlers.
+    /// Gets a value indicating whether or not this <see cref="IPayloadDispatchService"/> is running.
     /// </summary>
-    /// <typeparam name="T">The abstract type of the payload.</typeparam>
-    /// <param name="payload">The payload to dispatch.</param>
-    /// <param name="context">The context to inject.</param>
-    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the handlers.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    Task DispatchPayloadAsync<T>
+    bool IsRunning { get; }
+
+    /// <summary>
+    /// Enqueues a payload for dispatch.
+    /// </summary>
+    /// <typeparam name="TPayload">The type of the payload.</typeparam>
+    /// <param name="payload">The payload.</param>
+    /// <param name="context">The associated context.</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
+    /// <returns>A <see cref="ValueTask"/> representing the potentially asynchronous operation.</returns>
+    ValueTask EnqueuePayloadAsync<TPayload>
     (
-        T payload,
+        TPayload payload,
         IPayloadContext context,
         CancellationToken ct = default
-    ) where T : IPayload;
+    ) where TPayload : IPayload;
+
+    /// <summary>
+    /// Runs the dispatch service, allowing payloads to be enqueued and dispatched.
+    /// This method will not return until it is cancelled.
+    /// </summary>
+    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task RunAsync(CancellationToken ct = default);
 }
