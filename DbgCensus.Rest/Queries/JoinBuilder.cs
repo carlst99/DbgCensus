@@ -21,7 +21,7 @@ public sealed class JoinBuilder : IJoinBuilder
     private readonly SingleQueryCommandFormatter<char?> _isOuter; // No value by default, defaults to '1' in Census
 
     private MultiQueryCommandFormatter<string> _showHideFields;
-    private bool _isShowingFields; // Indicates whether, if present, fields in "_showHideFields" should be shown (or hidden).
+    private bool _isShowingFields = true; // Indicates whether, if present, fields in "_showHideFields" should be shown (or hidden).
 
     /// <summary>
     /// Initialises a new instance of the <see cref="JoinBuilder"/> class.
