@@ -2,6 +2,12 @@
 
 Date format: DD/MM/YYYY
 
+## 22/04/2022
+
+#### Rest-v3.0.2
+
+- Fixed being unable to hide join fields.
+
 ## 02/04/2022
 
 #### EventStream.EventHandlers-v3.1.0
