@@ -2,6 +2,16 @@
 
 Date format: DD/MM/YYYY
 
+## 08/06/2022
+
+#### Core-v1.4.0
+
+- Added the `GlobalizedString` object.
+
+#### EventStream-v2.3.5, EventHandlers-v3.1.1, Rest-v3.0.3
+
+- Updated dependency on `DbgCensus.Core` to v1.4.0
+
 ## 22/04/2022
 
 #### Rest-v3.0.2

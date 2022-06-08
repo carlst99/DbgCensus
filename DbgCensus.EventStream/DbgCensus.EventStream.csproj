@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
 
     <!-- Package info -->
-    <Version>2.3.4</Version>
+    <Version>2.3.5</Version>
     <Description>A library for receiving data from the websocket event stream of Daybreak Game Company's Census API.</Description>
     <PackageReleaseNotes>See CHANGELOG.md for release notes.</PackageReleaseNotes>
   </PropertyGroup>

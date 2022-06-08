@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     
     <!-- Package info -->
-    <Version>1.3.2</Version>
+    <Version>1.4.0</Version>
     <Description>Contains core data types and utilities for the DbgCensus.* libraries - wrappers for interacting with Daybreak Game Company's Census API.</Description>
     <PackageReleaseNotes>See CHANGELOG.md for release notes.</PackageReleaseNotes>
   </PropertyGroup>

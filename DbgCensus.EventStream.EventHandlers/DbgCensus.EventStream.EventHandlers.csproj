@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
 
     <!-- Package info -->
-    <Version>3.1.0</Version>
+    <Version>3.1.1</Version>
     <Description>An abstraction of DbgCensus.EventStream to provide an asynchronous and decoupled event handling model.</Description>
     <PackageReleaseNotes>See CHANGELOG.md for release notes.</PackageReleaseNotes>
   </PropertyGroup>
