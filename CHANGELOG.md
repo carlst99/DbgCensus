@@ -2,6 +2,18 @@
 
 Date format: DD/MM/YYYY
 
+## 16/06/2022
+
+#### Core-v1.4.1
+
+- Added metagame definitions for Air Anomalies.
+- Added XML documentation for various metagame definitions.
+- Added the `MetagameEventDefinition#GetAlertDuration` extension method.
+
+#### EventStream-v2.3.6, EventHandlers-v3.1.2, Rest-v3.0.4
+
+- Updated dependency on `DbgCensus.Core` to v1.4.1
+
 ## 08/06/2022
 
 #### Core-v1.4.0
