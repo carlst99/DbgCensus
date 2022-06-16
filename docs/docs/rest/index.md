@@ -1,13 +1,15 @@
 # Getting started with Querying
 
-## Before you begin
-
+:::tip
 Check out the [REST Sample](https://github.com/carlst99/DbgCensus/tree/main/Samples/RestSample) as you read through this guide.
+:::
 
-Note that `DbgCensus.Rest` configures two [Polly](https://github.com/App-vNext/Polly) policies by default. These are:
+:::info
+`DbgCensus.Rest` configures two [Polly](https://github.com/App-vNext/Polly) policies by default. These are:
 
 - Wait and Retry: Performs a jittered exponential backoff up to four times when a query fails.
 - Circuit Breaker: Throws an exception on any queries made in a 15sec window, after having four queries fail consecutively.
+:::
 
 ## Setup
 
@@ -80,6 +82,7 @@ This is the meat of any query. The `IQueryBuilder` represents a fluent interface
 
 ```csharp
 IQueryBuilder myQuery = new QueryBuilder()
+            .WithServiceId("example")
             .OnCollection("outfit")
             .Where("alias.first_lower", SearchModifier.Equals, myOutfitTag.ToLower());
 
@@ -116,10 +119,12 @@ public record CharacterMinified
 
 public class RestExample
 {
+    private readonly ILogger<RestExample> _logger;
     private readonly IQueryService _queryService;
 
-    public RestExample(IQueryService queryService)
+    public RestExample(ILogger<RestExample> logger, IQueryService queryService)
     {
+        _logger = logger;
         _queryService = queryService;
     }
 
@@ -147,7 +152,8 @@ public class RestExample
 }
 ```
 
-:warning: An important distinction to notice when defining queries is that filtering a property is split into two methods. If you'd like to filter a property by a singular value, use the `Where` method:
+:::warning
+An important distinction to notice when defining queries is that filtering a property is split into two methods. If you'd like to filter a property by a singular value, use the `Where` method:
 
 ```csharp
 query.Where("property", SearchModifier.LessThan, "value")
@@ -159,6 +165,7 @@ If you'd like to filter a property by multiple values, use the `WhereAll` method
 int[] values = new[] { 1, 2, 3 };
 query.WhereAll("property", SearchModifier.Equals, values);
 ```
+:::
 
 ### Retrieving collection counts
 

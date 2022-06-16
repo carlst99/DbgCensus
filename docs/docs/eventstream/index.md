@@ -1,14 +1,16 @@
 # Getting Started with Event Streaming
 
-## Before you begin
-
+:::tip
 Check out the [Event Streaming Sample](https://github.com/carlst99/DbgCensus/tree/main/Samples/EventStreamSample) as you read through this guide.
+:::
 
-Note that there are two `DbgCensus.*` packages available for assisting with event streaming.
+:::info
+There are two `DbgCensus.*` packages available for assisting with event streaming.
 
 - `DbgCensus.EventStream` is the base library and contains event stream types and a client websocket implementation. However, it does not manage events and you must implement the abstract `BaseEventStreamClient` class to do so.
 
 - `DbgCensus.EventStream.EventHandlers` builds off the base library to add an asynchronous event dispatch system and niceties like automatic subscription refreshing. The majority of the event streaming documentation will assume that you are using this package.
+:::
 
 ## Setup
 

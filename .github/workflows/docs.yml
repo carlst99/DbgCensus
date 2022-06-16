@@ -12,38 +12,29 @@ jobs:
         working-directory: ./docs
 
     steps:
-      # Fetch commits to get git log info on the docs pages
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
+        uses: actions/checkout@v3
+    
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
-
-      # Cache NPM cache
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        id: npm-cache
-        with:
-          path: |
-            ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm install
 
       # Run build script
       - name: Build VuePress site
+        if: success()
         run: npm run build
 
       # @see https://github.com/crazy-max/ghaction-github-pages
       - name: Deploy to GitHub Pages
-        uses: crazy-max/ghaction-github-pages@v2
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v3
         with:
           target_branch: gh-pages
-          build_dir: docs/src/.vuepress/dist
+          build_dir: docs/docs/.vitepress/dist
         env:
           # @see https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

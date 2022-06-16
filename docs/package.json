@@ -1,11 +1,13 @@
 {
   "name": "dbgcensus-docs",
   "version": "1.0.0",
-  "private": true,
   "description": "Documentation for the DbgCensus libraries, unofficial C# wrappers for Daybreak Game Company's Census API.",
+  "private": true,
   "scripts": {
-    "serve": "vuepress dev src",
-    "build": "vuepress build src"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "serve": "vitepress serve docs"
   },
   "repository": {
     "type": "git",
@@ -17,7 +19,7 @@
     "url": "https://github.com/carlst99/DbgCensus/issues"
   },
   "homepage": "https://github.com/carlst99/DbgCensus#readme",
-  "devDependencies": {
-    "vuepress-vite": "^2.0.0-beta.35"
+  "dependencies": {
+    "vitepress": "^1.0.0-alpha.2"
   }
 }
