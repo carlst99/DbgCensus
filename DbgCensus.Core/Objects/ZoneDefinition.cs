@@ -11,6 +11,7 @@ public enum ZoneDefinition : ushort
     Hossin = 4,
     Amerish = 6,
     Esamir = 8,
+    Nexus = 10,
     Koltyr = 14,
 
     /// <summary>
