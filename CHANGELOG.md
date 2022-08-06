@@ -2,6 +2,16 @@
 
 Date format: DD/MM/YYYY
 
+## 07/08/2022
+
+#### Core-v1.4.2
+
+- Consider digit sequences as words in the snake-case JSON name converter.
+
+#### EventStream-v2.3.7, EventHandlers-v3.1.3, Rest-v3.0.5
+
+- Updated dependency on `DbgCensus.Core` to v1.4.2.
+
 ## 16/06/2022
 
 #### Core-v1.4.1
