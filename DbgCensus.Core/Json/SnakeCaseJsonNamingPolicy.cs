@@ -4,8 +4,18 @@ using System.Text.Json;
 
 namespace DbgCensus.Core.Json;
 
+/// <summary>
+/// A naming policy which converts camel and pascal-case names
+/// into a snake-case representation.
+/// </summary>
 public class SnakeCaseJsonNamingPolicy : JsonNamingPolicy
 {
+    /// <summary>
+    /// Gets a default instance of the <see cref="SnakeCaseJsonNamingPolicy"/>.
+    /// </summary>
+    public static readonly SnakeCaseJsonNamingPolicy Default = new();
+
+    /// <inheritdoc />
     public override string ConvertName(string name)
     {
         if (string.IsNullOrEmpty(name))
@@ -27,6 +37,13 @@ public class SnakeCaseJsonNamingPolicy : JsonNamingPolicy
             }
 
             if (previousLetter is not null && char.IsLower(previousLetter.Value) && char.IsUpper(letter) && i != lastAddedBoundary)
+            {
+                lastAddedBoundary = i;
+                wordBoundaries.Enqueue(lastAddedBoundary);
+            }
+
+            // Split on the first of a sequence of digits
+            if (letter is >= '1' and <= '9' && previousLetter is <= '1' or >= '9')
             {
                 lastAddedBoundary = i;
                 wordBoundaries.Enqueue(lastAddedBoundary);
