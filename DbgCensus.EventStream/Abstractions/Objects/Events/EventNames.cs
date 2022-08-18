@@ -7,6 +7,7 @@ public static class EventNames
     public const string BattleRankUp = "BattleRankUp";
     public const string Death = "Death";
     public const string GainExperience = "GainExperience";
+    public const string ItemAdded = "ItemAdded";
     public const string PlayerFacilityCapture = "PlayerFacilityCapture";
     public const string PlayerFacilityDefend = "PlayerFacilityDefend";
     public const string PlayerLogin = "PlayerLogin";
