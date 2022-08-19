@@ -12,6 +12,7 @@ export default defineConfig({
     themeConfig: {
         logo: '/icon.svg',
         nav: nav(),
+        sidebar: sidebar(),
         socialLinks: [
             { icon: 'github', link: 'https://github.com/carlst99/DbgCensus' }
         ]
@@ -27,16 +28,7 @@ function nav() {
         },
         {
             text: 'Making Queries',
-            items: [
-                {
-                    text: 'Getting Started',
-                    link: '/rest/index.md'
-                },
-                {
-                    text: 'Advanced Configuration',
-                    link: '/rest/advanced.md'
-                }
-            ],
+            link: '/rest/',
             activeMatch: '/rest/'
         },
         // {
@@ -48,4 +40,19 @@ function nav() {
             link: 'https://github.com/carlst99/DbgCensus/blob/main/CHANGELOG.md'
         }
     ]
+}
+
+function sidebar() {
+    return {
+        '/rest/': [
+            {
+                text: 'Making Queries',
+                items: [
+                    { text: 'Setup', link: '/rest/' },
+                    { text: 'Performing Queries', link: '/rest/basic-querying' },
+                    { text: 'Advanced Configuration', link: '/rest/advanced' }
+                ]
+            }
+        ]
+    }
 }
