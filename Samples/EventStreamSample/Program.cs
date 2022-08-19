@@ -32,7 +32,6 @@ public static class Program
                         .AddPayloadHandler<SubscriptionPayloadHandler>()
                         .AddPayloadHandler<FacilityControlPayloadHandler>()
                         .AddPayloadHandler<PlayerLogEventHandler>()
-                        .AddPayloadHandler<PlayerLogEventHandler>()
                         .AddPayloadHandler<UnknownPayloadHandler>();
 
                 services.AddHostedService<EventStreamWorker>();
