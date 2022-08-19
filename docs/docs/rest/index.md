@@ -7,8 +7,8 @@ Check out the [REST Sample](https://github.com/carlst99/DbgCensus/tree/main/Samp
 :::info
 `DbgCensus.Rest` configures two [Polly](https://github.com/App-vNext/Polly) policies by default. These are:
 
-- Wait and Retry: Performs a jittered exponential backoff up to four times when a query fails.
-- Circuit Breaker: Throws an exception on any queries made in a 15sec window, after having four queries fail consecutively.
+- Wait and Retry: Performs a jittered exponential backoff up to four (by default) times when a query fails.
+- Circuit Breaker: Throws an exception on any queries made in a 15sec window, after having five (by default) queries fail consecutively.
 :::
 
 ## Setup

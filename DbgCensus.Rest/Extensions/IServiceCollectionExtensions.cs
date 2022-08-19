@@ -75,7 +75,7 @@ public static class IServiceCollectionExtensions
         {
             httpBuilder.AddTransientHttpErrorPolicy
             (
-                builder => builder.CircuitBreakerAsync(4, TimeSpan.FromSeconds(15))
+                builder => builder.CircuitBreakerAsync(maxRetryAttempts + 1, TimeSpan.FromSeconds(15))
             );
         }
 

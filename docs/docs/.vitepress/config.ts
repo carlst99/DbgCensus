@@ -27,7 +27,16 @@ function nav() {
         },
         {
             text: 'Making Queries',
-            link: '/rest/index.md',
+            items: [
+                {
+                    text: 'Getting Started',
+                    link: '/rest/index.md'
+                },
+                {
+                    text: 'Advanced Configuration',
+                    link: '/rest/advanced.md'
+                }
+            ],
             activeMatch: '/rest/'
         },
         // {
