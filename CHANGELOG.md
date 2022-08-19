@@ -2,6 +2,12 @@
 
 Date format: DD/MM/YYYY
 
+## 19/08/2022
+
+## EventStream-v2.3.8, EventHandlers-v3.1.4
+
+- Added the `IItemAdded` event stream type.
+
 ## 07/08/2022
 
 #### Core-v1.4.2
