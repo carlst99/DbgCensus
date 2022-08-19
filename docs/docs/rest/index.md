@@ -34,7 +34,7 @@ Typically, you'd register your options from a configuration source (such as a se
 
 **Example**
 
-```csharp{18-23}
+```csharp{16,25}
 using DbgCensus.Rest;
 using DbgCensus.Rest.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,33 +46,32 @@ namespace RestSample;
 public static class Program
 {
     public static async Task Main(string[] args)
-        => await CreateHostBuilder(args).Build().RunAsync().ConfigureAwait(false);
-
-    public static IHostBuilder CreateHostBuilder(string[] args)
-        => Host.CreateDefaultBuilder(args)
+    {
+        IHost host = Host.CreateDefaultBuilder(args)
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddCensusRestServices();
-
-                services.Configure<CensusQueryOptions>
-                (
-                    hostContext.Configuration.GetSection(nameof(CensusQueryOptions))
-                );
+                services.Configure<CensusQueryOptions>(hostContext.Configuration.GetSection(nameof(CensusQueryOptions)));
 
                 // AND/OR
-                services.Configure<CensusQueryOptions>
-                (
-                    o =>
-                    {
-                        o.LanguageCode = CensusLanguage.English
-                        // Etc.
-                    }
-                );
+                services.Configure<CensusQueryOptions>(o =>
+                {
+                    o.LanguageCode = CensusLanguage.English
+                    // Etc.
+                });
 
+                services.AddCensusRestServices();
                 ...
-            });
+            })
+            .Build();
+
+        await host.RunAsync();
+    }
 }
 ```
+
+`appsettings.json`:
+
+<<< @/../../Samples/RestSample/appsettings.json
 
 ## Components of a Query
 

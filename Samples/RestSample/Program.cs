@@ -11,10 +11,8 @@ namespace RestSample;
 public static class Program
 {
     public static async Task Main(string[] args)
-        => await CreateHostBuilder(args).Build().RunAsync().ConfigureAwait(false);
-
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
+    {
+        IHost host = Host.CreateDefaultBuilder(args)
             .UseDefaultServiceProvider(o => o.ValidateScopes = true)
             .UseSerilog(GetLogger())
             .ConfigureServices((hostContext, services) =>
@@ -28,7 +26,11 @@ public static class Program
                 services.AddCensusRestServices();
 
                 services.AddHostedService<Worker>();
-            });
+            })
+            .Build();
+
+        await host.RunAsync();
+    }
 
     private static ILogger GetLogger()
         => new LoggerConfiguration()
