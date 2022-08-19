@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents an 'all' value that can be used in a Census Event Stream subscription.
 /// </summary>
-public struct All
+public readonly struct All
 {
     /// <inheritdoc />
     public override string ToString()
