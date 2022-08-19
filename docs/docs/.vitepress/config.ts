@@ -31,10 +31,10 @@ function nav() {
             link: '/rest/',
             activeMatch: '/rest/'
         },
-        // {
-        //   text: 'Event Streaming',
-        //   link: '/eventstream/index.md'
-        // },
+        {
+          text: 'Event Streaming',
+          link: '/eventstream/'
+        },
         {
             text: 'Changelog',
             link: 'https://github.com/carlst99/DbgCensus/blob/main/CHANGELOG.md'
