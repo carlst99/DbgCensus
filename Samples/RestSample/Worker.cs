@@ -1,9 +1,11 @@
 using DbgCensus.Core.Exceptions;
 using DbgCensus.Core.Objects;
+using DbgCensus.Rest;
 using DbgCensus.Rest.Abstractions;
 using DbgCensus.Rest.Abstractions.Queries;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RestSample.Objects;
 using System;
 using System.Collections.Generic;
@@ -17,22 +19,26 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IQueryService _queryService;
+    private readonly CensusQueryOptions _falconQueryOptions;
     private readonly IHostApplicationLifetime _lifetime;
 
     public Worker
     (
         ILogger<Worker> logger,
         IQueryService queryService,
+        IOptionsMonitor<CensusQueryOptions> queryOptions,
         IHostApplicationLifetime lifetime
     )
     {
         _logger = logger;
         _queryService = queryService;
+        _falconQueryOptions = queryOptions.Get("falcon");
         _lifetime = lifetime;
     }
 
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
+        await GetWeapons(ct);
         await GetMapStatus(ct);
         await GetCharacter(ct);
         await GetCharacterCollectionCount(ct);
@@ -41,6 +47,78 @@ public class Worker : BackgroundService
 
         _logger.LogInformation("Done!");
         _lifetime.StopApplication();
+    }
+
+    /// <summary>
+    /// Queries Falcon's Census for up-to-date weaponry info, and prints all the weapons
+    /// that cannot be used underwater.
+    /// </summary>
+    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
+    private async Task GetWeapons(CancellationToken ct)
+    {
+        IQueryBuilder query = _queryService.CreateQuery(_falconQueryOptions)
+            .OnCollection("item")
+            .WhereAll("item_category_id", SearchModifier.Equals, new uint[] { 6, 7, 8, 11, 12, 19, 24 })
+            .WithLanguage("en")
+            .WithLimit(10000)
+            .AddJoin("item_to_weapon", j =>
+            {
+                j.IsInnerJoin();
+                j.AddNestedJoin("weapon", j =>
+                {
+                    j.AddNestedJoin("weapon_to_fire_group", j =>
+                    {
+                        j.IsList();
+                        j.AddNestedJoin("fire_group", j =>
+                        {
+                            j.AddNestedJoin("fire_group_to_fire_mode", j =>
+                            {
+                                j.IsList();
+                                j.AddNestedJoin("fire_mode_2", j =>
+                                {
+                                    j.IsList();
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+
+        _logger.LogInformation("Retrieving all infantry weapons that cannot be used underwater...");
+        try
+        {
+            IReadOnlyList<WeaponFireModeInfo>? weapons = await _queryService.GetAsync<IReadOnlyList<WeaponFireModeInfo>>(query, ct);
+            if (weapons is null)
+            {
+                _logger.LogWarning("Falcon's Census returned no weaponry info");
+                return;
+            }
+
+            foreach (WeaponFireModeInfo item in weapons)
+            {
+                IReadOnlyList<WeaponFireModeInfo.WeaponToFireGroup> fireGroups =
+                    item.ItemIdJoinItemToWeapon.WeaponIdJoinWeapon.WeaponIdJoinWeaponToFireGroup;
+                if (fireGroups.Count == 0)
+                    continue;
+
+                IReadOnlyList<WeaponFireModeInfo.FireGroupToFireMode> fireModes =
+                    fireGroups[0].FireGroupIdJoinFireGroup.FireGroupIdJoinFireGroupToFireMode;
+                if (fireModes.Count == 0)
+                    continue;
+
+                if (fireModes[0].FireModeIdJoinFireMode2.Count == 0)
+                    continue;
+
+                if (!fireModes[0].FireModeIdJoinFireMode2[0].UseInWater)
+                    _logger.LogInformation("The item {Name} cannot be used underwater", item.Name.English);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to retrieve weaponry fire mode info");
+        }
+
+        _logger.LogInformation("Retrieved all relevant weapons!");
     }
 
     private async Task GetCharacter(CancellationToken ct = default)
