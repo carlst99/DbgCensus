@@ -2,6 +2,12 @@
 
 Date format: DD/MM/YYYY
 
+## 27/08/2022
+
+## EventStream-v2.3.9, EventHandlers-v3.1.5
+
+- Added support for `AttackerTeamID`, `IsCritical` and `TeamID`  on the `IDeath` event.
+
 ## 19/08/2022
 
 ## EventStream-v2.3.8, EventHandlers-v3.1.4
