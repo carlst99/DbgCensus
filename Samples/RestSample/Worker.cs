@@ -19,7 +19,7 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IQueryService _queryService;
-    private readonly CensusQueryOptions _falconQueryOptions;
+    private readonly CensusQueryOptions _sanctuaryQueryOptions;
     private readonly IHostApplicationLifetime _lifetime;
 
     public Worker
@@ -32,7 +32,7 @@ public class Worker : BackgroundService
     {
         _logger = logger;
         _queryService = queryService;
-        _falconQueryOptions = queryOptions.Get("falcon");
+        _sanctuaryQueryOptions = queryOptions.Get("sanctuary");
         _lifetime = lifetime;
     }
 
@@ -56,7 +56,7 @@ public class Worker : BackgroundService
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
     private async Task GetWeapons(CancellationToken ct)
     {
-        IQueryBuilder query = _queryService.CreateQuery(_falconQueryOptions)
+        IQueryBuilder query = _queryService.CreateQuery(_sanctuaryQueryOptions)
             .OnCollection("item")
             .WhereAll("item_category_id", SearchModifier.Equals, new uint[] { 6, 7, 8, 11, 12, 19, 24 })
             .WithLanguage("en")
@@ -90,7 +90,7 @@ public class Worker : BackgroundService
             IReadOnlyList<WeaponFireModeInfo>? weapons = await _queryService.GetAsync<IReadOnlyList<WeaponFireModeInfo>>(query, ct);
             if (weapons is null)
             {
-                _logger.LogWarning("Falcon's Census returned no weaponry info");
+                _logger.LogWarning("Sanctuary.Census returned no weaponry info");
                 return;
             }
 

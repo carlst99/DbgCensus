@@ -19,9 +19,9 @@ public static class Program
             {
                 services.Configure<CensusQueryOptions>(hostContext.Configuration.GetSection(nameof(CensusQueryOptions)));
 
-                // Configure a second query options to point towards Falcon's Census
-                services.Configure<CensusQueryOptions>("falcon", hostContext.Configuration.GetSection(nameof(CensusQueryOptions)));
-                services.Configure<CensusQueryOptions>("falcon", o => o.RootEndpoint = "https://census.lithafalcon.cc");
+                // Configure a second query options to point towards Sanctuary.Census
+                services.Configure<CensusQueryOptions>("sanctuary", hostContext.Configuration.GetSection(nameof(CensusQueryOptions)));
+                services.Configure<CensusQueryOptions>("sanctuary", o => o.RootEndpoint = "https://census.lithafalcon.cc");
 
                 services.AddCensusRestServices();
 
