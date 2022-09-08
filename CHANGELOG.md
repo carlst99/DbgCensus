@@ -2,11 +2,27 @@
 
 Date format: DD/MM/YYYY
 
+## 08/09/2022
+
+## Core-v1.5.0
+
+Added the new 'Sudden Death' metagame event definitions.
+
+## EventStream-v2.4.0, EventHandlers-v3.2.0
+
+- Added the `AttackerTeamID` and `TeamID` properties to the `IVehicleDestroy` event.
+- Added the `TeamID` property to the `IGainExperience` event.
+- Updated dependency on `DbgCensus.Core` to v1.5.0
+
+## Rest-v3.1.0
+
+- Updated dependency on `DbgCensus.Core` to v1.5.0
+
 ## 27/08/2022
 
 ## EventStream-v2.3.9, EventHandlers-v3.1.5
 
-- Added support for `AttackerTeamID`, `IsCritical` and `TeamID`  on the `IDeath` event.
+- Added the `AttackerTeamID`, `IsCritical` and `TeamID` properties to the `IDeath` event.
 
 ## 19/08/2022
 
