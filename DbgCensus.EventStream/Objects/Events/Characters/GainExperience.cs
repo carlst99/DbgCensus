@@ -13,6 +13,7 @@ namespace DbgCensus.EventStream.Objects.Events.Characters;
 /// <param name="ExperienceID">The type of experience that caused the XP gain.</param>
 /// <param name="LoadoutID">The loadout ID of the character.</param>
 /// <param name="OtherID">The ID of the other entity/character involved in generating the XP gain.</param>
+/// <param name="TeamID">The currently assigned faction of the character that gained the experience.</param>
 /// <param name="Timestamp">The time at which the event occured.</param>
 /// <param name="WorldID">The world on which the event occured.</param>
 /// <param name="ZoneID">The zone on which the event occured.</param>
@@ -24,6 +25,7 @@ public record GainExperience
     uint ExperienceID,
     uint LoadoutID,
     ulong OtherID,
+    FactionDefinition TeamID,
     DateTimeOffset Timestamp,
     WorldDefinition WorldID,
     ZoneID ZoneID

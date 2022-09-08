@@ -1,4 +1,6 @@
-﻿namespace DbgCensus.EventStream.Abstractions.Objects.Events.Characters;
+﻿using DbgCensus.Core.Objects;
+
+namespace DbgCensus.EventStream.Abstractions.Objects.Events.Characters;
 
 /// <summary>
 /// Represents a GainExperience event.
@@ -29,4 +31,9 @@ public interface IGainExperience : IZoneEvent
     /// Gets the ID of the other entity/character involved in generating the XP gain.
     /// </summary>
     ulong OtherID { get; }
+
+    /// <summary>
+    /// Gets the currently assigned faction of the character that gained the experience.
+    /// </summary>
+    FactionDefinition TeamID { get; }
 }

@@ -10,7 +10,7 @@ namespace DbgCensus.EventStream.Objects.Events.Characters;
 /// <param name="AttackerCharacterID">The ID of the attacking character.</param>
 /// <param name="AttackerFireMode">The fire mode of the attacking character.</param>
 /// <param name="AttackerLoadoutID">The loadout ID of the attacking character.</param>
-/// <param name="AttackerTeamID">Gets the current faction of the attacking character.</param>
+/// <param name="AttackerTeamID">Gets the currently assigned faction of the attacking character.</param>
 /// <param name="AttackerVehicleID">The ID of the vehicle used by the attacking character.</param>
 /// <param name="AttackerWeaponID">The ID of the weapon used by the attacking character.</param>
 /// <param name="CharacterID">The ID of the killed character.</param>
@@ -18,7 +18,7 @@ namespace DbgCensus.EventStream.Objects.Events.Characters;
 /// <param name="EventName">The name of the event.</param>
 /// <param name="IsCritical">Unknown.</param>
 /// <param name="IsHeadshot">A value indicating whether the kill was a headshot.</param>
-/// <param name="TeamID">Gets the current faction of the killed character.</param>
+/// <param name="TeamID">Gets the currently assigned faction of the killed character.</param>
 /// <param name="Timestamp">The time at which the event occured.</param>
 /// <param name="WorldID">The world on which the event occured.</param>
 /// <param name="ZoneID">The zone on which the event occured.</param>

@@ -23,7 +23,7 @@ public interface IDeath : IZoneEvent
     uint AttackerLoadoutID { get; }
 
     /// <summary>
-    /// Gets the current faction of the attacking character.
+    /// Gets the currently assigned faction of the attacking character.
     /// </summary>
     FactionDefinition AttackerTeamID { get; }
 
@@ -58,7 +58,7 @@ public interface IDeath : IZoneEvent
     bool IsHeadshot { get; }
 
     /// <summary>
-    /// Gets the current faction of the killed character.
+    /// Gets the currently assigned faction of the killed character.
     /// </summary>
     FactionDefinition TeamID { get; }
 }

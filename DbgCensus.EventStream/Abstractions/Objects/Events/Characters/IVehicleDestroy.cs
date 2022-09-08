@@ -18,6 +18,11 @@ public interface IVehicleDestroy : IZoneEvent
     uint AttackerLoadoutID { get; }
 
     /// <summary>
+    /// Gets the currently assigned faction of the attacking character.
+    /// </summary>
+    FactionDefinition AttackerTeamID { get; }
+
+    /// <summary>
     /// Gets the ID of the vehicle used by the attacking character, or zero if a vehicle was not used.
     /// </summary>
     uint AttackerVehicleID { get; }
@@ -38,9 +43,14 @@ public interface IVehicleDestroy : IZoneEvent
     uint FacilityID { get; }
 
     /// <summary>
-    /// Gets the faction of the killed character.
+    /// Gets the home faction of the killed character.
     /// </summary>
     FactionDefinition FactionID { get; }
+
+    /// <summary>
+    /// Gets the currently assigned faction of the killed character.
+    /// </summary>
+    FactionDefinition TeamID { get; }
 
     /// <summary>
     /// Gets the ID of the vehicle used by the killed character.
