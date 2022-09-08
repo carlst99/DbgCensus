@@ -14,70 +14,37 @@ public enum MetagameEventDefinition : uint
     /// </summary>
     TRMeltdownAmerish = 147,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     VSMeltdownAmerish = 148,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     NCMeltdownAmerish = 149,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     TRMeltdownEsamir = 150,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     VSMeltdownEsamir = 151,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     NCMeltdownEsamir = 152,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     TRMeltdownHossin = 153,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     VSMeltdownHossin = 154,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     NCMeltdownHossin = 155,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     TRMeltdownIndar = 156,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     VSMeltdownIndar = 157,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     NCMeltdownIndar = 158,
 
     /// <summary>
@@ -86,22 +53,13 @@ public enum MetagameEventDefinition : uint
     /// </summary>
     LowPopCollapseAmerish = 159,
 
-    /// <summary>
-    /// Triggered when a fully-open continent collapses into
-    /// an unstable alert due to low population.
-    /// </summary>
+    /// <inheritdoc cref="LowPopCollapseAmerish" />
     LowPopCollapseEsamir = 160,
 
-    /// <summary>
-    /// Triggered when a fully-open continent collapses into
-    /// an unstable alert due to low population.
-    /// </summary>
+    /// <inheritdoc cref="LowPopCollapseAmerish" />
     LowPopCollapseHossin = 161,
 
-    /// <summary>
-    /// Triggered when a fully-open continent collapses into
-    /// an unstable alert due to low population.
-    /// </summary>
+    /// <inheritdoc cref="LowPopCollapseAmerish" />
     LowPopCollapseIndar = 162,
 
     /// <summary>
@@ -111,81 +69,37 @@ public enum MetagameEventDefinition : uint
     /// </summary>
     NCUnstableMeltdownEsamir = 176,
 
-    /// <summary>
-    /// An unstable meltdown alert triggered on a low-population
-    /// continent by a faction achieving the required number of
-    /// alert points, or the continent having been open for too long.
-    /// </summary>
+    /// <inheritdoc cref="NCUnstableMeltdownEsamir" />
     NCUnstableMeltdownHossin = 177,
 
-    /// <summary>
-    /// An unstable meltdown alert triggered on a low-population
-    /// continent by a faction achieving the required number of
-    /// alert points, or the continent having been open for too long.
-    /// </summary>
+    /// <inheritdoc cref="NCUnstableMeltdownEsamir" />
     NCUnstableMeltdownAmerish = 178,
 
-    /// <summary>
-    /// An unstable meltdown alert triggered on a low-population
-    /// continent by a faction achieving the required number of
-    /// alert points, or the continent having been open for too long.
-    /// </summary>
+    /// <inheritdoc cref="NCUnstableMeltdownEsamir" />
     NCUnstableMeltdownIndar = 179,
 
-    /// <summary>
-    /// An unstable meltdown alert triggered on a low-population
-    /// continent by a faction achieving the required number of
-    /// alert points, or the continent having been open for too long.
-    /// </summary>
+    /// <inheritdoc cref="NCUnstableMeltdownEsamir" />
     VSUnstableMeltdownEsamir = 186,
 
-    /// <summary>
-    /// An unstable meltdown alert triggered on a low-population
-    /// continent by a faction achieving the required number of
-    /// alert points, or the continent having been open for too long.
-    /// </summary>
+    /// <inheritdoc cref="NCUnstableMeltdownEsamir" />
     VSUnstableMeltdownHossin = 187,
 
-    /// <summary>
-    /// An unstable meltdown alert triggered on a low-population
-    /// continent by a faction achieving the required number of
-    /// alert points, or the continent having been open for too long.
-    /// </summary>
+    /// <inheritdoc cref="NCUnstableMeltdownEsamir" />
     VSUnstableMeltdownAmerish = 188,
 
-    /// <summary>
-    /// An unstable meltdown alert triggered on a low-population
-    /// continent by a faction achieving the required number of
-    /// alert points, or the continent having been open for too long.
-    /// </summary>
+    /// <inheritdoc cref="NCUnstableMeltdownEsamir" />
     VSUnstableMeltdownIndar = 189,
 
-    /// <summary>
-    /// An unstable meltdown alert triggered on a low-population
-    /// continent by a faction achieving the required number of
-    /// alert points, or the continent having been open for too long.
-    /// </summary>
+    /// <inheritdoc cref="NCUnstableMeltdownEsamir" />
     TRUnstableMeltdownEsamir = 190,
 
-    /// <summary>
-    /// An unstable meltdown alert triggered on a low-population
-    /// continent by a faction achieving the required number of
-    /// alert points, or the continent having been open for too long.
-    /// </summary>
+    /// <inheritdoc cref="NCUnstableMeltdownEsamir" />
     TRUnstableMeltdownHossin = 191,
 
-    /// <summary>
-    /// An unstable meltdown alert triggered on a low-population
-    /// continent by a faction achieving the required number of
-    /// alert points, or the continent having been open for too long.
-    /// </summary>
+    /// <inheritdoc cref="NCUnstableMeltdownEsamir" />
     TRUnstableMeltdownAmerish = 192,
 
-    /// <summary>
-    /// An unstable meltdown alert triggered on a low-population
-    /// continent by a faction achieving the required number of
-    /// alert points, or the continent having been open for too long.
-    /// </summary>
+    /// <inheritdoc cref="NCUnstableMeltdownEsamir" />
     TRUnstableMeltdownIndar = 193,
 
     OutfitWarsCaptureRelics = 204,
@@ -193,22 +107,13 @@ public enum MetagameEventDefinition : uint
     OutfitWarsRelicsChanging = 206,
     OutfitWarsMatchStart = 207,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     NCMeltdownKoltyr = 208,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     TRMeltdownKoltyr = 209,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     VSMeltdownKoltyr = 210,
 
     /// <summary>
@@ -217,22 +122,13 @@ public enum MetagameEventDefinition : uint
     /// </summary>
     ConquestAmerish = 211,
 
-    /// <summary>
-    /// Triggered immediately when more than 900 players
-    /// are present on a continent.
-    /// </summary>
+    /// <inheritdoc cref="ConquestAmerish" />
     ConquestEsamir = 212,
 
-    /// <summary>
-    /// Triggered immediately when more than 900 players
-    /// are present on a continent.
-    /// </summary>
+    /// <inheritdoc cref="ConquestAmerish" />
     ConquestHossin = 213,
 
-    /// <summary>
-    /// Triggered immediately when more than 900 players
-    /// are present on a continent.
-    /// </summary>
+    /// <inheritdoc cref="ConquestAmerish" />
     ConquestIndar = 214,
 
     /// <summary>
@@ -241,35 +137,43 @@ public enum MetagameEventDefinition : uint
     /// </summary>
     ConquestKoltyr = 215,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     NCMeltdownOshur = 222,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     TRMeltdownOshur = 223,
 
-    /// <summary>
-    /// Standard meltdown alert triggered by a faction
-    /// achieving the required number of victory points.
-    /// </summary>
+    /// <inheritdoc cref="TRMeltdownAmerish" />
     VSMeltdownOshur = 224,
 
-    /// <summary>
-    /// Triggered immediately when more than 900 players
-    /// are present on a continent.
-    /// </summary>
+    /// <inheritdoc cref="ConquestAmerish" />
     ConquestOshur = 226,
 
     AirAnomalyIndar = 228,
     AirAnomalyHossin = 229,
     AirAnomalyAmerish = 230,
     AirAnomalyEsamir = 231,
-    AirAnomalyOshur = 232
+    AirAnomalyOshur = 232,
+
+    /// <summary>
+    /// Triggered upon a drawn alert, sudden death alerts
+    /// last 15 minutes, or until a faction achieves 10 000 kills.
+    /// The faction with the most kills at the end of the
+    /// alert will lock the continent in their favour.
+    /// </summary>
+    SuddenDeathIndar = 236,
+
+    /// <inheritdoc cref="SuddenDeathIndar" />
+    SuddenDeathHossin = 237,
+
+    /// <inheritdoc cref="SuddenDeathIndar" />
+    SuddenDeathAmerish = 238,
+
+    /// <inheritdoc cref="SuddenDeathIndar" />
+    SuddenDeathEsamir = 239,
+
+    /// <inheritdoc cref="SuddenDeathIndar" />
+    SuddenDeathOshur = 240
 }
 
 public static class MetagameEventDefinitionExtensions
@@ -301,6 +205,7 @@ public static class MetagameEventDefinitionExtensions
             MED.ConquestAmerish or MED.ConquestEsamir or MED.ConquestHossin or MED.ConquestIndar or MED.ConquestOshur => MELTDOWN_DURATION,
             MED.ConquestKoltyr => KOLTYR_MELTDOWN_DURATION,
             MED.AirAnomalyIndar or MED.AirAnomalyHossin or MED.AirAnomalyAmerish or MED.AirAnomalyEsamir or MED.AirAnomalyOshur => TimeSpan.FromMinutes(30),
+            MED.SuddenDeathIndar or MED.SuddenDeathHossin or MED.SuddenDeathAmerish or MED.SuddenDeathEsamir or MED.SuddenDeathOshur => TimeSpan.FromMinutes(15),
             _ => MELTDOWN_DURATION
         };
 }
