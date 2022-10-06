@@ -12,40 +12,40 @@ public enum MetagameEventDefinition : uint
     /// Standard meltdown alert triggered by a faction
     /// achieving the required number of victory points.
     /// </summary>
-    TRMeltdownAmerish = 147,
+    TRMeltdownIndar = 147,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
-    VSMeltdownAmerish = 148,
+    /// <inheritdoc cref="TRMeltdownIndar" />
+    VSMeltdownIndar = 148,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
-    NCMeltdownAmerish = 149,
+    /// <inheritdoc cref="TRMeltdownIndar" />
+    NCMeltdownIndar = 149,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
+    /// <inheritdoc cref="TRMeltdownIndar" />
     TRMeltdownEsamir = 150,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
+    /// <inheritdoc cref="TRMeltdownIndar" />
     VSMeltdownEsamir = 151,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
+    /// <inheritdoc cref="TRMeltdownIndar" />
     NCMeltdownEsamir = 152,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
+    /// <inheritdoc cref="TRMeltdownIndar" />
     TRMeltdownHossin = 153,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
+    /// <inheritdoc cref="TRMeltdownIndar" />
     VSMeltdownHossin = 154,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
+    /// <inheritdoc cref="TRMeltdownIndar" />
     NCMeltdownHossin = 155,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
-    TRMeltdownIndar = 156,
+    /// <inheritdoc cref="TRMeltdownIndar" />
+    TRMeltdownAmerish = 156,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
-    VSMeltdownIndar = 157,
+    /// <inheritdoc cref="TRMeltdownIndar" />
+    VSMeltdownAmerish = 157,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
-    NCMeltdownIndar = 158,
+    /// <inheritdoc cref="TRMeltdownIndar" />
+    NCMeltdownAmerish = 158,
 
     /// <summary>
     /// Triggered when a fully-open continent collapses into
@@ -107,13 +107,13 @@ public enum MetagameEventDefinition : uint
     OutfitWarsRelicsChanging = 206,
     OutfitWarsMatchStart = 207,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
+    /// <inheritdoc cref="TRMeltdownIndar" />
     NCMeltdownKoltyr = 208,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
+    /// <inheritdoc cref="TRMeltdownIndar" />
     TRMeltdownKoltyr = 209,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
+    /// <inheritdoc cref="TRMeltdownIndar" />
     VSMeltdownKoltyr = 210,
 
     /// <summary>
@@ -137,13 +137,13 @@ public enum MetagameEventDefinition : uint
     /// </summary>
     ConquestKoltyr = 215,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
+    /// <inheritdoc cref="TRMeltdownIndar" />
     NCMeltdownOshur = 222,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
+    /// <inheritdoc cref="TRMeltdownIndar" />
     TRMeltdownOshur = 223,
 
-    /// <inheritdoc cref="TRMeltdownAmerish" />
+    /// <inheritdoc cref="TRMeltdownIndar" />
     VSMeltdownOshur = 224,
 
     /// <inheritdoc cref="ConquestAmerish" />
@@ -191,10 +191,10 @@ public static class MetagameEventDefinitionExtensions
     public static TimeSpan GetAlertDuration(this MetagameEventDefinition definition)
         => definition switch
         {
-            MED.NCMeltdownAmerish or MED.TRMeltdownAmerish or MED.VSMeltdownAmerish => MELTDOWN_DURATION,
+            MED.NCMeltdownIndar or MED.TRMeltdownIndar or MED.VSMeltdownIndar => MELTDOWN_DURATION,
             MED.NCMeltdownEsamir or MED.TRMeltdownEsamir or MED.VSMeltdownEsamir => MELTDOWN_DURATION,
             MED.NCMeltdownHossin or MED.TRMeltdownHossin or MED.VSMeltdownHossin => MELTDOWN_DURATION,
-            MED.NCMeltdownIndar or MED.TRMeltdownIndar or MED.VSMeltdownIndar => MELTDOWN_DURATION,
+            MED.NCMeltdownAmerish or MED.TRMeltdownAmerish or MED.VSMeltdownAmerish => MELTDOWN_DURATION,
             MED.NCMeltdownKoltyr or MED.TRMeltdownKoltyr or MED.VSMeltdownKoltyr => KOLTYR_MELTDOWN_DURATION,
             MED.NCMeltdownOshur or MED.TRMeltdownOshur or MED.VSMeltdownOshur => MELTDOWN_DURATION,
             MED.LowPopCollapseAmerish or MED.LowPopCollapseEsamir or MED.LowPopCollapseHossin or MED.LowPopCollapseIndar => UNSTABLE_MELTDOWN_DURATION,
