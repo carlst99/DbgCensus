@@ -50,7 +50,7 @@ public class Worker : BackgroundService
     }
 
     /// <summary>
-    /// Queries Falcon's Census for up-to-date weaponry info, and prints all the weapons
+    /// Queries Sanctuary.Census for up-to-date weaponry info, and prints all the weapons
     /// that cannot be used underwater.
     /// </summary>
     /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>

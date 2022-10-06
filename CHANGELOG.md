@@ -2,6 +2,17 @@
 
 Date format: DD/MM/YYYY
 
+## 06/10/2022
+
+## Core-v2.0.0
+
+- ⚠ Fixed the definitions for _Indar_ and _Amerish_ meltdown metagame events.
+- Added the new 'Haunted Bastion' metagame event definitions
+
+## EventStream-v2.5.0, EventHandlers-v3.3.0, Rest-v3.2.0
+
+- Updated dependency on `DbgCensus.Core` to v2.0.0.
+
 ## 08/09/2022
 
 ## Core-v1.5.0
