@@ -173,7 +173,27 @@ public enum MetagameEventDefinition : uint
     SuddenDeathEsamir = 239,
 
     /// <inheritdoc cref="SuddenDeathIndar" />
-    SuddenDeathOshur = 240
+    SuddenDeathOshur = 240,
+
+    /// <summary>
+    /// An unaligned Bastion Fleet Carrier descends, rendering regions of the
+    /// map un-contestable until destroyed. Triggered on a regular timer,
+    /// however destroying Halloween Space Pumpkins will shorten this time.
+    /// </summary>
+    /// <remarks>
+    /// This event was first introduced with the 2022 Nanite of the Living Dead
+    /// update, and ran for a limited time.
+    /// </remarks>
+    HauntedBastionIndar = 242,
+
+    /// <inheritdoc cref="HauntedBastionIndar" />
+    HauntedBastionHossin = 243,
+
+    /// <inheritdoc cref="HauntedBastionIndar" />
+    HauntedBastionAmerish = 244,
+
+    /// <inheritdoc cref="HauntedBastionIndar" />
+    HauntedBastionEsamir = 245,
 }
 
 public static class MetagameEventDefinitionExtensions
@@ -206,6 +226,7 @@ public static class MetagameEventDefinitionExtensions
             MED.ConquestKoltyr => KOLTYR_MELTDOWN_DURATION,
             MED.AirAnomalyIndar or MED.AirAnomalyHossin or MED.AirAnomalyAmerish or MED.AirAnomalyEsamir or MED.AirAnomalyOshur => TimeSpan.FromMinutes(30),
             MED.SuddenDeathIndar or MED.SuddenDeathHossin or MED.SuddenDeathAmerish or MED.SuddenDeathEsamir or MED.SuddenDeathOshur => TimeSpan.FromMinutes(15),
+            MED.HauntedBastionIndar or MED.HauntedBastionHossin or MED.HauntedBastionAmerish or MED.HauntedBastionEsamir => TimeSpan.FromMinutes(15),
             _ => MELTDOWN_DURATION
         };
 }
