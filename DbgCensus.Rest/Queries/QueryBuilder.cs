@@ -82,12 +82,10 @@ public sealed class QueryBuilder : IQueryBuilder
         UriBuilder builder = new(_queryOptions.RootEndpoint);
         builder.Path += $"s:{_serviceId}/{_verb.Value}/{_queryNamespace}";
 
-        if (CollectionName is not null)
-            builder.Path += $"/{CollectionName}";
-
         // A collection must be specified to perform a query
         if (CollectionName is null)
             return builder.Uri;
+        builder.Path += $"/{CollectionName}";
 
         // Add distinct command
         if (_distinctField.HasArgument)

@@ -1,9 +1,10 @@
 ﻿namespace DbgCensus.Rest.Abstractions.Queries;
 
 /// <summary>
-/// Contains constant fields for the various query types. Known as the Verb by the Census REST API.
+/// A container for a query type value. Known as the 'Verb' by the Census REST API.
 /// </summary>
-public sealed class QueryType
+/// <param name="Value">The query type.</param>
+public readonly record struct QueryType(string Value)
 {
     /// <summary>
     /// A regular query.
@@ -13,26 +14,14 @@ public sealed class QueryType
     /// <summary>
     /// Returns the number of values matching the query.
     /// </summary>
-    public static readonly QueryType Count = new("count");
+    public static readonly QueryType Count = new("get");
 
-    /// <summary>
-    /// Gets the value of the verb.
-    /// </summary>
-    public string Value { get; }
+    public override string ToString()
+        => Value;
 
-    private QueryType(string modifier)
-    {
-        Value = modifier;
-    }
+    public static implicit operator string(QueryType t)
+        => t.ToString();
 
-    public static implicit operator string(QueryType t) => t.ToString();
-    public static explicit operator QueryType(string s) => new(s);
-
-    public override string ToString() => Value;
-
-    public override bool Equals(object? obj)
-        => obj is QueryType qt
-        && qt.Value.Equals(Value);
-
-    public override int GetHashCode() => Value.GetHashCode();
+    public static explicit operator QueryType(string s)
+        => new(s);
 }
