@@ -9,12 +9,16 @@ public class DateTimeOffsetJsonConverter : JsonConverter<DateTimeOffset>
 {
     public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (ulong.TryParse(reader.GetString(), out ulong timestamp))
-            return new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero).AddSeconds(timestamp);
+        if (reader.TokenType is JsonTokenType.Number)
+            return DateTimeOffset.FromUnixTimeSeconds(reader.GetInt64());
 
-        return DateTimeOffset.TryParse(reader.GetString(), null, DateTimeStyles.AssumeUniversal, out DateTimeOffset time)
-            ? time
-            : DateTimeOffset.MinValue;
+        if (long.TryParse(reader.GetString(), out long timestamp))
+            return DateTimeOffset.FromUnixTimeSeconds(timestamp);
+
+        if (DateTimeOffset.TryParse(reader.GetString(), null, DateTimeStyles.AssumeUniversal, out DateTimeOffset time))
+            return time;
+
+        throw new JsonException("Failed to read token as DateTimeOffset");
     }
 
     public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
