@@ -28,7 +28,7 @@ public enum ZoneDefinition : ushort
     Sanctuary = 362,
 
     /// <summary>
-    /// The new tutorial zone, introduced with the NPE update on 15/09/2021
+    /// The new tutorial zone, introduced with the NPE update on 15/09/2021.
     /// </summary>
     Tutorial2 = 364
 }

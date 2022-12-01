@@ -20,5 +20,6 @@ public sealed class QueryBuilderFactory : IQueryBuilderFactory
     }
 
     /// <inheritdoc />
-    public IQueryBuilder Get(CensusQueryOptions? options = null) => new QueryBuilder(options ?? _defaultOptions.CurrentValue);
+    public IQueryBuilder Get(CensusQueryOptions? options = null)
+        => new QueryBuilder(options ?? _defaultOptions.CurrentValue);
 }

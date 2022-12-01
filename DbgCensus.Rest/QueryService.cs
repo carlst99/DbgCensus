@@ -42,8 +42,7 @@ public class QueryService : IQueryService
         string fieldName,
         int limit = ICensusRestClient.DistinctLimit,
         CancellationToken ct = default
-    )
-        => await _client.DistinctAsync<T>(collectionName, fieldName, limit, ct).ConfigureAwait(false);
+    ) => await _client.DistinctAsync<T>(collectionName, fieldName, limit, ct).ConfigureAwait(false);
 
     /// <inheritdoc />
     public virtual IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>
@@ -53,6 +52,5 @@ public class QueryService : IQueryService
         int pageCount,
         int start = 0,
         CancellationToken ct = default
-    )
-        => _client.GetPaginatedAsync<T>(query, pageSize, pageCount, start, ct);
+    ) => _client.GetPaginatedAsync<T>(query, pageSize, pageCount, start, ct);
 }
