@@ -1,12 +1,12 @@
 ﻿using DbgCensus.Rest.Abstractions.Queries;
 using System;
 
-namespace DbgCensus.Rest.Queries;
+namespace DbgCensus.Rest.Queries.Internal;
 
 /// <summary>
 /// Stores data required to perform a sort in the Census REST API.
 /// </summary>
-internal class QuerySortKey
+internal sealed class QuerySortKey
 {
     /// <summary>
     /// The field to sort on.

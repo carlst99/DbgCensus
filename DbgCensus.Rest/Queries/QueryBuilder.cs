@@ -1,5 +1,6 @@
 ﻿using DbgCensus.Core.Utils;
 using DbgCensus.Rest.Abstractions.Queries;
+using DbgCensus.Rest.Queries.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,16 +19,16 @@ public sealed class QueryBuilder : IQueryBuilder
     private readonly MultiQueryCommandFormatter<QuerySortKey> _sortKeys;
     private readonly MultiQueryCommandFormatter<IJoinBuilder> _joins;
     private readonly SingleQueryCommandFormatter<ITreeBuilder> _tree;
-    private readonly SingleQueryCommandFormatter<int?> _limit;
-    private readonly SingleQueryCommandFormatter<int?> _limitPerDb;
-    private readonly SingleQueryCommandFormatter<bool?> _exactMatchesFirst; // False by default
+    private readonly SingleQueryCommandFormatter<int> _limit;
+    private readonly SingleQueryCommandFormatter<int> _limitPerDb;
+    private readonly SingleQueryCommandFormatter<bool> _exactMatchesFirst; // False by default
     private readonly SingleQueryCommandFormatter<string> _language;
-    private readonly SingleQueryCommandFormatter<bool?> _isCaseSensitive; // True by default
-    private readonly SingleQueryCommandFormatter<bool?> _withNullFields; // False by default
-    private readonly SingleQueryCommandFormatter<bool?> _withTimings; // False by default
-    private readonly SingleQueryCommandFormatter<bool?> _retry; // True by default
+    private readonly SingleQueryCommandFormatter<bool> _isCaseSensitive; // True by default
+    private readonly SingleQueryCommandFormatter<bool> _withNullFields; // False by default
+    private readonly SingleQueryCommandFormatter<bool> _withTimings; // False by default
+    private readonly SingleQueryCommandFormatter<bool> _retry; // True by default
     private readonly SingleQueryCommandFormatter<string> _distinctField;
-    private readonly SingleQueryCommandFormatter<int?> _startIndex;
+    private readonly SingleQueryCommandFormatter<int> _startIndex;
 
     private string _serviceId;
     private string _queryNamespace;
@@ -53,16 +54,16 @@ public sealed class QueryBuilder : IQueryBuilder
         _sortKeys = GetMultiQCF<QuerySortKey>("c:sort");
         _joins = GetMultiQCF<IJoinBuilder>("c:join");
         _tree = GetSingleQCF<ITreeBuilder>("c:tree");
-        _limit = GetSingleQCF<int?>("c:limit");
-        _limitPerDb = GetSingleQCF<int?>("c:limitPerDB");
-        _exactMatchesFirst = GetSingleQCF<bool?>("c:exactMatchFirst");
+        _limit = GetSingleQCF<int>("c:limit");
+        _limitPerDb = GetSingleQCF<int>("c:limitPerDB");
+        _exactMatchesFirst = GetSingleQCF<bool>("c:exactMatchFirst");
         _language = GetSingleQCF<string>("c:lang");
-        _isCaseSensitive = GetSingleQCF<bool?>("c:case");
-        _withNullFields = GetSingleQCF<bool?>("c:includeNull");
-        _withTimings = GetSingleQCF<bool?>("c:timing");
-        _retry = GetSingleQCF<bool?>("c:retry");
+        _isCaseSensitive = GetSingleQCF<bool>("c:case");
+        _withNullFields = GetSingleQCF<bool>("c:includeNull");
+        _withTimings = GetSingleQCF<bool>("c:timing");
+        _retry = GetSingleQCF<bool>("c:retry");
         _distinctField = GetSingleQCF<string>("c:distinct");
-        _startIndex = GetSingleQCF<int?>("c:start");
+        _startIndex = GetSingleQCF<int>("c:start");
 
         CollectionName = null;
         _verb = QueryType.Get;
@@ -119,7 +120,7 @@ public sealed class QueryBuilder : IQueryBuilder
         // Add relevant limit command
         if (_limitPerDb.HasArgument)
             builder.Query += '&' + _limitPerDb;
-        else if (_limit.Argument is not null)
+        else if (_limit.HasArgument)
             builder.Query += '&' + _limit;
 
         return builder.Uri;
@@ -352,7 +353,11 @@ public sealed class QueryBuilder : IQueryBuilder
 
     public override string ToString() => ConstructEndpoint().ToString();
 
-    private static MultiQueryCommandFormatter<T> GetMultiQCF<T>(string command) => new(command, '=', ',');
+    private static MultiQueryCommandFormatter<T> GetMultiQCF<T>(string command)
+        where T : notnull
+        => new(command, '=', ',');
 
-    private static SingleQueryCommandFormatter<T> GetSingleQCF<T>(string command) => new(command, '=');
+    private static SingleQueryCommandFormatter<T> GetSingleQCF<T>(string command)
+        where T : notnull
+        => new(command, '=');
 }

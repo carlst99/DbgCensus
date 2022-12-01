@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace DbgCensus.Rest.Queries;
+namespace DbgCensus.Rest.Queries.Internal;
 
 internal abstract class QueryCommandFormatterBase
 {
+    private static readonly Dictionary<Type, string> _typeStringNames = new();
+
     /// <summary>
     /// Gets the command.
     /// </summary>
@@ -33,13 +36,18 @@ internal abstract class QueryCommandFormatterBase
     /// <param name="value">The object to convert and verify.</param>
     /// <returns>The object's string representation.</returns>
     /// <exception cref="ArgumentException">Thrown if the object's ToString() method has not been properly implemented.</exception>
-    public static string ToStringVerified(object value)
+    protected static string ToStringVerified<T>(T value)
+        where T : notnull
     {
-        string? typeName = value.GetType().FullName;
+        if (!_typeStringNames.TryGetValue(typeof(T), out string? typeName))
+        {
+            typeName = typeof(T).FullName ?? typeof(T).Name;
+            _typeStringNames.Add(typeof(T), typeName);
+        }
         string? valueString = value.ToString();
 
         if (string.IsNullOrEmpty(valueString) || valueString == typeName)
-            throw new ArgumentException("The type " + typeName + " must have properly implemented ToString()");
+            throw new ArgumentException($"The type {typeName} must have properly implemented ToString()");
 
         return valueString;
     }
@@ -47,9 +55,11 @@ internal abstract class QueryCommandFormatterBase
     /// <summary>
     /// Returns a well-formed query command string.
     /// </summary>
-    public override string ToString() => Command + ComponentSeparator;
+    public override string ToString()
+        => Command + ComponentSeparator;
 
-    public static implicit operator string(QueryCommandFormatterBase f) => f.ToString();
+    public static implicit operator string(QueryCommandFormatterBase f)
+        => f.ToString();
 }
 
 /// <summary>
@@ -57,6 +67,7 @@ internal abstract class QueryCommandFormatterBase
 /// </summary>
 /// <typeparam name="T">The type of value to be used as the argument.</typeparam>
 internal sealed class MultiQueryCommandFormatter<T> : QueryCommandFormatterBase
+    where T : notnull
 {
     private readonly List<T> _arguments;
 
@@ -120,9 +131,10 @@ internal sealed class MultiQueryCommandFormatter<T> : QueryCommandFormatterBase
     }
 
     /// <inheritdoc />
-    public override string ToString() => AnyArguments
-        ? base.ToString() + string.Join(ArgumentSeparator, Arguments.Select(a => ToStringVerified(a!)))
-        : string.Empty;
+    public override string ToString()
+        => AnyArguments
+            ? base.ToString() + string.Join(ArgumentSeparator, Arguments.Select(ToStringVerified))
+            : string.Empty;
 }
 
 /// <summary>
@@ -130,6 +142,7 @@ internal sealed class MultiQueryCommandFormatter<T> : QueryCommandFormatterBase
 /// </summary>
 /// <typeparam name="T">The type of value to be used as the argument.</typeparam>
 internal sealed class SingleQueryCommandFormatter<T> : QueryCommandFormatterBase
+    where T : notnull
 {
     /// <summary>
     /// Gets the argument.
@@ -139,6 +152,7 @@ internal sealed class SingleQueryCommandFormatter<T> : QueryCommandFormatterBase
     /// <summary>
     /// Gets a value indicating if an argument has been set on this <see cref="SingleQueryCommandFormatter{T}"/> instance.
     /// </summary>
+    [MemberNotNullWhen(true, nameof(Argument))]
     public bool HasArgument { get; private set; }
 
     /// <summary>
@@ -165,7 +179,8 @@ internal sealed class SingleQueryCommandFormatter<T> : QueryCommandFormatterBase
     }
 
     /// <inheritdoc />
-    public override string ToString() => Argument is not null
-        ? base.ToString() + ToStringVerified(Argument)
-        : string.Empty;
+    public override string ToString()
+        => HasArgument
+            ? base.ToString() + ToStringVerified(Argument)
+            : string.Empty;
 }

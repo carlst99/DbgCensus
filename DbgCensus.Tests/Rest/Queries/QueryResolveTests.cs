@@ -1,4 +1,4 @@
-﻿using DbgCensus.Rest.Queries;
+﻿using DbgCensus.Rest.Queries.Internal;
 using System;
 using Xunit;
 

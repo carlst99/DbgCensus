@@ -3,12 +3,12 @@ using DbgCensus.Rest.Abstractions.Queries;
 using System;
 using System.Collections.Generic;
 
-namespace DbgCensus.Rest.Queries;
+namespace DbgCensus.Rest.Queries.Internal;
 
 /// <summary>
 /// Stores the data required to perform a search on a collection in the Census REST API.
 /// </summary>
-internal class QueryFilter
+internal sealed class QueryFilter
 {
     /// <summary>
     /// Gets the field to filter on.
@@ -67,8 +67,10 @@ internal class QueryFilter
     /// </summary>
     /// <returns>A well-formed filter string.</returns>
     public override string ToString()
-        => Field +
-           "=" +
-           (Modifier != SearchModifier.Equals ? (char)Modifier : string.Empty) +
-           Value;
+        => $"{Field}{GetEqualityModifier()}{Value}";
+
+    private string GetEqualityModifier()
+        => Modifier is SearchModifier.Equals
+            ? "="
+            : $"={(char)Modifier}";
 }

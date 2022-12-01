@@ -1,9 +1,5 @@
-﻿using DbgCensus.Rest.Queries;
+﻿using DbgCensus.Rest.Queries.Internal;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace DbgCensus.Tests.Rest.Queries;
@@ -25,13 +21,13 @@ public class MultiQueryCommandFormatterTests
     {
         MultiQueryCommandFormatter<string> formatter = new("command", ';', ',');
 
-        Assert.False(formatter.AnyArguments);
+        Assert.Empty(formatter.Arguments);
         Assert.Throws<ArgumentNullException>(() => formatter.AddArgument(null!));
 
         formatter.AddArgument("argument");
         formatter.AddArgument("argument1");
 
-        Assert.True(formatter.AnyArguments);
+        Assert.Equal(2, formatter.Arguments.Count);
         Assert.Contains("argument", formatter.Arguments);
         Assert.Contains("argument1", formatter.Arguments);
     }
@@ -44,9 +40,9 @@ public class MultiQueryCommandFormatterTests
         Assert.Throws<ArgumentNullException>(() => formatter.AddArgumentRange(null!));
         Assert.Throws<ArgumentNullException>(() => formatter.AddArgumentRange(new string[] { null! }));
 
-        formatter.AddArgumentRange(new string[] { "argument", "argument1" });
+        formatter.AddArgumentRange(new[] { "argument", "argument1" });
 
-        Assert.True(formatter.AnyArguments);
+        Assert.Equal(2, formatter.Arguments.Count);
         Assert.Contains("argument", formatter.Arguments);
         Assert.Contains("argument1", formatter.Arguments);
     }

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DbgCensus.Rest.Queries;
+namespace DbgCensus.Rest.Queries.Internal;
 
 /// <summary>
 /// Stores data required to perform a resolve in the Census REST API.
 /// </summary>
-internal class QueryResolve
+internal sealed class QueryResolve
 {
     private readonly string[] _showFields;
 
@@ -18,7 +18,7 @@ internal class QueryResolve
     /// <summary>
     /// Gets the fields to show from the resolved collection.
     /// </summary>
-    public IReadOnlyList<string> ShowFields => _showFields;
+    public IReadOnlyList<string> ShowFields=> _showFields;
 
     /// <summary>
     /// Stores data required to perform a resolve in the Census REST API.

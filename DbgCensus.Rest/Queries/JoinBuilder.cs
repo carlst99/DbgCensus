@@ -1,5 +1,6 @@
 ﻿using DbgCensus.Core.Utils;
 using DbgCensus.Rest.Abstractions.Queries;
+using DbgCensus.Rest.Queries.Internal;
 using System;
 using System.Collections.Generic;
 
@@ -17,8 +18,8 @@ public sealed class JoinBuilder : IJoinBuilder
     private readonly SingleQueryCommandFormatter<string> _onField;
     private readonly SingleQueryCommandFormatter<string> _toField;
     private readonly SingleQueryCommandFormatter<string> _injectAt;
-    private readonly SingleQueryCommandFormatter<char?> _isList; // No value by default, defaults to '0' in Census
-    private readonly SingleQueryCommandFormatter<char?> _isOuter; // No value by default, defaults to '1' in Census
+    private readonly SingleQueryCommandFormatter<char> _isList; // No value by default, defaults to '0' in Census
+    private readonly SingleQueryCommandFormatter<char> _isOuter; // No value by default, defaults to '1' in Census
 
     private MultiQueryCommandFormatter<string> _showHideFields;
     private bool _isShowingFields = true; // Indicates whether, if present, fields in "_showHideFields" should be shown (or hidden).
@@ -36,8 +37,8 @@ public sealed class JoinBuilder : IJoinBuilder
         _onField = GetSingleQCF<string>("on");
         _toField = GetSingleQCF<string>("to");
         _injectAt = GetSingleQCF<string>("inject_at");
-        _isList = GetSingleQCF<char?>("list");
-        _isOuter = GetSingleQCF<char?>("outer");
+        _isList = GetSingleQCF<char>("list");
+        _isOuter = GetSingleQCF<char>("outer");
 
         _showHideFields = GetMultiQCF<string>("show");
 
@@ -193,8 +194,10 @@ public sealed class JoinBuilder : IJoinBuilder
         => j.ToString();
 
     private static MultiQueryCommandFormatter<T> GetMultiQCF<T>(string command)
+        where T : notnull
         => new(command, ':', '\'');
 
     private static SingleQueryCommandFormatter<T> GetSingleQCF<T>(string command)
+        where T : notnull
         => new(command, ':');
 }

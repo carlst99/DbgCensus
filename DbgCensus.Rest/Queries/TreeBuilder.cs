@@ -1,5 +1,6 @@
 ﻿using DbgCensus.Core.Utils;
 using DbgCensus.Rest.Abstractions.Queries;
+using DbgCensus.Rest.Queries.Internal;
 
 namespace DbgCensus.Rest.Queries;
 
@@ -9,7 +10,7 @@ namespace DbgCensus.Rest.Queries;
 public sealed class TreeBuilder : ITreeBuilder
 {
     private readonly SingleQueryCommandFormatter<string> _onField;
-    private readonly SingleQueryCommandFormatter<char?> _isList; // No value by default, defaults to '0' in Census
+    private readonly SingleQueryCommandFormatter<char> _isList; // No value by default, defaults to '0' in Census
     private readonly SingleQueryCommandFormatter<string> _prefix;
     private readonly SingleQueryCommandFormatter<string> _startOn;
 
@@ -20,7 +21,7 @@ public sealed class TreeBuilder : ITreeBuilder
     public TreeBuilder(string onField)
     {
         _onField = GetSingleQCF<string>("field");
-        _isList = GetSingleQCF<char?>("list");
+        _isList = GetSingleQCF<char>("list");
         _prefix = GetSingleQCF<string>("prefix");
         _startOn = GetSingleQCF<string>("start");
 
@@ -73,5 +74,6 @@ public sealed class TreeBuilder : ITreeBuilder
         => t.ToString();
 
     private static SingleQueryCommandFormatter<T> GetSingleQCF<T>(string command)
+        where T : notnull
         => new(command, ':');
 }
