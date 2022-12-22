@@ -1,8 +1,12 @@
-<img title="DbgCensus Icon" alt="DbgCensus Icon" src="https://github.com/carlst99/DbgCensus/blob/main/Assets/Icon_128.png?raw=true" align="left"></img>
+![DbgCensus Icon](Assets/Icon_128.png)
 
 # DbgCensus
 
-DbgCensus is a C# wrapper for [Daybreak Game Company's Census API](https://census.daybreakgames.com). It was built with PlanetSide 2's endpoints in mind, but should work across all namespaces.
+DbgCensus is a C# wrapper for [Daybreak Game Company's Census API](https://census.daybreakgames.com).
+It was built with PlanetSide 2's endpoints in mind, but should work across all namespaces.
+
+Want to chat with developers of all things Census related? Come say hello in the Planetside Community Developers Discord!\
+![Discord](https://img.shields.io/discord/1019343142471880775?color=blue&label=Planetside%20Community%20Developers&logo=discord&logoColor=%2302B4FF)
 
 **This package is unofficial and is not affiliated with Daybreak Games Company in any way.**
 
