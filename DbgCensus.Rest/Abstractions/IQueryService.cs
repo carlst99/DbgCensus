@@ -19,6 +19,9 @@ public interface IQueryService
     /// <inheritdoc cref="ICensusRestClient.CountAsync(string, CancellationToken)"/>
     Task<ulong> CountAsync(string collectionName, CancellationToken ct = default);
 
+    /// <inheritdoc cref="ICensusRestClient.CountAsync(IQueryBuilder, CancellationToken)"/>
+    Task<ulong> CountAsync(IQueryBuilder query, CancellationToken ct = default);
+
     /// <inheritdoc cref="ICensusRestClient.DistinctAsync{T}(string, string, int, CancellationToken)"/>
     Task<IReadOnlyList<T>?> DistinctAsync<T>
     (

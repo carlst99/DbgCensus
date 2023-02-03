@@ -71,6 +71,13 @@ public class CensusRestClient : ICensusRestClient
             .OnCollection(collectionName)
             .OfQueryType(QueryType.Count);
 
+        return await CountAsync(query, ct).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<ulong> CountAsync(IQueryBuilder query, CancellationToken ct = default)
+    {
+        query.OfQueryType(QueryType.Count);
         return await GetAsync<ulong>(query, ct).ConfigureAwait(false);
     }
 
@@ -83,7 +90,7 @@ public class CensusRestClient : ICensusRestClient
         CancellationToken ct = default
     )
     {
-        if (limit > ICensusRestClient.DistinctLimit || limit < 0)
+        if (limit is > ICensusRestClient.DistinctLimit or < 0)
             throw new ArgumentOutOfRangeException(nameof(limit), limit, $"The limit may not be larger than {ICensusRestClient.DistinctLimit} or smaller than 0.");
 
         IQueryBuilder query = _queryFactory.Get()

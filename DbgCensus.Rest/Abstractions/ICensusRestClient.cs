@@ -49,6 +49,14 @@ public interface ICensusRestClient
     Task<ulong> CountAsync(string collectionName, CancellationToken ct = default);
 
     /// <summary>
+    /// Performs a query using the COUNT verb to retrieve the number of elements returned by the given query.
+    /// </summary>
+    /// <param name="query">The query to perform.</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> that can be used to stop the operation.</param>
+    /// <returns>The number of elements returned by the query.</returns>
+    Task<ulong> CountAsync(IQueryBuilder query, CancellationToken ct = default);
+
+    /// <summary>
     /// Gets all the distinct values of a collection field. Limited by Census to 20000 results.
     /// </summary>
     /// <typeparam name="T">The type of the field.</typeparam>

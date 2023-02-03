@@ -36,6 +36,10 @@ public class QueryService : IQueryService
         => await _client.CountAsync(collectionName, ct).ConfigureAwait(false);
 
     /// <inheritdoc />
+    public virtual async Task<ulong> CountAsync(IQueryBuilder query, CancellationToken ct = default)
+        => await _client.CountAsync(query, ct).ConfigureAwait(false);
+
+    /// <inheritdoc />
     public virtual async Task<IReadOnlyList<T>?> DistinctAsync<T>
     (
         string collectionName,
