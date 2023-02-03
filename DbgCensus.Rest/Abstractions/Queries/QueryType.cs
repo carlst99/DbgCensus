@@ -14,7 +14,7 @@ public readonly record struct QueryType(string Value)
     /// <summary>
     /// Returns the number of values matching the query.
     /// </summary>
-    public static readonly QueryType Count = new("get");
+    public static readonly QueryType Count = new("count");
 
     public override string ToString()
         => Value;
