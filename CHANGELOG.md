@@ -2,6 +2,13 @@
 
 Date format: DD/MM/YYYY
 
+## 03/02/2022
+
+## Rest-v3.3.0
+
+- Fixed `QueryType#Count` returning the wrong verb, and hence the `ICensusRestClient#CountAsync` method.
+- Added an `ICensusRestClient.cs#CountAsync` overload to count results of query, rather than entire collection.
+
 ## 06/10/2022
 
 ## Core-v2.0.0
