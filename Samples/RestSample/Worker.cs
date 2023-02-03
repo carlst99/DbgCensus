@@ -58,7 +58,7 @@ public class Worker : BackgroundService
     {
         IQueryBuilder query = _queryService.CreateQuery(_sanctuaryQueryOptions)
             .OnCollection("item")
-            .WhereAll("item_category_id", SearchModifier.Equals, new uint[] { 6, 7, 8, 11, 12, 19, 24 })
+            .WhereAll("item_category_id", SearchModifier.Equals, new uint[] { 2, 3, 4, 5, 6, 7, 8, 11, 12, 19, 24, 219, 220, 223 })
             .WithLanguage("en")
             .WithLimit(10000)
             .AddJoin("item_to_weapon", j =>
