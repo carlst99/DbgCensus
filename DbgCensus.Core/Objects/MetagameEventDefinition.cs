@@ -194,6 +194,9 @@ public enum MetagameEventDefinition : uint
 
     /// <inheritdoc cref="HauntedBastionIndar" />
     HauntedBastionEsamir = 245,
+
+    /// <inheritdoc cref="HauntedBastionIndar" />
+    HauntedBastionOshur = 246
 }
 
 public static class MetagameEventDefinitionExtensions
