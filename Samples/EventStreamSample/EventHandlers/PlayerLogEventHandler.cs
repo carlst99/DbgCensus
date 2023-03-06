@@ -19,7 +19,7 @@ public class PlayerLogEventHandler : IPayloadHandler<IPlayerLogin>, IPayloadHand
     {
         _logger.LogInformation
         (
-            "Player {playerId} logged in on {world} at {timestamp}",
+            "Player {PlayerId} logged in on {World} at {Timestamp}",
             payload.CharacterID,
             payload.WorldID,
             payload.Timestamp
@@ -32,7 +32,7 @@ public class PlayerLogEventHandler : IPayloadHandler<IPlayerLogin>, IPayloadHand
     {
         _logger.LogInformation
         (
-            "Player {playerId} logged out on {world} at {timestamp}",
+            "Player {PlayerId} logged out on {World} at {Timestamp}",
             payload.CharacterID,
             payload.WorldID,
             payload.Timestamp

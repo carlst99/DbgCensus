@@ -30,14 +30,21 @@ public class EventStreamWorker : BackgroundService
 
             try
             {
-                await _client.StartAsync(ct: stoppingToken).ConfigureAwait(false);
+                await _client.StartAsync(stoppingToken).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not TaskCanceledException)
             {
                 _logger.LogError(ex, "An error occurred in the event stream client");
             }
 
-            await Task.Delay(15000, stoppingToken).ConfigureAwait(false);
+            try
+            {
+                await Task.Delay(500, stoppingToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // This is fine
+            }
         }
     }
 

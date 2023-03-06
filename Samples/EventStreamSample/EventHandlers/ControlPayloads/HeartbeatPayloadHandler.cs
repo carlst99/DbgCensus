@@ -22,7 +22,7 @@ public class HeartbeatPayloadHandler : IPayloadHandler<IHeartbeat>
         foreach (KeyValuePair<string, bool> element in payload.Online)
             message += $"\t- {element.Key}: {element.Value}\n";
 
-        _logger.LogInformation("Received heartbeat:\n{heartbeat}", message);
+        _logger.LogInformation("Received heartbeat:\n{Heartbeat}", message);
 
         return Task.CompletedTask;
     }

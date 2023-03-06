@@ -20,10 +20,10 @@ public class SubscriptionPayloadHandler : IPayloadHandler<ISubscription>
         _logger.LogInformation
         (
             "Current subscription changed! Subscribed to:" +
-            "\n\t- {charCount} characters: {characters}" +
-            "\n\t- on worlds {worlds}" +
-            "\n\t- for events {events}" +
-            "\n\t- logical AND characters with worlds: {logicalAnd}",
+            "\n\t- {CharCount} characters: {Characters}" +
+            "\n\t- on worlds {Worlds}" +
+            "\n\t- for events {Events}" +
+            "\n\t- logical AND characters with worlds: {LogicalAnd}",
             payload.CharacterCount,
             string.Join(", ", payload.Characters ?? new[] { "none" }),
             string.Join(", ", payload.Worlds),

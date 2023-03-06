@@ -19,7 +19,8 @@ public class FacilityControlPayloadHandler : IPayloadHandler<IFacilityControl>
     {
         _logger.LogInformation
         (
-            "The facility {facilityId} on {world} changed ownership, from {oldFaction} to {newFaction}. It was captured at {captureTime}, in the zone {zone}.",
+            "The facility {FacilityId} on {World} changed ownership, from {OldFaction} to {NewFaction}. " +
+            "It was captured at {CaptureTime}, in the zone {Zone}",
             payload.FacilityID,
             payload.WorldID,
             payload.OldFactionID,

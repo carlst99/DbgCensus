@@ -19,7 +19,7 @@ public class ServiceStateChangedPayloadHandler : IPayloadHandler<IServiceStateCh
     {
         _logger.LogInformation
         (
-            "An event stream endpoint has changed state: {endpoint} is now {state}",
+            "An event stream endpoint has changed state: {Endpoint} is now {State}",
             payload.Detail,
             payload.Online ? "online" : "offline"
         );
