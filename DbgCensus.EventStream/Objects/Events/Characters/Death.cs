@@ -8,7 +8,7 @@ namespace DbgCensus.EventStream.Objects.Events.Characters;
 /// Initializes a new instance of the <see cref="Death"/> record.
 /// </summary>
 /// <param name="AttackerCharacterID">The ID of the attacking character.</param>
-/// <param name="AttackerFireMode">The fire mode of the attacking character.</param>
+/// <param name="AttackerFireModeID">The fire mode of the attacking character.</param>
 /// <param name="AttackerLoadoutID">The loadout ID of the attacking character.</param>
 /// <param name="AttackerTeamID">Gets the currently assigned faction of the attacking character.</param>
 /// <param name="AttackerVehicleID">The ID of the vehicle used by the attacking character.</param>
@@ -25,7 +25,7 @@ namespace DbgCensus.EventStream.Objects.Events.Characters;
 public record Death
 (
     ulong AttackerCharacterID,
-    uint AttackerFireMode,
+    uint AttackerFireModeID,
     uint AttackerLoadoutID,
     FactionDefinition AttackerTeamID,
     uint AttackerVehicleID,

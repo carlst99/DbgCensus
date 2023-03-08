@@ -15,7 +15,7 @@ public interface IDeath : IZoneEvent
     /// <summary>
     /// The fire mode of the attacking character.
     /// </summary>
-    uint AttackerFireMode { get; }
+    uint AttackerFireModeID { get; }
 
     /// <summary>
     /// Gets the loadout ID of the attacking character.
