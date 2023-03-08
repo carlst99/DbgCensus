@@ -2,6 +2,13 @@
 
 Date format: DD/MM/YYYY
 
+## 08/03/2023
+
+## EventStream-v2.6.0, EventHandlers-v3.4.0
+
+- Removed the `IContinentUnlock` event - this was never actually implemented on the Census end.
+- Correctly renamed `IDeath#AttackerFireMode` to `AttackerFireModeID`.
+
 ## 03/02/2022
 
 ## Rest-v3.3.0
