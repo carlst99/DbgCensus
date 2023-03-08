@@ -87,7 +87,6 @@ public static class IServiceCollectionExtensions
 
                 // World-level events
                 o.Register<IContinentLock, ContinentLock>(EventNames.ContinentLock);
-                o.Register<IContinentUnlock, ContinentUnlock>(EventNames.ContinentUnlock);
                 o.Register<IFacilityControl, FacilityControl>(EventNames.FacilityControl);
                 o.Register<IMetagameEvent, MetagameEvent>(EventNames.MetagameEvent);
             }

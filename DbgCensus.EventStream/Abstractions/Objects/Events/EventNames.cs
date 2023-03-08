@@ -17,7 +17,6 @@ public static class EventNames
 
     // World-level events
     public const string ContinentLock = "ContinentLock";
-    public const string ContinentUnlock = "ContinentUnlock";
     public const string FacilityControl = "FacilityControl";
     public const string MetagameEvent = "MetagameEvent";
 
