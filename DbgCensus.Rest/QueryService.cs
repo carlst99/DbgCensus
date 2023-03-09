@@ -49,7 +49,7 @@ public class QueryService : IQueryService
     ) => await _client.DistinctAsync<T>(collectionName, fieldName, limit, ct).ConfigureAwait(false);
 
     /// <inheritdoc />
-    public virtual IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>
+    public virtual IAsyncEnumerable<IEnumerable<T>> GetPaginatedAsync<T>
     (
         IQueryBuilder query,
         int pageSize,
