@@ -2,6 +2,13 @@
 
 Date format: DD/MM/YYYY
 
+## 03/03/2023
+
+## Rest-v3.4.0
+
+- `ICensusRestClient.cs#GetPaginatedAsync` can no longer return null pages.
+- Added a default value of `int.MaxValue` for `ICensusRestClient.cs#GetPaginatedAsync(pageCount)`.
+
 ## 08/03/2023
 
 ## EventStream-v2.6.0, EventHandlers-v3.4.0

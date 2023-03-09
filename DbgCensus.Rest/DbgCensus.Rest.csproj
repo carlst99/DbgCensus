@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     
     <!-- Package info -->
-    <Version>3.3.0</Version>
+    <Version>3.4.0</Version>
     <Description>A wrapper for interacting with the query endpoints of Daybreak Game Company's Census API.</Description>
     <PackageReleaseNotes>See CHANGELOG.md for release notes.</PackageReleaseNotes>
   </PropertyGroup>
