@@ -83,11 +83,11 @@ public interface ICensusRestClient
     /// <param name="start">The index at which to start getting objects from.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>An <see cref="IAsyncEnumerable{T}"/> that yields enumerables for each page.</returns>
-    IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>
+    IAsyncEnumerable<IEnumerable<T>> GetPaginatedAsync<T>
     (
         IQueryBuilder query,
         int pageSize,
-        int pageCount,
+        int pageCount = int.MaxValue,
         int start = 0,
         CancellationToken ct = default
     );

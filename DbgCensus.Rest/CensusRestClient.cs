@@ -112,11 +112,11 @@ public class CensusRestClient : ICensusRestClient
     }
 
     /// <inheritdoc />
-    public virtual async IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>
+    public virtual async IAsyncEnumerable<IEnumerable<T>> GetPaginatedAsync<T>
     (
         IQueryBuilder query,
         int pageSize,
-        int pageCount,
+        int pageCount = int.MaxValue,
         int start = 0,
         [EnumeratorCancellation] CancellationToken ct = default
     )
@@ -130,9 +130,12 @@ public class CensusRestClient : ICensusRestClient
             query.WithLimit(pageSize);
 
             List<T>? results = await GetAsync<List<T>>(query, ct).ConfigureAwait(false);
+            if (results is null)
+                break;
+
             yield return results;
 
-            if (results is null || results.Count < pageSize)
+            if (results.Count < pageSize)
                 break;
 
             start += pageSize;

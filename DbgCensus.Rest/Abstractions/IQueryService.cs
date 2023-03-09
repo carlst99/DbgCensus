@@ -32,11 +32,11 @@ public interface IQueryService
     );
 
     /// <inheritdoc cref="ICensusRestClient.GetPaginatedAsync{T}(IQueryBuilder, int, int, int, CancellationToken)"/>
-    IAsyncEnumerable<IEnumerable<T>?> GetPaginatedAsync<T>
+    IAsyncEnumerable<IEnumerable<T>> GetPaginatedAsync<T>
     (
         IQueryBuilder query,
         int pageSize,
-        int pageCount,
+        int pageCount = int.MaxValue,
         int start = 0,
         CancellationToken ct = default
     );
