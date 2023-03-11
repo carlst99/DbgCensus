@@ -11,10 +11,8 @@ such as a *Worker Service* or an *ASP.NET Core* project.
 :::
 
 :::info
-`DbgCensus.Rest` configures two [Polly](https://github.com/App-vNext/Polly) policies by default. These are:
-
-- Wait and Retry: Performs a jittered exponential backoff up to four (by default) times when a query fails.
-- Circuit Breaker: Throws an exception on any queries made in a 15sec window, after having five (by default) queries fail consecutively.
+`DbgCensus.Rest` configures a wait-and-retry [Polly](https://github.com/App-vNext/Polly) policies by default.
+This will perform a jittered exponential backoff up to four (by default) times when a query fails.
 
 See [Advanced Configuration](advanced.md) for more information.
 :::

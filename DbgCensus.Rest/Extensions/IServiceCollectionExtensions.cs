@@ -23,17 +23,11 @@ public static class IServiceCollectionExtensions
     /// </summary>
     /// <param name="serviceCollection">The <see cref="IServiceCollection"/> to add the services to.</param>
     /// <param name="maxRetryAttempts">The maximum number of times that a query may be retried on failure.</param>
-    /// <param name="useCircuitBreakerPolicy">
-    /// A value indicating whether or not the circuit breaker policy will be used.
-    /// If true, more than <paramref name="maxRetryAttempts"/> failures will cause
-    /// all query requests to be blocked for 15s.
-    /// </param>
     /// <returns>A reference to this <see cref="IServiceCollection"/> so that calls may be chained.</returns>
     public static IServiceCollection AddCensusRestServices
     (
         this IServiceCollection serviceCollection,
-        int maxRetryAttempts = 4,
-        bool useCircuitBreakerPolicy = true
+        int maxRetryAttempts = 3
     )
     {
         serviceCollection.Configure<JsonSerializerOptions>
@@ -42,7 +36,7 @@ public static class IServiceCollectionExtensions
             o => o.AddCensusDeserializationOptions()
         );
 
-        IHttpClientBuilder httpBuilder = serviceCollection.AddHttpClient<ICensusRestClient, CensusRestClient>()
+        serviceCollection.AddHttpClient<ICensusRestClient, CensusRestClient>()
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false })
             .AddPolicyHandler
             (
@@ -70,14 +64,6 @@ public static class IServiceCollectionExtensions
                         }
                     )
             );
-
-        if (useCircuitBreakerPolicy)
-        {
-            httpBuilder.AddTransientHttpErrorPolicy
-            (
-                builder => builder.CircuitBreakerAsync(maxRetryAttempts + 1, TimeSpan.FromSeconds(15))
-            );
-        }
 
         serviceCollection.TryAddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
         serviceCollection.TryAddTransient<IQueryService, QueryService>();
