@@ -43,7 +43,7 @@ There are two `DbgCensus.*` packages available for assisting with event streamin
 
 You'll note here that we're adding various *handlers*. They'll be explained in more detail later.
 
-```csharp{19-24}
+```csharp{17,19-23}
 using DbgCensus.EventStream;
 using DbgCensus.EventStream.EventHandlers.Extensions;
 using EventStreamSample.EventHandlers;
