@@ -2,6 +2,13 @@
 
 Date format: DD/MM/YYYY
 
+## 11/03/2023
+
+## Rest-v3.5.0
+
+- Removed the circuit breaker policy. Per information from Census developers, requests are not rate-limited in any way
+  and errors/timeouts are likely to be collection-specific.
+
 ## 03/03/2023
 
 ## Rest-v3.4.0
