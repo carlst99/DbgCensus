@@ -101,19 +101,12 @@ query.WhereAll("property", SearchModifier.Equals, values);
 
 ## Retrieving collection counts
 
-Using the `count` verb to retrieve the number of elements in a collection can be done in two ways. Firstly, by using the shortcut on the `ICensusRestClient`, or secondly by making a query as per usual and defining the query type. Just remember to deserialise to a number type!
+There is a shortcut for the `count` verb on the `ICensusRestClient` interface. It accepts either a query, or a raw collection name,
+and directly returns the Census count value.
 
 ```csharp
 ICensusRestClient client = ...;
 ulong count = await client.CountAsync("character", ct);
-
-// OR
-
-IQueryBuilder query = ...;
-query.OnCollection("character")
-    .OfQueryType(QueryType.Count);
-
-ulong count = await _queryService.GetAsync<ulong>(query, ct).ConfigureAwait(false);
 ```
 
 ## Retrieving distinct field values
