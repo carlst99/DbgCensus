@@ -60,6 +60,14 @@ public readonly struct Optional<TValue>
     }
 
     /// <summary>
+    /// Gets the value of the optional if present, otherwise the
+    /// default value of the optional type.
+    /// </summary>
+    /// <returns>The value if present, otherwise the default type value.</returns>
+    public TValue? GetValueOrDefault()
+        => HasValue ? Value : default;
+
+    /// <summary>
     /// Indicates whether this instance and a specified <see cref="Optional{TValue}"/> are equal.
     /// </summary>
     /// <param name="other">The <see cref="Optional{TValue}"/> to compare with the current instance.</param>

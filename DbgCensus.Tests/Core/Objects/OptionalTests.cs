@@ -17,6 +17,8 @@ public class OptionalTests
         Assert.False(empty.IsDefined(out string? definedValue));
         Assert.Null(definedValue);
 
+        Assert.Equal(default, empty.GetValueOrDefault());
+
         Assert.Throws<InvalidOperationException>(() => empty.Value);
     }
 
@@ -32,6 +34,8 @@ public class OptionalTests
         Assert.True(present.IsDefined(out string? definedValue));
         Assert.Equal(value, definedValue);
 
+        Assert.Equal(value, present.GetValueOrDefault());
+
         Assert.Equal(value, present.Value);
     }
 
@@ -45,6 +49,8 @@ public class OptionalTests
 
         Assert.False(nullo.IsDefined(out string? definedValue));
         Assert.Null(definedValue);
+
+        Assert.Null(nullo.GetValueOrDefault());
 
         Assert.Null(nullo.Value);
     }
