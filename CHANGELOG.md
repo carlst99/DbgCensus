@@ -2,70 +2,76 @@
 
 Date format: DD/MM/YYYY
 
+## 23/03/2023
+
+#### Core-v2.0.1
+
+- Added the `Optional#GetValueOrDefault` function.
+
 ## 11/03/2023
 
-## Rest-v3.5.0
+#### Rest-v3.5.0
 
 - Removed the circuit breaker policy. Per information from Census developers, requests are not rate-limited in any way
   and errors/timeouts are likely to be collection-specific.
 
 ## 03/03/2023
 
-## Rest-v3.4.0
+#### Rest-v3.4.0
 
 - `ICensusRestClient.cs#GetPaginatedAsync` can no longer return null pages.
 - Added a default value of `int.MaxValue` for `ICensusRestClient.cs#GetPaginatedAsync(pageCount)`.
 
 ## 08/03/2023
 
-## EventStream-v2.6.0, EventHandlers-v3.4.0
+#### EventStream-v2.6.0, EventHandlers-v3.4.0
 
 - Removed the `IContinentUnlock` event - this was never actually implemented on the Census end.
 - Correctly renamed `IDeath#AttackerFireMode` to `AttackerFireModeID`.
 
 ## 03/02/2022
 
-## Rest-v3.3.0
+#### Rest-v3.3.0
 
 - Fixed `QueryType#Count` returning the wrong verb, and hence the `ICensusRestClient#CountAsync` method.
 - Added an `ICensusRestClient.cs#CountAsync` overload to count results of query, rather than entire collection.
 
 ## 06/10/2022
 
-## Core-v2.0.0
+#### Core-v2.0.0
 
 - ⚠ Fixed the definitions for _Indar_ and _Amerish_ meltdown metagame events.
 - Added the new 'Haunted Bastion' metagame event definitions
 
-## EventStream-v2.5.0, EventHandlers-v3.3.0, Rest-v3.2.0
+#### EventStream-v2.5.0, EventHandlers-v3.3.0, Rest-v3.2.0
 
 - Updated dependency on `DbgCensus.Core` to v2.0.0.
 
 ## 08/09/2022
 
-## Core-v1.5.0
+#### Core-v1.5.0
 
 Added the new 'Sudden Death' metagame event definitions.
 
-## EventStream-v2.4.0, EventHandlers-v3.2.0
+#### EventStream-v2.4.0, EventHandlers-v3.2.0
 
 - Added the `AttackerTeamID` and `TeamID` properties to the `IVehicleDestroy` event.
 - Added the `TeamID` property to the `IGainExperience` event.
 - Updated dependency on `DbgCensus.Core` to v1.5.0
 
-## Rest-v3.1.0
+#### Rest-v3.1.0
 
 - Updated dependency on `DbgCensus.Core` to v1.5.0
 
 ## 27/08/2022
 
-## EventStream-v2.3.9, EventHandlers-v3.1.5
+#### EventStream-v2.3.9, EventHandlers-v3.1.5
 
 - Added the `AttackerTeamID`, `IsCritical` and `TeamID` properties to the `IDeath` event.
 
 ## 19/08/2022
 
-## EventStream-v2.3.8, EventHandlers-v3.1.4
+#### EventStream-v2.3.8, EventHandlers-v3.1.4
 
 - Added the `IItemAdded` event stream type.
 
