@@ -2,6 +2,14 @@
 
 Date format: DD/MM/YYYY
 
+## 02/04/2023
+
+#### Rest-v3.6.0
+
+- Added the `IQueryBuilder#WithCustomParameter` function.
+- An exception is now thrown when attempting to use both `ShowFields` and `HideFields` on a `QueryBuilder`.
+- Updated dependency on `DbgCensus.Core` to v2.0.1.
+
 ## 23/03/2023
 
 #### Core-v2.0.1
