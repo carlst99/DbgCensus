@@ -2,6 +2,7 @@
   
   <!-- Build-related properties -->
   <PropertyGroup>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
@@ -46,11 +47,11 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Assets\Icon_128.png">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath>.</PackagePath>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Assets\README.nuget.md">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath>.</PackagePath>
     </None>
   </ItemGroup>
   

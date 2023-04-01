@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <UserSecretsId>dotnet-DbgCensusDemo-68A3505B-E415-4103-B44D-2D314D46B925</UserSecretsId>
   </PropertyGroup>
 
