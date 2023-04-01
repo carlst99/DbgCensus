@@ -29,6 +29,7 @@ public sealed class QueryBuilder : IQueryBuilder
     private readonly SingleQueryCommandFormatter<bool> _retry; // True by default
     private readonly SingleQueryCommandFormatter<string> _distinctField;
     private readonly SingleQueryCommandFormatter<int> _startIndex;
+    private readonly List<string> _customParameters;
 
     private string _serviceId;
     private string _queryNamespace;
@@ -64,6 +65,7 @@ public sealed class QueryBuilder : IQueryBuilder
         _retry = GetSingleQCF<bool>("c:retry");
         _distinctField = GetSingleQCF<string>("c:distinct");
         _startIndex = GetSingleQCF<int>("c:start");
+        _customParameters = new List<string>();
 
         CollectionName = null;
         _verb = QueryType.Get;
@@ -87,6 +89,10 @@ public sealed class QueryBuilder : IQueryBuilder
             return builder.Uri;
         builder.Path += $"/{CollectionName}";
 
+        // Add any custom parameters
+        if (_customParameters.Count > 0)
+            builder.Query += string.Join('&', _customParameters);
+
         // Add distinct command
         if (_distinctField.HasArgument)
         {
@@ -98,7 +104,8 @@ public sealed class QueryBuilder : IQueryBuilder
         foreach (QueryFilter filter in _filters)
             builder.Query += $"{filter}&";
 
-        builder.Query += StringUtils.JoinWithoutNullOrEmptyValues
+        // Add commands
+        string commandsJoin = StringUtils.JoinWithoutNullOrEmptyValues
         (
             '&',
             _hasFields,
@@ -114,6 +121,9 @@ public sealed class QueryBuilder : IQueryBuilder
             _withTimings,
             _retry
         );
+
+        if (!string.IsNullOrEmpty(commandsJoin))
+            builder.Query += commandsJoin;
 
         // Add relevant limit command
         if (_limitPerDb.HasArgument)
@@ -176,11 +186,15 @@ public sealed class QueryBuilder : IQueryBuilder
     /// <inheritdoc />
     public IQueryBuilder WhereAll<T>(string field, SearchModifier modifier, IEnumerable<T> filterValues) where T : notnull
     {
-        List<string> values = filterValues.Select(StringUtils.SafeToString).ToList();
+        string value = string.Join
+        (
+            ',',
+            filterValues.Select(StringUtils.SafeToString)
+        );
 
         _filters.Add
         (
-            new QueryFilter(field, modifier, string.Join(',', values))
+            new QueryFilter(field, modifier, value)
         );
 
         return this;
@@ -345,6 +359,16 @@ public sealed class QueryBuilder : IQueryBuilder
     public IQueryBuilder OnNamespace(string censusNamespace)
     {
         _queryNamespace = censusNamespace;
+
+        return this;
+    }
+
+    public IQueryBuilder WithCustomParameter(string parameter)
+    {
+        parameter = parameter.Trim('?', '&');
+
+        if (!string.IsNullOrEmpty(parameter))
+            _customParameters.Add(parameter);
 
         return this;
     }

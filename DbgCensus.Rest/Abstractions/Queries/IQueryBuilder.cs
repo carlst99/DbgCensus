@@ -214,4 +214,11 @@ public interface IQueryBuilder
     /// <param name="censusNamespace">The namespace.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
     IQueryBuilder OnNamespace(string censusNamespace);
+
+    /// <summary>
+    /// Adds a custom parameter to the query.
+    /// </summary>
+    /// <param name="parameter">The parameter.</param>
+    /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
+    IQueryBuilder WithCustomParameter(string parameter);
 }
