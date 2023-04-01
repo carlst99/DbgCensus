@@ -34,8 +34,7 @@ public sealed class QueryBuilder : IQueryBuilder
     private string _serviceId;
     private string _queryNamespace;
     private QueryType _verb;
-    private MultiQueryCommandFormatter<string> _showHideFields;
-    private bool _isShowingFields = true; // Indicates whether, if present, fields in <see cref="_showHideFields"/> should be shown (or hidden).
+    private MultiQueryCommandFormatter<string>? _showHideFields;
 
     public string? CollectionName { get; private set; }
 
@@ -69,7 +68,6 @@ public sealed class QueryBuilder : IQueryBuilder
 
         CollectionName = null;
         _verb = QueryType.Get;
-        _showHideFields = GetMultiQCF<string>("c:show");
 
         if (queryOptions.LanguageCode is not null)
             WithLanguage(queryOptions.LanguageCode);
@@ -109,7 +107,7 @@ public sealed class QueryBuilder : IQueryBuilder
         (
             '&',
             _hasFields,
-            _showHideFields,
+            _showHideFields?.ToString(),
             _resolves,
             _joins,
             _sortKeys,
@@ -265,12 +263,13 @@ public sealed class QueryBuilder : IQueryBuilder
     /// <inheritdoc />
     public IQueryBuilder ShowFields(params string[] fieldNames)
     {
-        // Show and hide are incompatible
-        if (!_isShowingFields)
-            _showHideFields = GetMultiQCF<string>("c:show");
+        const string showCommand = "c:show";
 
+        if (_showHideFields is not null && _showHideFields.Command is not showCommand)
+            throw new InvalidOperationException($"{nameof(ShowFields)} is not compatible with {nameof(HideFields)}");
+
+        _showHideFields ??= GetMultiQCF<string>(showCommand);
         _showHideFields.AddArgumentRange(fieldNames);
-        _isShowingFields = true;
 
         return this;
     }
@@ -278,12 +277,13 @@ public sealed class QueryBuilder : IQueryBuilder
     /// <inheritdoc />
     public IQueryBuilder HideFields(params string[] fieldNames)
     {
-        // Show and hide are incompatible
-        if (_isShowingFields)
-            _showHideFields = GetMultiQCF<string>("c:hide");
+        const string hideCommand = "c:hide";
 
+        if (_showHideFields is not null && _showHideFields.Command is not hideCommand)
+            throw new InvalidOperationException($"{nameof(HideFields)} is not compatible with {nameof(ShowFields)}");
+
+        _showHideFields ??= GetMultiQCF<string>(hideCommand);
         _showHideFields.AddArgumentRange(fieldNames);
-        _isShowingFields = false;
 
         return this;
     }
