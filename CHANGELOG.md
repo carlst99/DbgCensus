@@ -4,6 +4,13 @@ Date format: DD/MM/YYYY
 
 ## 02/04/2023
 
+#### Core-v2.1.0, EventStream-v2.7.0, EventHandlers-v3.5.0, Rest-v3.7.0
+
+- Multi-target .NET 6.0 and .NET 7.0.
+- Updated NuGet dependencies.
+
+## 02/04/2023
+
 #### Rest-v3.6.0
 
 - Added the `IQueryBuilder#WithCustomParameter` function.
