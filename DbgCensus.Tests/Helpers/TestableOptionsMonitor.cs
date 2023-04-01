@@ -11,7 +11,7 @@ public class TestableOptionsMonitor<T> : IOptionsMonitor<T>
         CurrentValue = currentValue;
     }
 
-    public T Get(string name)
+    public T Get(string? name)
         => CurrentValue;
 
     public IDisposable OnChange(Action<T, string> listener)
