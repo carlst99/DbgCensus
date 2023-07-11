@@ -174,15 +174,12 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
 
         try
         {
-            JsonSerializer.Serialize(_sendJsonWriter, command, command.GetType(), _jsonSerializerOptions);
-
-            ReadOnlyMemory<byte> data = _sendBuffer.WrittenMemory;
-
             bool entered = await _sendSemaphore.WaitAsync(1000, ct).ConfigureAwait(false);
             if (!entered)
-            {
                 throw new OperationCanceledException("Could not enter semaphore.");
-            }
+
+            JsonSerializer.Serialize(_sendJsonWriter, command, command.GetType(), _jsonSerializerOptions);
+            ReadOnlyMemory<byte> data = _sendBuffer.WrittenMemory;
 
             int pageCount = (int)Math.Ceiling((double)data.Length / SOCKET_BUFFER_SIZE);
 
@@ -204,9 +201,9 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
         }
         finally
         {
-            _sendSemaphore.Release();
             _sendBuffer.Clear();
             _sendJsonWriter.Reset();
+            _sendSemaphore.Release();
         }
     }
 
