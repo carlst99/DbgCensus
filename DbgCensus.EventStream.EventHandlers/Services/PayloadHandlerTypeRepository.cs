@@ -30,11 +30,11 @@ public class PayloadHandlerTypeRepository : IPayloadHandlerTypeRepository
         if (!payloadType.GetInterfaces().Contains(typeof(IPayload)))
             throw new ArgumentException("The type must derive from " + nameof(IPayload), nameof(payloadType));
 
-        Type keyType = typeof(IPayloadHandler<>).MakeGenericType(new Type[] { payloadType });
-        if (_repository.ContainsKey(keyType))
-            return _repository[keyType];
-        else
-            return Array.Empty<Type>();
+        Type keyType = typeof(IPayloadHandler<>).MakeGenericType(payloadType);
+
+        return _repository.TryGetValue(keyType, out List<Type>? types)
+            ? types
+            : Array.Empty<Type>();
     }
 
     /// <inheritdoc/>

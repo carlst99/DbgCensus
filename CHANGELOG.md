@@ -1,6 +1,26 @@
 # CHANGELOG
 
-Date format: DD/MM/YYYY
+Date format: YYYY/MM/DD (ISO)
+
+## 2023/07/11
+
+#### EventStream-v2.7.1
+
+- Thanks @thelostv - Fixed `EventNames#PlayerLogout` pointing to the *PlayerLogin* event.
+- Fixed the thread-safety of `BaseEventStreamClient#SendCommandAsync`.
+- `IEcho` and `IServiceMessage` now support covariant generics.
+
+#### EventHandlers-v3.5.1
+
+- Updated dependency on `DbgCensus.EventStream` to v2.7.1.
+- Thanks @thelostv - Fixed *PlayerLogin* events being deserialized to `PlayerLogout` types when using the default 
+event type registration.
+
+#### Rest-v3.7.1
+
+- Improved pagination reliability on multi-database collections by using `WithLimitPerDatabase`.
+
+⚠️ Date format changes to: DD/MM/YYYY
 
 ## 02/04/2023
 
