@@ -4,7 +4,7 @@
 /// Represents a ServiceMessage payload.
 /// </summary>
 /// <typeparam name="TEvent">The type of the encapsulated event.</typeparam>
-public interface IServiceMessage<TEvent> : IControl
+public interface IServiceMessage<out TEvent> : IControl
 {
     /// <summary>
     /// Gets the encapsulated event payload.
