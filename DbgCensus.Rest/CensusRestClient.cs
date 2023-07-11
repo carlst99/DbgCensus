@@ -127,7 +127,7 @@ public class CensusRestClient : ICensusRestClient
                 throw new TaskCanceledException();
 
             query.WithStartIndex(start);
-            query.WithLimit(pageSize);
+            query.WithLimitPerDatabase(pageSize);
 
             List<T>? results = await GetAsync<List<T>>(query, ct).ConfigureAwait(false);
             if (results is null)
