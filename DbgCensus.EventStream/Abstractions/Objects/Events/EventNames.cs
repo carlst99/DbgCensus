@@ -11,7 +11,7 @@ public static class EventNames
     public const string PlayerFacilityCapture = "PlayerFacilityCapture";
     public const string PlayerFacilityDefend = "PlayerFacilityDefend";
     public const string PlayerLogin = "PlayerLogin";
-    public const string PlayerLogout = "PlayerLogin";
+    public const string PlayerLogout = "PlayerLogout";
     public const string SkillAdded = "SkillAdded";
     public const string VehicleDestroy = "VehicleDestroy";
 
