@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Documentation for the DbgCensus libraries, unofficial C# wrappers for Daybreak Game Company's Census API.",
   "private": true,
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vitepress dev docs",
@@ -20,6 +21,6 @@
   },
   "homepage": "https://github.com/carlst99/DbgCensus#readme",
   "dependencies": {
-    "vitepress": "^1.0.0-beta.1"
+    "vitepress": "^1.0.0-rc.24"
   }
 }
