@@ -33,7 +33,7 @@ The *Core* library contains common types and extensions. Of these, it is likely 
 
 - Enumerations of the faction, world, zone and metagame (definition and state) IDs that Census uses.
 - An `Optional<T>` structure w/ relevant JSON converters that you can use to represent optional Census fields in your models.
-- A `ZoneID` struct that represents Census' special zone ID format - [see here](https://github.com/cooltrain7/Planetside-2-API-Tracker/wiki/Zone-ID-Tutorial) for more info. JSON converters are registered by default for this type, so you can use it anywhere that you would normally use an integer zone ID in your models.
+- A `ZoneID` struct that represents Census' special zone ID format - [see here](https://github.com/cooltrain7/Planetside-2-API-Tracker/wiki/Tutorial:-Zone-IDs) for more info. JSON converters are registered by default for this type, so you can use it anywhere that you would normally use an integer zone ID in your models.
 - A `GlobalizedString` structure that represents Census' globalized string fields:
     ```json
     "name": {
