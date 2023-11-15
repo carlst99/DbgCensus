@@ -2,6 +2,12 @@
 
 Date format: YYYY/MM/DD (ISO)
 
+## 2023/11/15
+
+#### Core-v2.2.0, EventStream-v2.8.0, EventHandlers-v3.6.0, Rest-v3.8.0
+
+- Added support for .NET 8.0.
+
 ## 2023/07/11
 
 #### EventStream-v2.7.1
