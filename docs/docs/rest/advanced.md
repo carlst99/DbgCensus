@@ -44,7 +44,7 @@ by means of configuring a *named options* instance, so that the configured third
 
 1. Create a `CensusQueryOptions` instance, and point it towards the alternative Census implementation:
     ```csharp
-    CensusQueryOptions falconQueryOptions = new()
+    CensusQueryOptions sanctuaryQueryOptions = new()
     {
         RootEndpoint = "https://census.lithafalcon.cc"
     }
@@ -52,7 +52,7 @@ by means of configuring a *named options* instance, so that the configured third
    
 2. Then, simply pass in these options when creating a query builder.
     ```csharp
-    QueryBuilder builder = new(falconQueryOptions);
+    QueryBuilder builder = new(sanctuaryQueryOptions);
     // OR
-    IQueryBuilder builder = _queryService.CreateQuery(falconQueryOptions);
+    IQueryBuilder builder = _queryService.CreateQuery(sanctuaryQueryOptions);
     ```
