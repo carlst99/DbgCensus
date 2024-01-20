@@ -1,0 +1,1 @@
+import{_ as s,c as n,o as a,V as e}from"./chunks/framework.qOOP-YZN.js";const d=JSON.parse('{"title":"Setup","description":"","frontmatter":{},"headers":[],"relativePath":"rest/index.md","filePath":"rest/index.md"}'),l={name:"rest/index.md"},p=e("",9),o=[p];function t(r,c,i,B,y,u){return a(),n("div",null,o)}const C=s(l,[["render",t]]);export{d as __pageData,C as default};
