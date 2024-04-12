@@ -21,6 +21,6 @@
   },
   "homepage": "https://github.com/carlst99/DbgCensus#readme",
   "dependencies": {
-    "vitepress": "^1.0.0-rc.39"
+    "vitepress": "^1.1.0"
   }
 }
