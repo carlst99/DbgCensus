@@ -194,7 +194,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
 
             if (data.Length > SOCKET_BUFFER_SIZE * 8)
             {
-                // Reset the backing buffer so we don't hold on to more memory than necessary
+                // Reset the backing buffer, so we don't hold on to more memory than necessary
                 _sendBuffer = new ArrayBufferWriter<byte>(SOCKET_BUFFER_SIZE);
                 _sendJsonWriter.Reset(_sendBuffer);
             }
@@ -310,7 +310,8 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     protected async Task ConnectWebsocket(CancellationToken ct)
     {
         _webSocket = _services.GetRequiredService<ClientWebSocket>();
-        _webSocket.Options.KeepAliveInterval = KeepAliveInterval;
+        if (!OperatingSystem.IsBrowser())
+            _webSocket.Options.KeepAliveInterval = KeepAliveInterval;
         await _webSocket.ConnectAsync(_endpoint, ct).ConfigureAwait(false);
 
         _logger.LogInformation("Connected to event stream websocket");
@@ -338,7 +339,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     /// <summary>
     /// Disposes of managed and unmanaged resources.
     /// </summary>
-    /// <param name="disposeManaged">A value indicating whether or not to dispose of managed resources.</param>
+    /// <param name="disposeManaged">A value indicating whether to dispose of managed resources.</param>
     protected virtual void Dispose(bool disposeManaged)
     {
         if (IsDisposed)
