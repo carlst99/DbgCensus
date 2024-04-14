@@ -22,8 +22,6 @@ public class CensusRestClient : ICensusRestClient
     protected readonly IQueryBuilderFactory _queryFactory;
     protected readonly JsonSerializerOptions _jsonOptions;
 
-    public bool IsDisposed { get; protected set; }
-
     /// <summary>
     /// Initialises a new instance of the <see cref="CensusRestClient"/> class.
     /// </summary>

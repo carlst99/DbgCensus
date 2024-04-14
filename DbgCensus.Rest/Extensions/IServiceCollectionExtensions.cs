@@ -37,6 +37,7 @@ public static class IServiceCollectionExtensions
         );
 
         serviceCollection.AddHttpClient<ICensusRestClient, CensusRestClient>()
+            // Disallow redirects so that when Census is down, we don't head over to the HTML land of the DBG website
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false })
             .AddPolicyHandler
             (
