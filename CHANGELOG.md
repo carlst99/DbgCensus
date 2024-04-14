@@ -2,6 +2,23 @@
 
 Date format: YYYY/MM/DD (ISO)
 
+## vNext (unreleased, version numbers TBD)
+
+#### Core-v2.3.0, EventHandlers-v3.7.0, 
+
+- Remove explicit target for net7.0.
+
+#### EventStream-v2.9.0
+
+- Guard against usage of `ClientWebSocket.Options.KeepAliveInterval` on browser platforms.
+- Remove explicit target for net7.0.
+
+#### Rest-v3.9.0
+
+- Now compatible with Native AOT and trimming, via new APIs that support using `JsonTypeInfo`.
+- Remove unused `CensusRestClient.IsDisposed` property.
+- Remove explicit target for net7.0.
+
 ## 2023/11/15
 
 #### Core-v2.2.0, EventStream-v2.8.0, EventHandlers-v3.6.0, Rest-v3.8.0
@@ -12,15 +29,15 @@ Date format: YYYY/MM/DD (ISO)
 
 #### EventStream-v2.7.1
 
-- Thanks @thelostv - Fixed `EventNames#PlayerLogout` pointing to the *PlayerLogin* event.
+- Fixed `EventNames#PlayerLogout` pointing to the *PlayerLogin* event - thanks @thelostv.
 - Fixed the thread-safety of `BaseEventStreamClient#SendCommandAsync`.
 - `IEcho` and `IServiceMessage` now support covariant generics.
 
 #### EventHandlers-v3.5.1
 
 - Updated dependency on `DbgCensus.EventStream` to v2.7.1.
-- Thanks @thelostv - Fixed *PlayerLogin* events being deserialized to `PlayerLogout` types when using the default 
-event type registration.
+- Fixed *PlayerLogin* events being deserialized to `PlayerLogout` types when using the default 
+event type registration - thanks @thelostv.
 
 #### Rest-v3.7.1
 

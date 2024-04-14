@@ -5,7 +5,9 @@ using DbgCensus.Rest.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -15,7 +17,7 @@ using System.Threading.Tasks;
 namespace DbgCensus.Rest;
 
 /// <inheritdoc cref="ICensusRestClient" />
-public class CensusRestClient : ICensusRestClient
+public partial class CensusRestClient : ICensusRestClient
 {
     protected readonly ILogger<CensusRestClient> _logger;
     protected readonly HttpClient _client;
@@ -44,10 +46,18 @@ public class CensusRestClient : ICensusRestClient
     }
 
     /// <inheritdoc />
+#if NET7_0_OR_GREATER
+    [RequiresDynamicCode(ICensusRestClient.SerializationRequiresDynamicCodeMessage)]
+#endif
+    [RequiresUnreferencedCode(ICensusRestClient.SerializationUnreferencedCodeMessage)]
     public virtual async Task<T?> GetAsync<T>(IQueryBuilder query, CancellationToken ct = default)
         => await GetAsync<T>(query.ConstructEndpoint().AbsoluteUri, query.CollectionName, ct).ConfigureAwait(false);
 
     /// <inheritdoc />
+#if NET7_0_OR_GREATER
+    [RequiresDynamicCode(ICensusRestClient.SerializationRequiresDynamicCodeMessage)]
+#endif
+    [RequiresUnreferencedCode(ICensusRestClient.SerializationUnreferencedCodeMessage)]
     public virtual async Task<T?> GetAsync<T>
     (
         string query,
@@ -76,10 +86,14 @@ public class CensusRestClient : ICensusRestClient
     public virtual async Task<ulong> CountAsync(IQueryBuilder query, CancellationToken ct = default)
     {
         query.OfQueryType(QueryType.Count);
-        return await GetAsync<ulong>(query, ct).ConfigureAwait(false);
+        return await GetAsync(query, RestJsonContext.Default.UInt64, ct).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
+#if NET7_0_OR_GREATER
+    [RequiresDynamicCode(ICensusRestClient.SerializationRequiresDynamicCodeMessage)]
+#endif
+    [RequiresUnreferencedCode(ICensusRestClient.SerializationUnreferencedCodeMessage)]
     public virtual async Task<IReadOnlyList<T>?> DistinctAsync<T>
     (
         string collectionName,
@@ -110,6 +124,10 @@ public class CensusRestClient : ICensusRestClient
     }
 
     /// <inheritdoc />
+#if NET7_0_OR_GREATER
+    [RequiresDynamicCode(ICensusRestClient.SerializationRequiresDynamicCodeMessage)]
+#endif
+    [RequiresUnreferencedCode(ICensusRestClient.SerializationUnreferencedCodeMessage)]
     public virtual async IAsyncEnumerable<IEnumerable<T>> GetPaginatedAsync<T>
     (
         IQueryBuilder query,
@@ -161,6 +179,10 @@ public class CensusRestClient : ICensusRestClient
     /// <param name="collectionName">The name of the collection that was queried.</param>
     /// <param name="ct">A token which can be used to cancel asynchronous logic.</param>
     /// <returns>The deserialized value.</returns>
+#if NET7_0_OR_GREATER
+    [RequiresDynamicCode(ICensusRestClient.SerializationRequiresDynamicCodeMessage)]
+#endif
+    [RequiresUnreferencedCode(ICensusRestClient.SerializationUnreferencedCodeMessage)]
     protected virtual async Task<T?> DeserializeResponseContentAsync<T>
     (
         HttpContent content,
@@ -171,6 +193,7 @@ public class CensusRestClient : ICensusRestClient
         using JsonDocument data = await InitialParseAsync(content, ct).ConfigureAwait(false);
         collectionName ??= "datatype";
 
+        // Shortcut early for count, as it is not nested in the collection array
         if (data.RootElement.TryGetProperty("count", out JsonElement countElement))
             return countElement.Deserialize<T>(_jsonOptions);
 
@@ -183,7 +206,7 @@ public class CensusRestClient : ICensusRestClient
         return length switch
         {
             0 => default,
-            1 when !typeof(T).IsAssignableTo(typeof(System.Collections.IEnumerable)) => collectionElement[0].Deserialize<T>(_jsonOptions),
+            1 when !typeof(T).IsAssignableTo(typeof(IEnumerable)) => collectionElement[0].Deserialize<T>(_jsonOptions),
             _ => collectionElement.Deserialize<T>(_jsonOptions)
         };
     }

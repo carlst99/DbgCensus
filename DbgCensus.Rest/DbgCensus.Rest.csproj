@@ -5,6 +5,7 @@
     <Version>3.8.0</Version>
     <Description>A wrapper for interacting with the query endpoints of Daybreak Game Company's Census API.</Description>
     <PackageReleaseNotes>See CHANGELOG.md for release notes.</PackageReleaseNotes>
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DbgCensus.Core\DbgCensus.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="CensusRestClient.TrimSafe.cs">
+      <DependentUpon>CensusRestClient.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>
