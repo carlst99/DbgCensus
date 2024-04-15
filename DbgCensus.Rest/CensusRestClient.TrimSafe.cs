@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,6 +33,18 @@ public partial class CensusRestClient
     /// <inheritdoc />
     public virtual async Task<T?> GetAsync<T>
     (
+        IQueryBuilder query,
+        JsonSerializerContext jsonContext,
+        CancellationToken ct = default
+    )
+    {
+        return await GetAsync<T>(query.ConstructEndpoint().AbsoluteUri, query.CollectionName, jsonContext, ct)
+            .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<T?> GetAsync<T>
+    (
         string query,
         string? collectionName,
         JsonTypeInfo<T> typeInfo,
@@ -43,6 +56,23 @@ public partial class CensusRestClient
         using HttpResponseMessage response = await PerformQueryAsync(query, ct).ConfigureAwait(false);
 
         return await DeserializeResponseContentAsync(response.Content, collectionName, typeInfo, ct)
+            .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<T?> GetAsync<T>
+    (
+        string query,
+        string? collectionName,
+        JsonSerializerContext jsonContext,
+        CancellationToken ct = default
+    )
+    {
+        _logger.LogTrace("Performing Census GET request with query: {Query}", query);
+
+        using HttpResponseMessage response = await PerformQueryAsync(query, ct).ConfigureAwait(false);
+
+        return await DeserializeResponseContentAsync<T>(response.Content, collectionName, jsonContext, ct)
             .ConfigureAwait(false);
     }
 
@@ -122,7 +152,7 @@ public partial class CensusRestClient
     /// <typeparam name="T">The type to deserialize to.</typeparam>
     /// <param name="content">The result of the REST request.</param>
     /// <param name="collectionName">The name of the collection that was queried.</param>
-    /// <param name="typeInfo">The JSON type info to use.</param>
+    /// <param name="typeInfo">The JSON type info to deserialize into.</param>
     /// <param name="ct">A token which can be used to cancel asynchronous logic.</param>
     /// <returns>The deserialized value.</returns>
     protected virtual async Task<T?> DeserializeResponseContentAsync<T>
@@ -151,6 +181,45 @@ public partial class CensusRestClient
             0 => default,
             1 when !typeof(T).IsAssignableTo(typeof(IEnumerable)) => collectionElement[0].Deserialize(typeInfo),
             _ => collectionElement.Deserialize(typeInfo)
+        };
+    }
+
+    /// <summary>
+    /// Performs checks on the returned data and deserializes it.
+    /// </summary>
+    /// <typeparam name="T">The type to deserialize to.</typeparam>
+    /// <param name="content">The result of the REST request.</param>
+    /// <param name="collectionName">The name of the collection that was queried.</param>
+    /// <param name="jsonContext">The JSON serializer context use.</param>
+    /// <param name="ct">A token which can be used to cancel asynchronous logic.</param>
+    /// <returns>The deserialized value.</returns>
+    protected virtual async Task<T?> DeserializeResponseContentAsync<T>
+    (
+        HttpContent content,
+        string? collectionName,
+        JsonSerializerContext jsonContext,
+        CancellationToken ct
+    )
+    {
+        using JsonDocument data = await InitialParseAsync(content, ct).ConfigureAwait(false);
+        collectionName ??= "datatype";
+
+        // Shortcut early for count, as it is not nested in the collection array
+        if (data.RootElement.TryGetProperty("count", out JsonElement countElement))
+            return (T?)countElement.Deserialize(typeof(T), jsonContext);
+
+        JsonElement collectionElement = GetCollectionArrayElement(data.RootElement, collectionName);
+        int length = collectionElement.GetArrayLength();
+
+        if (typeof(T) == typeof(JsonDocument))
+            return (T?)collectionElement.Deserialize(typeof(JsonDocument), jsonContext);
+
+        return length switch
+        {
+            0 => default,
+            1 when !typeof(T).IsAssignableTo(typeof(IEnumerable))
+                => (T?)collectionElement[0].Deserialize(typeof(T), jsonContext),
+            _ => (T?)collectionElement.Deserialize(typeof(T), jsonContext)
         };
     }
 }

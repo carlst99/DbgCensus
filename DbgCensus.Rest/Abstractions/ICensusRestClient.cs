@@ -1,6 +1,7 @@
 ﻿using DbgCensus.Rest.Abstractions.Queries;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,6 +51,16 @@ public interface ICensusRestClient
     /// </summary>
     /// <typeparam name="T">The type to deserialise the response to.</typeparam>
     /// <param name="query">The query to perform.</param>
+    /// <param name="jsonContext">The JSON serializer context to use.</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
+    /// <returns>The deserialized response, or null if no value was returned.</returns>
+    Task<T?> GetAsync<T>(IQueryBuilder query, JsonSerializerContext jsonContext, CancellationToken ct = default);
+
+    /// <summary>
+    /// Performs a query on the Census REST API.
+    /// </summary>
+    /// <typeparam name="T">The type to deserialise the response to.</typeparam>
+    /// <param name="query">The query to perform.</param>
     /// <param name="collectionName">The collection that the query will be performed on.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>The deserialized response, or null if no value was returned.</returns>
@@ -78,6 +89,23 @@ public interface ICensusRestClient
         string query,
         string? collectionName,
         JsonTypeInfo<T> typeInfo,
+        CancellationToken ct = default
+    );
+
+    /// <summary>
+    /// Performs a query on the Census REST API.
+    /// </summary>
+    /// <typeparam name="T">The type to deserialise the response to.</typeparam>
+    /// <param name="query">The query to perform.</param>
+    /// <param name="collectionName">The collection that the query will be performed on.</param>
+    /// <param name="jsonContext">The JSON serializer context to use.</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
+    /// <returns>The deserialized response, or null if no value was returned.</returns>
+    Task<T?> GetAsync<T>
+    (
+        string query,
+        string? collectionName,
+        JsonSerializerContext jsonContext,
         CancellationToken ct = default
     );
 
