@@ -1,8 +1,8 @@
 using DbgCensus.Core.Objects;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace DbgCensus.Core.Json;
 
@@ -10,16 +10,19 @@ namespace DbgCensus.Core.Json;
 /// Converts an <see cref="Optional{TValue}"/> to/from JSON.
 /// </summary>
 /// <typeparam name="TValue">The value type of the optional.</typeparam>
-#if NET7_0_OR_GREATER
-[RequiresDynamicCode("Ensure the TValue of the optional is not trimmed, or use the TrimmableOptionalJsonConverter<TValue>")]
-#endif
-[RequiresUnreferencedCode("Ensure the TValue of the optional is not trimmed, or use the TrimmableOptionalJsonConverter<TValue>")]
-public class OptionalJsonConverter<TValue> : JsonConverter<Optional<TValue?>>
+public class TrimmableOptionalJsonConverter<TValue> : JsonConverter<Optional<TValue?>>
 {
+    private readonly JsonTypeInfo<TValue> _typeInfo;
+
+    public TrimmableOptionalJsonConverter(JsonTypeInfo<TValue> typeInfo)
+    {
+        _typeInfo = typeInfo;
+    }
+
     /// <inheritdoc />
     public override Optional<TValue?> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return new Optional<TValue?>(JsonSerializer.Deserialize<TValue>(ref reader, options));
+        return new Optional<TValue?>(JsonSerializer.Deserialize(ref reader, _typeInfo));
     }
 
     /// <inheritdoc />
@@ -37,6 +40,6 @@ public class OptionalJsonConverter<TValue> : JsonConverter<Optional<TValue?>>
             return;
         }
 
-        JsonSerializer.Serialize(writer, value.Value, options);
+        JsonSerializer.Serialize(writer, value.Value, _typeInfo);
     }
 }

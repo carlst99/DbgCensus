@@ -14,7 +14,7 @@ public readonly struct Optional<TValue>
     private readonly TValue _value;
 
     /// <summary>
-    /// Gets a value indicating whether or not this optional contains a value.
+    /// Gets a value indicating whether this optional contains a value.
     /// </summary>
     public bool HasValue { get; }
 

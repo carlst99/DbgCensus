@@ -8,6 +8,7 @@
       wrappers for interacting with Daybreak Game Company's Census API.
     </Description>
     <PackageReleaseNotes>See CHANGELOG.md for release notes.</PackageReleaseNotes>
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,11 +1,15 @@
 using DbgCensus.Core.Objects;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace DbgCensus.Core.Json;
 
+#if NET7_0_OR_GREATER
+[RequiresDynamicCode("This factory uses Type.MakeGenericType, which may break functionality when compiling AOT code. Consider registering a generic instance of the OptionalConverter<T> instead")]
+#endif
 public class OptionalJsonConverterFactory : JsonConverterFactory
 {
     /// <inheritdoc />

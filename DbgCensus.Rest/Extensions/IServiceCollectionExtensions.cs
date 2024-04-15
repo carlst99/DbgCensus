@@ -33,7 +33,9 @@ public static class IServiceCollectionExtensions
         serviceCollection.Configure<JsonSerializerOptions>
         (
             Constants.JsonDeserializationOptionsName,
+#pragma warning disable IL3050 // RequiresDynamicCode: This path should only be used when the AOT API is not in use
             o => o.AddCensusDeserializationOptions()
+#pragma warning restore IL3050
         );
 
         serviceCollection.AddHttpClient<ICensusRestClient, CensusRestClient>()
