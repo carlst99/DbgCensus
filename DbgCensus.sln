@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Samples\Benchmarks\Benchmarks.csproj", "{333AA9DC-60E3-4150-B130-A99F35C115E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{CDAF368C-5AEA-41F2-9A3B-42994F75FA40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CDAF368C-5AEA-41F2-9A3B-42994F75FA40}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CDAF368C-5AEA-41F2-9A3B-42994F75FA40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{333AA9DC-60E3-4150-B130-A99F35C115E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{333AA9DC-60E3-4150-B130-A99F35C115E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{333AA9DC-60E3-4150-B130-A99F35C115E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{333AA9DC-60E3-4150-B130-A99F35C115E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +72,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{5D4E1B12-E20D-4918-A4DC-FFF4EC0EEDE1} = {192E67B9-9A22-4A5F-BBFD-608F4A6C2807}
 		{4C123014-3A3B-40AA-92CD-1488FD0A28D3} = {192E67B9-9A22-4A5F-BBFD-608F4A6C2807}
+		{333AA9DC-60E3-4150-B130-A99F35C115E4} = {192E67B9-9A22-4A5F-BBFD-608F4A6C2807}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {451779D3-6D5D-4290-A6AB-7EBAD1F2C8C5}

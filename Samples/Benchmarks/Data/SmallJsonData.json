@@ -1,0 +1,23 @@
+{
+  "faction_list": [
+    {
+      "faction_id": "1",
+      "name": {
+        "en": "Vanu Sovereignty"
+      },
+      "short_name": {
+        "en": "VS"
+      },
+      "description": {
+        "en": "Embracing ancient Vanu technology, VS weapons and vehicles are the most exotic on the battlefield."
+      },
+      "image_set_id": "21",
+      "image_id": "90",
+      "image_path": "/files/ps2/images/static/90.png",
+      "hud_tint_rgb": "4460130",
+      "code_tag": "VS",
+      "user_selectable": "1"
+    }
+  ],
+  "returned": 1
+}
