@@ -2,6 +2,13 @@
 
 Date format: YYYY/MM/DD (ISO)
 
+## 2024/04/17
+
+#### EventStream-v3.0.1, EventHandlers-v3.7.2
+
+- Fixed a bug in the new `ReadOnlySequence`-based data processing that causes errors when deserializing JSON data
+larger than the size of a single segment (4096 bytes).
+
 ## 2024/04/16 Update 2
 
 #### EventStream-v3.0.0
