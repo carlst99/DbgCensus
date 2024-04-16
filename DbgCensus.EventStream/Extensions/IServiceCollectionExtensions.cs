@@ -4,7 +4,6 @@ using DbgCensus.EventStream.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using Microsoft.IO;
 using System;
 using System.Net.WebSockets;
 using System.Text.Json;
@@ -47,7 +46,6 @@ public static class IServiceCollectionExtensions
             }
         );
 
-        serviceCollection.TryAddSingleton<RecyclableMemoryStreamManager>();
         serviceCollection.TryAddTransient<ClientWebSocket>();
 
         serviceCollection.TryAddSingleton<IEventStreamClientFactory>

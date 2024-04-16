@@ -5,9 +5,8 @@ using DbgCensus.EventStream.EventHandlers.Abstractions.Services;
 using DbgCensus.EventStream.EventHandlers.Objects;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IO;
 using System;
-using System.IO;
+using System.Buffers;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,7 +42,6 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     /// <param name="baseOptions">The options used to configure the client.</param>
     /// <param name="handlingOptions">The options used to configure the client.</param>
     /// <param name="jsonSerializerOptions">The JSON serializer options to use when de/serializing payloads.</param>
-    /// <param name="memoryStreamPool">The memory stream pool.</param>
     /// <param name="payloadTypeRepository">The payload type repository.</param>
     /// <param name="dispatchService">The payload dispatch service.</param>
     public EventHandlingEventStreamClient
@@ -54,11 +52,10 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
         IOptions<EventStreamOptions> baseOptions,
         IOptions<EventHandlingClientOptions> handlingOptions,
         IOptionsMonitor<JsonSerializerOptions> jsonSerializerOptions,
-        RecyclableMemoryStreamManager memoryStreamPool,
         IPayloadTypeRepository payloadTypeRepository,
         IPayloadDispatchService dispatchService
     )
-        : base(name, logger, services, baseOptions, jsonSerializerOptions, memoryStreamPool)
+        : base(name, logger, services, baseOptions, jsonSerializerOptions)
     {
         _logger = logger;
         _handlingOptions = handlingOptions.Value;
@@ -99,7 +96,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
     }
 
     /// <inheritdoc />
-    protected override async ValueTask HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct)
+    protected override async ValueTask HandlePayloadAsync(ReadOnlySequence<byte> data, CancellationToken ct)
     {
         // Check the health of the dispatch task
         if (_dispatchTask!.IsCompleted)
@@ -117,7 +114,7 @@ public sealed class EventHandlingEventStreamClient : BaseEventStreamClient
             _dispatchTask = _dispatchService.RunAsync(_dispatchCts.Token);
         }
 
-        using JsonDocument jsonResponse = await JsonDocument.ParseAsync(eventStream, cancellationToken: ct).ConfigureAwait(false);
+        using JsonDocument jsonResponse = JsonDocument.Parse(data);
 
         if (jsonResponse.RootElement.TryGetProperty("type", out JsonElement typeElement))
         {

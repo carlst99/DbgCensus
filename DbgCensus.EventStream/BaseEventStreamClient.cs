@@ -1,12 +1,11 @@
 ﻿using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Abstractions.Objects.Commands;
+using DbgCensus.EventStream.Objects;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IO;
 using System;
 using System.Buffers;
-using System.IO;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -37,7 +36,6 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
 
     protected readonly IServiceProvider _services;
     protected readonly EventStreamOptions _options;
-    protected readonly RecyclableMemoryStreamManager _memoryStreamPool;
     protected readonly JsonSerializerOptions _jsonDeserializerOptions;
     protected readonly JsonSerializerOptions _jsonSerializerOptions;
 
@@ -67,15 +65,13 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     /// <param name="services">The service provider, used to retrieve <see cref="ClientWebSocket"/> instances.</param>
     /// <param name="options">The options used to configure the client.</param>
     /// <param name="jsonSerializerOptions">The JSON serializer options to use when de/serializing payloads.</param>
-    /// <param name="memoryStreamPool">The memory stream pool.</param>
     protected BaseEventStreamClient
     (
         string name,
         ILogger<BaseEventStreamClient> logger,
         IServiceProvider services,
         IOptions<EventStreamOptions> options,
-        IOptionsMonitor<JsonSerializerOptions> jsonSerializerOptions,
-        RecyclableMemoryStreamManager memoryStreamPool
+        IOptionsMonitor<JsonSerializerOptions> jsonSerializerOptions
     )
     {
         if (string.IsNullOrEmpty(options.Value.ServiceId))
@@ -94,7 +90,6 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
         Name = name;
         _logger = logger;
         _services = services;
-        _memoryStreamPool = memoryStreamPool;
         _options = options.Value;
         _webSocket = services.GetRequiredService<ClientWebSocket>();
 
@@ -249,7 +244,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected virtual async Task StartListeningAsync(CancellationToken ct)
     {
-        IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent(SOCKET_BUFFER_SIZE);
+        JsonReadOnlySequenceSegment? startSeg = null;
 
         try
         {
@@ -272,11 +267,13 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
                         return;
                 }
 
-                await using MemoryStream stream = _memoryStreamPool.GetStream();
                 ValueWebSocketReceiveResult result;
+                JsonReadOnlySequenceSegment? endSeg = null;
+                int endSegIndex = 0;
 
                 do
                 {
+                    IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent(SOCKET_BUFFER_SIZE);
                     result = await _webSocket.ReceiveAsync(buffer.Memory, ct).ConfigureAwait(false);
 
                     // The streaming API occasionally closes your connection. We'll helpfully restore that.
@@ -290,16 +287,30 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
                         continue;
                     }
 
-                    await stream.WriteAsync(buffer.Memory[..result.Count], ct).ConfigureAwait(false);
+                    endSegIndex = result.Count;
+                    if (startSeg is null)
+                        startSeg = new JsonReadOnlySequenceSegment(buffer, result.Count);
+                    else if (endSeg is null)
+                        endSeg = new JsonReadOnlySequenceSegment(startSeg, buffer, result.Count);
+                    else
+                        endSeg = new JsonReadOnlySequenceSegment(endSeg, buffer, result.Count);
                 } while (!result.EndOfMessage);
 
-                stream.Seek(0, SeekOrigin.Begin);
-                await HandlePayloadAsync(stream, ct).ConfigureAwait(false);
+                if (startSeg is null)
+                    return;
+                ReadOnlySequence<byte> sequence = endSeg is null
+                    ? new ReadOnlySequence<byte>(startSeg.Memory)
+                    : new ReadOnlySequence<byte>(startSeg, 0, endSeg, endSegIndex);
+
+                await HandlePayloadAsync(sequence, ct).ConfigureAwait(false);
+
+                startSeg.Dispose();
+                startSeg = null;
             }
         }
         finally
         {
-            buffer.Dispose();
+            startSeg?.Dispose();
         }
     }
 
@@ -320,10 +331,12 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
     /// <summary>
     /// Called when an event is received.
     /// </summary>
-    /// <param name="eventStream">The event data. This stream will be disposed by the <see cref="BaseEventStreamClient"/>.</param>
+    /// <param name="data">
+    /// The event data. The underlying segments will be disposed by the <see cref="BaseEventStreamClient"/>.
+    /// </param>
     /// <param name="ct">A <see cref="CancellationToken"/> used to stop the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    protected abstract ValueTask HandlePayloadAsync(MemoryStream eventStream, CancellationToken ct);
+    protected abstract ValueTask HandlePayloadAsync(ReadOnlySequence<byte> data, CancellationToken ct);
 
     /// <summary>
     /// Checks if this object has been disposed.

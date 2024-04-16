@@ -14,7 +14,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +55,6 @@ public static class IServiceCollectionExtensions
                 o,
                 s.GetRequiredService<IOptions<EventHandlingClientOptions>>(),
                 s.GetRequiredService<IOptionsMonitor<JsonSerializerOptions>>(),
-                s.GetRequiredService<RecyclableMemoryStreamManager>(),
                 s.GetRequiredService<IPayloadTypeRepository>(),
                 s.GetRequiredService<IPayloadDispatchService>()
             )
