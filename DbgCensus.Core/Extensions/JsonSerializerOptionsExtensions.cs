@@ -29,6 +29,7 @@ public static class JsonSerializerOptionsExtensions
         options.Converters.Add(new DateTimeOffsetJsonConverter());
     }
 
+#if NET7_0_OR_GREATER
     /// <summary>
     /// Adds required options to deserialize Census JSON data and DbgCensus-specific types.
     /// This method is a NativeAOT/trimming compatible variant of <see cref="AddCensusDeserializationOptions"/>.
@@ -40,7 +41,6 @@ public static class JsonSerializerOptionsExtensions
     /// Use this created instance to retrieve JSON type infos.
     /// </remarks>
     /// <param name="options">The options instance to modify.</param>
-#if NET7_0_OR_GREATER
     public static void AddDbgCensusOptions(this JsonSerializerOptions options)
     {
         options.NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals;
