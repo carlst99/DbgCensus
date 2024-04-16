@@ -2,7 +2,30 @@
 
 Date format: YYYY/MM/DD (ISO)
 
-## vNext (unreleased, version numbers TBD)
+## 2024/04/16 Update 2
+
+#### EventStream-v3.0.0
+
+🚨 Breaking Change - The `BaseEventStreamClient.HandlePayloadAsync` method is now passed a `ReadOnlySequence<byte>`,
+rather than a `MemoryStream`. Consumers will need to use other overloads of the System.Text.Json APIs to process the
+data, or convert the sequence back into a stream using similar to the following logic:
+
+```csharp
+protected override async ValueTask HandlePayloadAsync(ReadOnlySequence<byte> data, CancellationToken ct)
+{
+    MemoryStream ms = new(data.ToArray());
+    // ...
+}
+```
+
+This change was made to remove the dependency on `Microsoft.IO.RecyclableMemoryStream` while still retaining pooled
+memory allocations in the `BaseEventStreamClient`.
+
+#### EventHandlers-v3.7.1
+
+- Update to support breaking change in **EventStream-v3.0.0**.
+
+## 2024/04/16 Update 1
 
 #### Core-v2.3.0
 
@@ -14,7 +37,7 @@ Date format: YYYY/MM/DD (ISO)
 - Guard against usage of `ClientWebSocket.Options.KeepAliveInterval` on browser platforms.
 - Remove explicit target for net7.0.
 
-#### EventHandlers-v3.7.0,
+#### EventHandlers-v3.7.0
 
 - Remove explicit target for net7.0.
 
