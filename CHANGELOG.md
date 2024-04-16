@@ -4,13 +4,18 @@ Date format: YYYY/MM/DD (ISO)
 
 ## vNext (unreleased, version numbers TBD)
 
-#### Core-v2.3.0, EventHandlers-v3.7.0, 
+#### Core-v2.3.0
 
+- Now compatible with Native AOT and trimming, via new APIs that support using `JsonTypeInfo`.
 - Remove explicit target for net7.0.
 
 #### EventStream-v2.9.0
 
 - Guard against usage of `ClientWebSocket.Options.KeepAliveInterval` on browser platforms.
+- Remove explicit target for net7.0.
+
+#### EventHandlers-v3.7.0,
+
 - Remove explicit target for net7.0.
 
 #### Rest-v3.9.0
