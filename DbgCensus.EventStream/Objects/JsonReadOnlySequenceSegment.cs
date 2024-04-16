@@ -16,7 +16,7 @@ internal sealed class JsonReadOnlySequenceSegment : ReadOnlySequenceSegment<byte
     public JsonReadOnlySequenceSegment(JsonReadOnlySequenceSegment previous, IMemoryOwner<byte> data, int dataLength)
         : this(data, dataLength)
     {
-        base.RunningIndex = previous.Memory.Length;
+        base.RunningIndex = previous.RunningIndex + previous.Memory.Length;
         previous.Next = this;
     }
 
