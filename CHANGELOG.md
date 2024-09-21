@@ -2,6 +2,24 @@
 
 Date format: YYYY/MM/DD (ISO)
 
+## 2024/09/21
+
+#### Core-v3.0.0
+
+- 🚨 Breaking Change: The CamelCaseJsonNamingPolicy class has been removed, as it is no longer used internally.
+It was an exceedingly domain-specific implementation, and should not have been `public`.
+
+#### EventStream-v3.1.0
+
+- Changed the JSON serialization of commands to use a proper camelCase property name converter. The existing
+converter was PascalCase. This fixes compatibility with the NSS third-party Event-Stream wrapper.
+
+#### EventHandlers-v3.8.0
+
+- Added a parameter to `AddPayloadHandler` and `RegisterPreDispatchHandler` to allow changing the service lifetime under
+which handlers are registered. See `Program.cs` in the ESS sample for a demonstration (which also fixes the 
+`DuplicatePreventionPreDispatchHandler` being non-functional in the ESS sample).
+
 ## 2024/04/17
 
 #### EventStream-v3.0.1, EventHandlers-v3.7.2
