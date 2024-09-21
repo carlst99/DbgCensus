@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!-- Package info -->
-    <Version>3.0.1</Version>
+    <Version>3.1.0</Version>
     <Description>A library for receiving data from the websocket event stream of Daybreak Game Company's Census API.</Description>
     <PackageReleaseNotes>See CHANGELOG.md for release notes.</PackageReleaseNotes>
   </PropertyGroup>
