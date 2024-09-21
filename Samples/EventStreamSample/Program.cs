@@ -20,7 +20,8 @@ public static class Program
         builder.Services.Configure<EventStreamOptions>(builder.Configuration.GetSection(nameof(EventStreamOptions)));
 
         builder.Services.AddCensusEventHandlingServices()
-            .RegisterPreDispatchHandler<DuplicatePreventionPreDispatchHandler>()
+            // There should only ever be one instance of the duplicate prevention handler, hence the singleton scope
+            .RegisterPreDispatchHandler<DuplicatePreventionPreDispatchHandler>(ServiceLifetime.Singleton)
             .AddPayloadHandler<ConnectionStateChangedPayloadHandler>()
             .AddPayloadHandler<HeartbeatPayloadHandler>()
             .AddPayloadHandler<ServiceStateChangedPayloadHandler>()

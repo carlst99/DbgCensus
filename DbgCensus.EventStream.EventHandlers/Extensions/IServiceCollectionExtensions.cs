@@ -98,9 +98,13 @@ public static class IServiceCollectionExtensions
     /// </summary>
     /// <typeparam name="THandler">The handler type.</typeparam>
     /// <param name="serviceCollection">The service collection.</param>
+    /// <param name="lifetime">The lifetime scope to register the payload handler under.</param>
     /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
-    public static IServiceCollection AddPayloadHandler<THandler>(this IServiceCollection serviceCollection)
-        where THandler : IPayloadHandler
+    public static IServiceCollection AddPayloadHandler<THandler>
+    (
+        this IServiceCollection serviceCollection,
+        ServiceLifetime lifetime = ServiceLifetime.Scoped
+    ) where THandler : IPayloadHandler
     {
         Type handlerType = typeof(THandler);
 
@@ -111,9 +115,9 @@ public static class IServiceCollectionExtensions
 
         // Register the handler interface to the implementing type
         foreach (Type handlerInterface in handlerInterfaces)
-            serviceCollection.AddScoped(handlerInterface, handlerType);
+            serviceCollection.Add(new ServiceDescriptor(handlerInterface, handlerType, lifetime));
 
-        serviceCollection.AddScoped(handlerType);
+        serviceCollection.Add(new ServiceDescriptor(handlerType, handlerType, lifetime));
 
         serviceCollection.Configure<PayloadHandlerTypeRepository>(r => r.RegisterHandler<THandler>());
 
@@ -125,13 +129,17 @@ public static class IServiceCollectionExtensions
     /// </summary>
     /// <typeparam name="THandler">The handler type.</typeparam>
     /// <param name="serviceCollection">The service collection.</param>
+    /// <param name="lifetime">The lifetime scope to register the payload handler under.</param>
     /// <returns>The <see cref="IServiceCollection"/> instance so that calls may be chained.</returns>
-    public static IServiceCollection RegisterPreDispatchHandler<THandler>(this IServiceCollection serviceCollection)
-        where THandler : IPreDispatchHandler
+    public static IServiceCollection RegisterPreDispatchHandler<THandler>
+    (
+        this IServiceCollection serviceCollection,
+        ServiceLifetime lifetime = ServiceLifetime.Scoped
+    ) where THandler : IPreDispatchHandler
     {
         Type handlerType = typeof(THandler);
 
-        serviceCollection.AddScoped(handlerType);
+        serviceCollection.Add(new ServiceDescriptor(handlerType, handlerType, lifetime));
         serviceCollection.Configure<PreDispatchHandlerTypeRepository>(r => r.Register<THandler>());
 
         return serviceCollection;
