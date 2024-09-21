@@ -7,42 +7,45 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
-using System.Threading.Tasks;
 
 namespace EventStreamSample;
 
 public static class Program
 {
-    public static async Task Main(string[] args)
+    public static void Main(string[] args)
     {
-        IHost host = Host.CreateDefaultBuilder(args)
-            .UseDefaultServiceProvider(o => o.ValidateScopes = true)
-            .UseSerilog(GetLogger())
-            .ConfigureServices((hostContext, services) =>
-            {
-                services.Configure<EventStreamOptions>(hostContext.Configuration.GetSection(nameof(EventStreamOptions)));
+        HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+        SetupLogger(builder);
 
-                services.AddCensusEventHandlingServices()
-                    .RegisterPreDispatchHandler<DuplicatePreventionPreDispatchHandler>()
-                    .AddPayloadHandler<ConnectionStateChangedPayloadHandler>()
-                    .AddPayloadHandler<HeartbeatPayloadHandler>()
-                    .AddPayloadHandler<ServiceStateChangedPayloadHandler>()
-                    .AddPayloadHandler<SubscriptionPayloadHandler>()
-                    .AddPayloadHandler<FacilityControlPayloadHandler>()
-                    .AddPayloadHandler<PlayerLogEventHandler>()
-                    .AddPayloadHandler<UnknownPayloadHandler>();
+        builder.Services.Configure<EventStreamOptions>(builder.Configuration.GetSection(nameof(EventStreamOptions)));
 
-                services.AddHostedService<EventStreamWorker>();
-            })
-            .Build();
+        builder.Services.AddCensusEventHandlingServices()
+            .RegisterPreDispatchHandler<DuplicatePreventionPreDispatchHandler>()
+            .AddPayloadHandler<ConnectionStateChangedPayloadHandler>()
+            .AddPayloadHandler<HeartbeatPayloadHandler>()
+            .AddPayloadHandler<ServiceStateChangedPayloadHandler>()
+            .AddPayloadHandler<SubscriptionPayloadHandler>()
+            .AddPayloadHandler<FacilityControlPayloadHandler>()
+            .AddPayloadHandler<PlayerLogEventHandler>()
+            .AddPayloadHandler<UnknownPayloadHandler>();
 
-        await host.RunAsync();
+        builder.Services.AddHostedService<EventStreamWorker>();
+
+        builder.Build().Run();
     }
 
-    private static ILogger GetLogger()
-        => new LoggerConfiguration()
+    private static void SetupLogger(HostApplicationBuilder builder)
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Verbose()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .Enrich.FromLogContext()
-            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
+            .WriteTo.Console
+            (
+                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
+            )
             .CreateLogger();
+
+        builder.Services.AddSerilog();
+    }
 }

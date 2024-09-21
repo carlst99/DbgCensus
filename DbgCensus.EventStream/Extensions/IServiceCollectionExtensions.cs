@@ -1,5 +1,4 @@
-﻿using DbgCensus.Core.Json;
-using DbgCensus.EventStream.Abstractions;
+﻿using DbgCensus.EventStream.Abstractions;
 using DbgCensus.EventStream.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -40,7 +39,7 @@ public static class IServiceCollectionExtensions
             Constants.JsonSerializationOptionsName,
             o =>
             {
-                o.PropertyNamingPolicy = new CamelCaseJsonNamingPolicy();
+                o.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                 o.Converters.Add(new SubscribeUInt64ListJsonConverter());
                 o.Converters.Add(new SubscribeWorldListJsonConverter());
             }

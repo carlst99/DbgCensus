@@ -173,8 +173,12 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
             if (!entered)
                 throw new OperationCanceledException("Could not enter semaphore.");
 
+            // Use the explicit type of the object, to prevent issues with serializing only an interface definition
             JsonSerializer.Serialize(_sendJsonWriter, command, command.GetType(), _jsonSerializerOptions);
             ReadOnlyMemory<byte> data = _sendBuffer.WrittenMemory;
+
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Sending command: {Data}", System.Text.Encoding.UTF8.GetString(data.Span));
 
             int pageCount = (int)Math.Ceiling((double)data.Length / SOCKET_BUFFER_SIZE);
 
@@ -184,7 +188,8 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
                 int count = SOCKET_BUFFER_SIZE * (i + 1) < data.Length ? SOCKET_BUFFER_SIZE : data.Length - offset;
                 bool isLastMessage = (i + 1) == pageCount;
 
-                await _webSocket.SendAsync(data.Slice(offset, count), WebSocketMessageType.Text, isLastMessage, ct).ConfigureAwait(false);
+                await _webSocket.SendAsync(data.Slice(offset, count), WebSocketMessageType.Text, isLastMessage, ct)
+                    .ConfigureAwait(false);
             }
 
             if (data.Length > SOCKET_BUFFER_SIZE * 8)
@@ -325,7 +330,7 @@ public abstract class BaseEventStreamClient : IEventStreamClient, IDisposable, I
             _webSocket.Options.KeepAliveInterval = KeepAliveInterval;
         await _webSocket.ConnectAsync(_endpoint, ct).ConfigureAwait(false);
 
-        _logger.LogInformation("Connected to event stream websocket");
+        _logger.LogInformation("Connected to event stream websocket at {Endpoint}", _endpoint.Host);
     }
 
     /// <summary>
