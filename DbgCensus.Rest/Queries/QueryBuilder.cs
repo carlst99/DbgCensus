@@ -76,6 +76,17 @@ public sealed class QueryBuilder : IQueryBuilder
             WithLimit((int)queryOptions.Limit);
     }
 
+    /// <summary>
+    /// Provides functions to build a query string for the Census REST API.
+    /// </summary>
+    /// <param name="onCollection">The collection to perform the query on.</param>
+    /// <param name="queryOptions">The default configuration for the query.</param>
+    public QueryBuilder(string onCollection, CensusQueryOptions queryOptions)
+        : this(queryOptions)
+    {
+        OnCollection(onCollection);
+    }
+
     /// <inheritdoc />
     public Uri ConstructEndpoint()
     {
