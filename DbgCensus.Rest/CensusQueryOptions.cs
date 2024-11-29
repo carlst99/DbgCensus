@@ -1,28 +1,21 @@
-﻿using System.Collections.Generic;
-
-namespace DbgCensus.Rest;
+﻿namespace DbgCensus.Rest;
 
 public class CensusQueryOptions
 {
     /// <summary>
     /// The root endpoint of the Census API.
     /// </summary>
-    public string RootEndpoint { get; set; }
+    public string RootEndpoint { get; set; } = "https://census.daybreakgames.com";
 
     /// <summary>
     /// The service ID used to authenticate with the Census API.
     /// </summary>
-    public string ServiceId { get; set; }
-
-    /// <summary>
-    /// Gets a list of service IDs that can be used to authenticate with the Census API.
-    /// </summary>
-    public List<string> ServiceIDs { get; }
+    public string ServiceId { get; set; } = "example";
 
     /// <summary>
     /// The Census namespace to retrieve data from.
     /// </summary>
-    public string Namespace { get; set; }
+    public string Namespace { get; set; } = "ps2";
 
     /// <summary>
     /// Optionally remove all translations by default from internationalized strings except the one specified.
@@ -33,12 +26,4 @@ public class CensusQueryOptions
     /// Optionally set a default limit for each query.
     /// </summary>
     public int? Limit { get; set; }
-
-    public CensusQueryOptions()
-    {
-        RootEndpoint = "https://census.daybreakgames.com";
-        ServiceId = "example";
-        ServiceIDs = new List<string>();
-        Namespace = "ps2";
-    }
 }
