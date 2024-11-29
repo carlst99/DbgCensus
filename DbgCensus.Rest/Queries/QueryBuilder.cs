@@ -87,16 +87,16 @@ public sealed class QueryBuilder : IQueryBuilder
             return builder.Uri;
         builder.Path += $"/{CollectionName}";
 
-        // Add any custom parameters
-        if (_customParameters.Count > 0)
-            builder.Query += string.Join('&', _customParameters);
-
         // Add distinct command
         if (_distinctField.HasArgument)
         {
             builder.Query = _distinctField;
             return builder.Uri; // Querying doesn't work in tandem with the distinct command
         }
+
+        // Add any custom parameters
+        foreach (string custom in _customParameters)
+            builder.Query += $"{custom}&";
 
         // Add filters
         foreach (QueryFilter filter in _filters)
