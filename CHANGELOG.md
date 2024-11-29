@@ -2,6 +2,24 @@
 
 Date format: YYYY/MM/DD (ISO)
 
+## 2024/11/30
+
+#### Core-v3.1.0
+
+- `ZoneID` now implements `IEquatable<ZoneID>, IEquatable<uint>`.
+- Updated dependencies.
+
+#### Rest-v4.0.0
+
+- 🚨 Breaking Change: Removed of `CensusQueryOptions.ServiceIDs`, and associated service-id rotation behaviour. This
+  has been noted to have no effect by the Census developers.
+- 🐛 Bugfix: `QueryBuilder.WithCustomParameter` no longer results in invalid query strings - thanks @bigwoke.
+- `QueryBuilder` now allows `WithDistinctFieldValues` to be used with any other commands/filters.
+- `QueryBuilder` no longer ignores `WithLimit` when `WithLimitPerDatabase` is specified.
+- `QueryBuilder` has a new constructor that allows specifying the collection to query.
+- New `IQueryBuilderFactory.Get` overload that allows specifying the collection to query.
+- Updated dependencies.
+
 ## 2024/09/21
 
 #### Core-v3.0.0

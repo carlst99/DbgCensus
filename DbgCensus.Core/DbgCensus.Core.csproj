@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!-- Package info -->
-    <Version>3.0.0</Version>
+    <Version>3.1.0</Version>
     <Description>
       Contains core data types and utilities for the DbgCensus.* libraries -
       wrappers for interacting with Daybreak Game Company's Census API.
