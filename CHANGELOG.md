@@ -4,23 +4,23 @@ Date format: YYYY/MM/DD (ISO)
 
 ## 2024/11/30
 
-#### Core-v3.1.0
+#### Core-v3.1.1
 
 - `ZoneID` now implements `IEquatable<ZoneID>, IEquatable<uint>`.
 - Update dependencies.
 - Add target for net9.0.
 
-#### EventStream-v3.2.0
+#### EventStream-v3.2.1
 
 - Update dependencies.
 - Add target for net9.0.
 
-#### EventHandlers-v3.9.0
+#### EventHandlers-v3.9.1
 
 - Update dependencies.
 - Add target for net9.0.
 
-#### Rest-v4.0.0
+#### Rest-v4.0.1
 
 - 🚨 Breaking Change: Removed `CensusQueryOptions.ServiceIDs`, and associated service-id rotation behaviour. This
   has been noted to have no effect by the Census developers.
