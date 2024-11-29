@@ -95,8 +95,8 @@ public sealed class QueryBuilder : IQueryBuilder
         }
 
         // Add any custom parameters
-        if (_customParameters.Count > 0)
-            builder.Query += string.Join('&', _customParameters);
+        foreach (string custom in _customParameters)
+            builder.Query += $"{custom}&";
 
         // Add filters
         foreach (QueryFilter filter in _filters)
