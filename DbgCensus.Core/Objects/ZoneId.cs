@@ -1,11 +1,13 @@
-﻿namespace DbgCensus.Core.Objects;
+﻿using System;
+
+namespace DbgCensus.Core.Objects;
 
 /// <summary>
 /// Represents Census' special zone ID format.
 /// A zone ID is a <see cref="uint"/> where the upper two bytes represent the instance of the zone
 /// and the lower two bytes represent the <see cref="ZoneDefinition"/>.
 /// </summary>
-public readonly struct ZoneID
+public readonly struct ZoneID : IEquatable<ZoneID>, IEquatable<uint>
 {
     /// <summary>
     /// Gets the actual Census ID, a combination of the <see cref="Instance"/> and <see cref="Definition"/>
@@ -46,7 +48,15 @@ public readonly struct ZoneID
 
     public override bool Equals(object? obj)
         => obj is ZoneID zoneId
-           && zoneId.CombinedId == CombinedId;
+           && Equals(zoneId);
+
+    /// <inheritdoc />
+    public bool Equals(ZoneID zoneId)
+        => zoneId.CombinedId == CombinedId;
+
+    /// <inheritdoc />
+    public bool Equals(uint combinedId)
+        => combinedId == CombinedId;
 
     public override int GetHashCode()
         => CombinedId.GetHashCode();
