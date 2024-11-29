@@ -98,47 +98,30 @@ public sealed class QueryBuilder : IQueryBuilder
             return builder.Uri;
         builder.Path += $"/{CollectionName}";
 
-        // Add distinct command
-        if (_distinctField.HasArgument)
-        {
-            builder.Query = _distinctField;
-            return builder.Uri; // Querying doesn't work in tandem with the distinct command
-        }
+        // Combine any customer parameters, filters and commands into a string array, such that we can join them
+        // into a query string
+        IEnumerable<string?> arguments = _customParameters
+            .Concat(_filters.Select(x => x.ToString()))
+            .Concat(new[]
+            {
+                _distinctField,
+                _hasFields,
+                _showHideFields?.ToString(),
+                _resolves,
+                _joins,
+                _sortKeys,
+                _startIndex,
+                _language,
+                _exactMatchesFirst,
+                _isCaseSensitive,
+                _withNullFields,
+                _withTimings,
+                _retry,
+                _limit,
+                _limitPerDb
+            });
 
-        // Add any custom parameters
-        foreach (string custom in _customParameters)
-            builder.Query += $"{custom}&";
-
-        // Add filters
-        foreach (QueryFilter filter in _filters)
-            builder.Query += $"{filter}&";
-
-        // Add commands
-        string commandsJoin = StringUtils.JoinWithoutNullOrEmptyValues
-        (
-            '&',
-            _hasFields,
-            _showHideFields?.ToString(),
-            _resolves,
-            _joins,
-            _sortKeys,
-            _startIndex,
-            _language,
-            _exactMatchesFirst,
-            _isCaseSensitive,
-            _withNullFields,
-            _withTimings,
-            _retry
-        );
-
-        if (!string.IsNullOrEmpty(commandsJoin))
-            builder.Query += commandsJoin;
-
-        // Add relevant limit command
-        if (_limitPerDb.HasArgument)
-            builder.Query += '&' + _limitPerDb;
-        else if (_limit.HasArgument)
-            builder.Query += '&' + _limit;
+        builder.Query = StringUtils.JoinWithoutNullOrEmptyValues('&', arguments);
 
         return builder.Uri;
     }

@@ -33,7 +33,8 @@ public interface IQueryBuilder
     IQueryBuilder OnCollection(string collection);
 
     /// <summary>
-    /// Limits the number of items returned by the query.
+    /// Limits the number of items returned by the query. If used in tandem with <see cref="WithDistinctFieldValues"/>,
+    /// limits the number of distinct values returned.
     /// </summary>
     /// <param name="limit">The maximum number of items.</param>
     /// <returns>The <see cref="IQueryBuilder"/> instance so that calls may be chained.</returns>
