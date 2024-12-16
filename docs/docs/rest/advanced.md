@@ -10,28 +10,6 @@ The number of times the query is retried can be configured when registering the 
 services.AddCensusRestServices(maxRetryAttempts: 5);
 ```
 
-## Service ID Rotation
-
-There has been observation by the community that rotating the service ID you use when querying, can
-help to reduce the amount of failures. `DbgCensus` manages this automatically, by attempting to rotate
-your service ID after the wait-and-retry policy fails its last retry attempt. In order to set this up,
-you must configure the `ServiceIDs` property of your `CensusQueryOptions`, and provide multiple service
-IDs to rotate through.
-
-`appsettings.json`:
-
-```json
-{
-  "CensusQueryOptions": {
-    "ServiceId": "example",
-    "ServiceIDs": [
-      "example",
-      "asdf"
-    ]
-  }
-}
-```
-
 ## Using Alternative Census Implementations
 
 With Census being, at one point in its history, two years out of date on any static data, the API developer community began

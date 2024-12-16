@@ -76,6 +76,17 @@ public sealed class QueryBuilder : IQueryBuilder
             WithLimit((int)queryOptions.Limit);
     }
 
+    /// <summary>
+    /// Provides functions to build a query string for the Census REST API.
+    /// </summary>
+    /// <param name="onCollection">The collection to perform the query on.</param>
+    /// <param name="queryOptions">The default configuration for the query.</param>
+    public QueryBuilder(string onCollection, CensusQueryOptions queryOptions)
+        : this(queryOptions)
+    {
+        OnCollection(onCollection);
+    }
+
     /// <inheritdoc />
     public Uri ConstructEndpoint()
     {
@@ -87,47 +98,30 @@ public sealed class QueryBuilder : IQueryBuilder
             return builder.Uri;
         builder.Path += $"/{CollectionName}";
 
-        // Add any custom parameters
-        if (_customParameters.Count > 0)
-            builder.Query += string.Join('&', _customParameters);
+        // Combine any customer parameters, filters and commands into a string array, such that we can join them
+        // into a query string
+        IEnumerable<string?> arguments = _customParameters
+            .Concat(_filters.Select(x => x.ToString()))
+            .Concat(new[]
+            {
+                _distinctField,
+                _hasFields,
+                _showHideFields?.ToString(),
+                _resolves,
+                _joins,
+                _sortKeys,
+                _startIndex,
+                _language,
+                _exactMatchesFirst,
+                _isCaseSensitive,
+                _withNullFields,
+                _withTimings,
+                _retry,
+                _limit,
+                _limitPerDb
+            });
 
-        // Add distinct command
-        if (_distinctField.HasArgument)
-        {
-            builder.Query = _distinctField;
-            return builder.Uri; // Querying doesn't work in tandem with the distinct command
-        }
-
-        // Add filters
-        foreach (QueryFilter filter in _filters)
-            builder.Query += $"{filter}&";
-
-        // Add commands
-        string commandsJoin = StringUtils.JoinWithoutNullOrEmptyValues
-        (
-            '&',
-            _hasFields,
-            _showHideFields?.ToString(),
-            _resolves,
-            _joins,
-            _sortKeys,
-            _startIndex,
-            _language,
-            _exactMatchesFirst,
-            _isCaseSensitive,
-            _withNullFields,
-            _withTimings,
-            _retry
-        );
-
-        if (!string.IsNullOrEmpty(commandsJoin))
-            builder.Query += commandsJoin;
-
-        // Add relevant limit command
-        if (_limitPerDb.HasArgument)
-            builder.Query += '&' + _limitPerDb;
-        else if (_limit.HasArgument)
-            builder.Query += '&' + _limit;
+        builder.Query = StringUtils.JoinWithoutNullOrEmptyValues('&', arguments);
 
         return builder.Uri;
     }
