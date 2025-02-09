@@ -1,0 +1,1 @@
+import{_ as n,c as a,o as e,ae as l}from"./chunks/framework.uY-EIwh2.js";const u=JSON.parse('{"title":"Setup","description":"","frontmatter":{},"headers":[],"relativePath":"rest/index.md","filePath":"rest/index.md"}'),p={name:"rest/index.md"};function o(t,s,r,c,i,B){return e(),a("div",null,s[0]||(s[0]=[l("",9)]))}const b=n(p,[["render",o]]);export{u as __pageData,b as default};
