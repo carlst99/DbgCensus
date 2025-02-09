@@ -43,5 +43,5 @@ using the `AddCensusEventStreamServices` extension method.
 
 ### Event Streaming
 
-I haven't gotten around to documenting this yet! Please check out the [Event Stream Sample](Samples/EventStreamSample) in the meantime
-:slightly_smiling_face:.
+I haven't gotten around to documenting this yet! Please check out the [Event Stream Sample](Samples/EventStreamSample)
+in the meantime 🙂.
