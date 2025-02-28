@@ -2,11 +2,14 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
     lang: 'en-US',
-    title: 'DbgCensus Documentation',
+    title: 'DbgCensus Docs',
     description: "Unofficial C# wrappers for Daybreak Game Company's Census API.",
     base: '/DbgCensus/',
     markdown: {
-        theme: 'one-dark-pro',
+        theme: {
+            dark: 'one-dark-pro',
+            light: 'one-light'
+        },
         lineNumbers: true
     },
     themeConfig: {
