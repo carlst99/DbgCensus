@@ -1,0 +1,1 @@
+import{_ as i,c as a,o as n,ae as e}from"./chunks/framework.DHm_ITtO.js";const o=JSON.parse('{"title":"Setup","description":"","frontmatter":{},"headers":[],"relativePath":"rest/index.md","filePath":"rest/index.md"}'),l={name:"rest/index.md"};function t(p,s,h,k,r,d){return n(),a("div",null,s[0]||(s[0]=[e("",9)]))}const B=i(l,[["render",t]]);export{o as __pageData,B as default};
