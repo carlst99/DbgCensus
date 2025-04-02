@@ -74,6 +74,7 @@ public static class IServiceCollectionExtensions
                 o.Register<IAchievementEarned, AchievementEarned>(EventNames.AchievementEarned);
                 o.Register<IBattleRankUp, BattleRankUp>(EventNames.BattleRankUp);
                 o.Register<IDeath, Death>(EventNames.Death);
+                o.Register<IFishScan, FishScan>(EventNames.FishScan);
                 o.Register<IGainExperience, GainExperience>(EventNames.GainExperience);
                 o.Register<IItemAdded, ItemAdded>(EventNames.ItemAdded);
                 o.Register<IPlayerFacilityCapture, PlayerFacilityCapture>(EventNames.PlayerFacilityCapture);

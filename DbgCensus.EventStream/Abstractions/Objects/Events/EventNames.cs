@@ -6,6 +6,7 @@ public static class EventNames
     public const string AchievementEarned = "AchievementEarned";
     public const string BattleRankUp = "BattleRankUp";
     public const string Death = "Death";
+    public const string FishScan = "FishScan";
     public const string GainExperience = "GainExperience";
     public const string ItemAdded = "ItemAdded";
     public const string PlayerFacilityCapture = "PlayerFacilityCapture";

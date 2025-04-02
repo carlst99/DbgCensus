@@ -53,7 +53,7 @@ public interface IDeath : IZoneEvent
     bool IsCritical { get; }
 
     /// <summary>
-    /// Gets a value indicating whether or not the kill was a headshot.
+    /// Gets a value indicating whether the kill was a headshot.
     /// </summary>
     bool IsHeadshot { get; }
 
