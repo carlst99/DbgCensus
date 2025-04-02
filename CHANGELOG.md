@@ -2,6 +2,16 @@
 
 Date format: YYYY/MM/DD (ISO)
 
+## 2025/04/02
+
+#### EventStream-v3.3.0
+
+- Add the FishScan event.
+
+#### Core-v3.1.2, EventHandlers-v3.9.2, Rest-v4.0.2
+
+- Update dependencies.
+
 ## 2024/11/30
 
 #### Core-v3.1.1
