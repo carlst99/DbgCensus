@@ -38,6 +38,8 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
+        // TODO: Demonstrate NativeAOT logic
+
         await GetWeapons(ct);
         await GetMapStatus(ct);
         await GetCharacter(ct);
