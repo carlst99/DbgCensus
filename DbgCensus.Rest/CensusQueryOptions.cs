@@ -3,6 +3,11 @@
 public class CensusQueryOptions
 {
     /// <summary>
+    /// A default key under which configuration for this object can be written.
+    /// </summary>
+    public const string CONFIG_KEY = "CensusQueryOptions";
+
+    /// <summary>
     /// The root endpoint of the Census API.
     /// </summary>
     public string RootEndpoint { get; set; } = "https://census.daybreakgames.com";

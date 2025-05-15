@@ -12,32 +12,35 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
-        IHost host = Host.CreateDefaultBuilder(args)
-            .UseDefaultServiceProvider(o => o.ValidateScopes = true)
-            .UseSerilog(GetLogger())
-            .ConfigureServices((hostContext, services) =>
-            {
-                services.Configure<CensusQueryOptions>(hostContext.Configuration.GetSection(nameof(CensusQueryOptions)));
+        HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+        SetupLogger(builder);
 
-                // Configure a second query options to point towards Sanctuary.Census
-                services.Configure<CensusQueryOptions>("sanctuary", hostContext.Configuration.GetSection(nameof(CensusQueryOptions)));
-                services.Configure<CensusQueryOptions>("sanctuary", o => o.RootEndpoint = "https://census.lithafalcon.cc");
+        builder.Services.Configure<CensusQueryOptions>(builder.Configuration.GetSection(CensusQueryOptions.CONFIG_KEY));
 
-                services.AddCensusRestServices();
+        // Configure a second query options to point towards Sanctuary.Census
+        builder.Services.Configure<CensusQueryOptions>("sanctuary", builder.Configuration.GetSection(CensusQueryOptions.CONFIG_KEY));
+        builder.Services.Configure<CensusQueryOptions>("sanctuary", o => o.RootEndpoint = "https://census.lithafalcon.cc");
 
-                services.AddHostedService<Worker>();
-            })
-            .Build();
+        builder.Services.AddCensusRestServices();
 
-        await host.RunAsync();
+        builder.Services.AddHostedService<Worker>();
+
+        await builder.Build().RunAsync();
     }
 
-    private static ILogger GetLogger()
-        => new LoggerConfiguration()
+    private static void SetupLogger(HostApplicationBuilder builder)
+    {
+        Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .MinimumLevel.Override("System.Net.Http.HttpClient.ICensusRestClient.ClientHandler", LogEventLevel.Warning)
             .MinimumLevel.Override("System.Net.Http.HttpClient.ICensusRestClient.LogicalHandler", LogEventLevel.Warning)
             .Enrich.FromLogContext()
-            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
+            .WriteTo.Console
+            (
+                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
+            )
             .CreateLogger();
+
+        builder.Services.AddSerilog();
+    }
 }

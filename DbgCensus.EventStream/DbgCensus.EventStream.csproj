@@ -5,6 +5,7 @@
     <Version>3.3.0</Version>
     <Description>A library for receiving data from the websocket event stream of Daybreak Game Company's Census API.</Description>
     <PackageReleaseNotes>See CHANGELOG.md for release notes.</PackageReleaseNotes>
+<!--    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>-->
   </PropertyGroup>
 
   <ItemGroup>

@@ -17,7 +17,7 @@ public static class Program
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
         SetupLogger(builder);
 
-        builder.Services.Configure<EventStreamOptions>(builder.Configuration.GetSection(nameof(EventStreamOptions)));
+        builder.Services.Configure<EventStreamOptions>(builder.Configuration.GetSection(EventStreamOptions.CONFIG_KEY));
 
         builder.Services.AddCensusEventHandlingServices()
             // There should only ever be one instance of the duplicate prevention handler, hence the singleton scope

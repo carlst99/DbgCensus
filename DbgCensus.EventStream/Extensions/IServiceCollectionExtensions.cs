@@ -28,7 +28,9 @@ public static class IServiceCollectionExtensions
             Constants.JsonDeserializationOptionsName,
             o =>
             {
+#pragma warning disable IL3050 // RequiresDynamicCode: This path should only be used when the AOT API is not in use
                 o.AddCensusDeserializationOptions();
+#pragma warning restore IL3050
                 o.Converters.Add(new SubscribeUInt64ListJsonConverter());
                 o.Converters.Add(new SubscribeWorldListJsonConverter());
             }

@@ -4,6 +4,11 @@
 public class EventStreamOptions
 {
     /// <summary>
+    /// A default key under which configuration for this object can be written.
+    /// </summary>
+    public const string CONFIG_KEY = "EventStreamOptions";
+
+    /// <summary>
     /// The root endpoint of the Census event stream endpoint.
     /// </summary>
     public string RootEndpoint { get; set; }
