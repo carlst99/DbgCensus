@@ -1,0 +1,1 @@
+import{_ as i,c as a,o as n,af as e}from"./chunks/framework.B6SQUEf8.js";const g=JSON.parse('{"title":"Setup","description":"","frontmatter":{},"headers":[],"relativePath":"rest/index.md","filePath":"rest/index.md"}'),l={name:"rest/index.md"};function t(p,s,h,k,r,d){return n(),a("div",null,s[0]||(s[0]=[e("",9)]))}const o=i(l,[["render",t]]);export{g as __pageData,o as default};
