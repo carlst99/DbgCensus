@@ -10,5 +10,5 @@ public interface IHeartbeat : IControl
     /// <summary>
     /// Gets a map of endpoint names to their online status.
     /// </summary>
-    public IReadOnlyDictionary<string, bool> Online { get; }
+    IReadOnlyDictionary<string, bool> Online { get; }
 }

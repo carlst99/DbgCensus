@@ -13,11 +13,11 @@ public interface IPlayerFacilityCapture : IZoneEvent
     /// <summary>
     /// Gets the ID of the captured facility.
     /// </summary>
-    public uint FacilityID { get; }
+    uint FacilityID { get; }
 
     /// <summary>
     /// Gets the ID of the outfit that the <see cref="CharacterID"/>
     /// belongs to, or zero if they are not in an outfit.
     /// </summary>
-    public ulong OutfitID { get; }
+    ulong OutfitID { get; }
 }

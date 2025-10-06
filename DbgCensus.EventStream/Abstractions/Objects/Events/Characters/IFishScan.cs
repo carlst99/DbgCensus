@@ -10,20 +10,20 @@ public interface IFishScan : IZoneEvent
     /// <summary>
     /// The ID of the character that scanned the fish.
     /// </summary>
-    public ulong CharacterID { get; }
+    ulong CharacterID { get; }
 
     /// <summary>
     /// The ID of the fish that was scanned.
     /// </summary>
-    public uint FishID { get; }
+    uint FishID { get; }
 
     /// <summary>
     /// The loadout ID of the character that scanned the fish.
     /// </summary>
-    public uint LoadoutID { get; }
+    uint LoadoutID { get; }
 
     /// <summary>
     /// Gets the currently-assigned faction of the character that scanned the fish.
     /// </summary>
-    public FactionDefinition TeamID { get; }
+    FactionDefinition TeamID { get; }
 }
