@@ -1,0 +1,1 @@
+import{U as e,W as t,nt as n,t as r}from"./chunks/framework.BPwQCpO3.js";var i=JSON.parse(`{"title":"Setup","description":"","frontmatter":{},"headers":[],"relativePath":"rest/index.md","filePath":"rest/index.md"}`),a={name:`rest/index.md`};function o(r,i,a,o,s,c){return n(),e(`div`,null,[...i[0]||=[t("",9)]])}var s=r(a,[[`render`,o]]);export{i as __pageData,s as default};
